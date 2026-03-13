@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Services - Straya Co Pty Ltd</title>
+    <style>
+        :root {
+            --primary: #0056b3;
+            --secondary: #ff6600;
+            --dark: #333;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header & Navigation */
+        header {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            text-decoration: none;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+        
+        nav a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        nav a:hover {
+            color: var(--primary);
+        }
+        
+        /* Page Header */
+        .page-header {
+            background: linear-gradient(135deg, var(--primary) 0%, #003d82 100%);
+            color: white;
+            padding: 4rem 0;
+            text-align: center;
+        }
+        
+        .page-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .page-header p {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+            opacity: 0.9;
+        }
+        
+        /* Service Sections */
+        .service-section {
+            padding: 4rem 0;
+        }
+        
+        .service-section:nth-child(even) {
+            background: var(--light);
+        }
+        
+        .service-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+        
+        .service-text h2 {
+            color: var(--primary);
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .service-text h3 {
+            color: var(--secondary);
+            margin: 1.5rem 0 1rem;
+            font-size: 1.3rem;
+        }
+        
+        .service-text ul {
+            list-style: none;
+            margin: 1rem 0;
+        }
+        
+        .service-text li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .service-text li:last-child {
+            border-bottom: none;
+        }
+        
+        .service-cta {
+            margin-top: 2rem;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: var(--secondary);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,102,0,0.3);
+        }
+        
+        .service-visual {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .service-visual h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 3rem 0;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .footer-section h3 {
+            color: var(--secondary);
+            margin-bottom: 1rem;
+        }
+        
+        .footer-section ul {
+            list-style: none;
+        }
+        
+        .footer-section li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer-section a {
+            color: #ccc;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-section a:hover {
+            color: white;
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid #444;
+            color: #999;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 1rem;
+            }
+            
+            .service-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .page-header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Straya Co Pty Ltd</a>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="services.html">Services</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="blog.html">Resources</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <h1>Our Services</h1>
+            <p>Comprehensive IT solutions tailored for Australian businesses</p>
+        </div>
+    </section>
+
+    <!-- Email Security Section -->
+    <section id="email" class="service-section">
+        <div class="container">
+            <div class="service-content">
+                <div class="service-text">
+                    <h2>Email Security & Deliverability</h2>
+                    <p>Protect your business from email fraud and ensure every email reaches its destination. Our comprehensive email security solutions safeguard your brand and improve inbox delivery rates.</p>
+                    
+                    <h3>Our Solutions</h3>
+                    <ul>
+                        <li>DMARC, SPF & DKIM setup & monitoring</li>
+                        <li>Email deliverability optimization</li>
+                        <li>Phishing protection & reporting</li>
+                        <li>Brand protection from email spoofing</li>
+                        <li>Email authentication compliance</li>
+                    </ul>
+                    
+                    <h3>Benefits</h3>
+                    <ul>
+                        <li>Increase customer trust and brand reputation</li>
+                        <li>Reduce bounce rates & email blocks</li>
+                        <li>Protect your business from cyber threats</li>
+                        <li>Ensure compliance with email security standards</li>
+                        <li>Improve marketing email deliverability</li>
+                    </ul>
+                    
+                    <div class="service-cta">
+                        <a href="contact.html" class="cta-button">Secure Your Emails Today</a>
+                    </div>
+                </div>
+                
+                <div class="service-visual">
+                    <h3>Email Security Package</h3>
+                    <p>Complete protection for your business communications</p>
+                    <ul>
+                        <li>Initial setup & configuration</li>
+                        <li>Ongoing monitoring & reporting</li>
+                        <li>24/7 threat detection</li>
+                        <li>Monthly security reports</li>
+                        <li>Emergency response support</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Office Automation Section -->
+    <section id="automation" class="service-section">
+        <div class="container">
+            <div class="service-content">
+                <div class="service-visual">
+                    <h3>Automation Solutions</h3>
+                    <p>Streamline your business processes</p>
+                    <ul>
+                        <li>Custom workflow design</li>
+                        <li>Integration with existing systems</li>
+                        <li>Training & documentation</li>
+                        <li>Ongoing support & maintenance</li>
+                        <li>Performance optimization</li>
+                    </ul>
+                </div>
+                
+                <div class="service-text">
+                    <h2>Office Document Automation</h2>
+                    <p>Automate repetitive office tasks and unlock efficiency. Transform manual processes into automated workflows that save time and reduce errors.</p>
+                    
+                    <h3>Our Services</h3>
+                    <ul>
+                        <li>PDF data extraction & processing</li>
+                        <li>Excel automation & reporting</li>
+                        <li>Workflow integration for teams</li>
+                        <li>Document generation systems</li>
+                        <li>Data migration & conversion</li>
+                    </ul>
+                    
+                    <h3>Benefits</h3>
+                    <ul>
+                        <li>Save time & reduce manual errors</li>
+                        <li>Streamline business processes</li>
+                        <li>Focus on strategic work, not manual tasks</li>
+                        <li>Improve data accuracy & consistency</li>
+                        <li>Scale operations without adding staff</li>
+                    </ul>
+                    
+                    <div class="service-cta">
+                        <a href="contact.html" class="cta-button">Automate Your Workflow</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- IT Setup Section -->
+    <section id="setup" class="service-section">
+        <div class="container">
+            <div class="service-content">
+                <div class="service-text">
+                    <h2>IT Setup for New Companies</h2>
+                    <p>Start your business IT the right way. We provide complete IT infrastructure setup for new companies, ensuring you have a secure, scalable, and professional foundation.</p>
+                    
+                    <h3>Our Services</h3>
+                    <ul>
+                        <li>Domain name registration & hosting setup</li>
+                        <li>Professional email setup with security</li>
+                        <li>Website setup & launch</li>
+                        <li>Cloud storage & backup solutions</li>
+                        <li>Network security configuration</li>
+                    </ul>
+                    
+                    <h3>Benefits</h3>
+                    <ul>
+                        <li>Hassle-free IT launch for startups</li>
+                        <li>Secure, scalable, and professional online presence</li>
+                        <li>Compliance-ready email and systems</li>
+                        <li>Expert guidance from day one</li>
+                        <li>Future-proof infrastructure</li>
+                    </ul>
+                    
+                    <div class="service-cta">
+                        <a href="contact.html" class="cta-button">Launch Your Business IT Today</a>
+                    </div>
+                </div>
+                
+                <div class="service-visual">
+                    <h3>New Business Package</h3>
+                    <p>Complete IT foundation package</p>
+                    <ul>
+                        <li>Domain registration (1 year)</li>
+                        <li>Professional email accounts</li>
+                        <li>Basic website setup</li>
+                        <li>Security configuration</li>
+                        <li>30-day support package</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Straya Co Pty Ltd</h3>
+                    <p>Sydney's trusted IT consulting partner for secure and efficient business solutions.</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="services.html">Services</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="blog.html">Resources</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Contact</h3>
+                    <ul>
+                        <li>Email: <a href="mailto:vincent@strayaco.com.au">vincent@strayaco.com.au</a></li>
+                        <li>Location: Sydney, Australia</li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Legal</h3>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms & Conditions</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>© 2026 Straya Co Pty Ltd — Sydney, Australia</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
