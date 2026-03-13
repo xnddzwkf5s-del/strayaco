@@ -420,7 +420,7 @@
                 <!-- Contact Form -->
                 <div class="contact-form">
                     <h2>Send Us a Message</h2>
-                    <form id="contactForm">
+                    <form id="contactForm" action="mailto:info@strayaco.com.au" method="post" enctype="text/plain">
                         <div class="form-row">
                             <div class="form-group">
                                 <label for="name">Full Name *</label>
@@ -582,9 +582,9 @@
     
     <script>
         document.getElementById('contactForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert('Thank you for your message! We will contact you within 24 hours.');
-            this.reset();
+            // Form will now submit via mailto: action
+            // Show a confirmation message
+            alert('Thank you for your message! Your email client will open with the message pre-filled. Please send the email to complete your submission.');
         });
     </script>
 </body>
