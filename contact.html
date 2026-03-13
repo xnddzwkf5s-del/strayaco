@@ -8,105 +8,70 @@
     <meta http-equiv="X-Frame-Options" content="DENY">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
     <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            background: #f5f7fb;
-            color: #333;
+        /* Contact Page Specific Styles */
+        .contact-section {
+            padding: 80px 20px;
+            background: #f8f9fa;
         }
-
-        /* NAVBAR */
-        .navbar {
-            background: #0f4c81;
-            padding: 15px 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .nav-container {
+        
+        .contact-container {
             max-width: 1200px;
             margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0 20px;
         }
-
-        .nav-logo {
-            color: white;
-            font-size: 24px;
-            font-weight: bold;
-            text-decoration: none;
-        }
-
-        .nav-menu {
-            display: flex;
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        .nav-menu li {
-            margin-left: 30px;
-        }
-
-        .nav-menu a {
-            color: white;
-            text-decoration: none;
-            font-size: 16px;
-            transition: color 0.3s;
-        }
-
-        .nav-menu a:hover,
-        .nav-menu a.active {
-            color: #4da6ff;
-        }
-
-        /* CONTACT SECTION */
-        .contact-container {
-            max-width: 800px;
-            margin: 60px auto;
-            padding: 0 20px;
-        }
-
+        
         .contact-header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 60px;
         }
-
+        
         .contact-header h1 {
             color: #0f4c81;
-            font-size: 36px;
-            margin-bottom: 15px;
+            font-size: 42px;
+            margin-bottom: 20px;
         }
-
+        
         .contact-header p {
             font-size: 18px;
             color: #666;
             max-width: 600px;
             margin: 0 auto;
+            line-height: 1.6;
         }
-
-        /* FORM */
+        
+        .contact-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+        }
+        
+        @media (max-width: 768px) {
+            .contact-content {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Form Styles */
         .contact-form {
             background: white;
             padding: 40px;
             border-radius: 10px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
-
+        
         .form-group {
             margin-bottom: 25px;
         }
-
+        
         .form-group label {
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
             color: #0f4c81;
         }
-
+        
         .form-group input,
         .form-group textarea,
         .form-group select {
@@ -118,19 +83,19 @@
             font-family: inherit;
             transition: border-color 0.3s;
         }
-
+        
         .form-group input:focus,
         .form-group textarea:focus,
         .form-group select:focus {
             outline: none;
             border-color: #0f4c81;
         }
-
+        
         .form-group textarea {
             min-height: 150px;
             resize: vertical;
         }
-
+        
         .submit-btn {
             background: #0f4c81;
             color: white;
@@ -143,54 +108,84 @@
             width: 100%;
             transition: background 0.3s;
         }
-
+        
         .submit-btn:hover {
             background: #1b78c3;
         }
-
-        .submit-btn:disabled {
-            background: #cccccc;
-            cursor: not-allowed;
-        }
-
-        /* CONTACT INFO */
+        
+        /* Contact Info */
         .contact-info {
-            background: #eef4ff;
-            padding: 30px;
+            background: white;
+            padding: 40px;
             border-radius: 10px;
-            margin-top: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
-
+        
         .contact-info h3 {
             color: #0f4c81;
             margin-top: 0;
+            margin-bottom: 30px;
+            font-size: 24px;
         }
-
-        .contact-details p {
-            margin: 10px 0;
-            font-size: 16px;
+        
+        .contact-details {
+            margin-bottom: 30px;
         }
-
-        .contact-details i {
+        
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 25px;
+        }
+        
+        .contact-item i {
             color: #0f4c81;
-            margin-right: 10px;
+            font-size: 20px;
+            margin-right: 15px;
+            margin-top: 5px;
         }
-
-        /* FOOTER */
-        footer {
-            text-align: center;
-            padding: 25px;
-            font-size: 14px;
-            background: #eef1f6;
-            margin-top: 60px;
+        
+        .contact-item h4 {
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+        
+        .contact-item p {
+            margin: 0;
+            color: #666;
+            line-height: 1.5;
+        }
+        
+        .business-hours {
+            background: #eef4ff;
+            padding: 20px;
+            border-radius: 6px;
+            margin-top: 30px;
+        }
+        
+        .business-hours h4 {
+            color: #0f4c81;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        
+        .hours-list p {
+            margin: 8px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .hours-list span:last-child {
+            font-weight: 600;
+            color: #0f4c81;
         }
     </style>
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar">
+    <nav>
         <div class="nav-container">
-            <a href="index.html" class="nav-logo">Straya Co Pty Ltd</a>
+            <a href="index.html" class="logo">Straya Co Pty Ltd</a>
             <ul class="nav-menu">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="services.html">Services</a></li>
@@ -201,77 +196,123 @@
         </div>
     </nav>
 
-    <div class="contact-container">
-        <div class="contact-header">
-            <h1>Get In Touch</h1>
-            <p>Have questions about our cybersecurity services? Send us a message and we'll get back to you within 24 hours.</p>
-        </div>
-
-        <form class="contact-form" action="https://formspree.io/f/xgonzwod" method="POST">
+    <!-- Contact Section -->
+    <section class="contact-section">
+        <div class="contact-container">
+            <div class="contact-header">
+                <h1>Get In Touch</h1>
+                <p>Have questions about our cybersecurity services? Send us a message and we'll get back to you within 24 hours.</p>
+            </div>
             
-            <div class="form-group">
-                <label for="name">Full Name *</label>
-                <input type="text" id="name" name="name" required minlength="2" maxlength="100">
-            </div>
-
-            <div class="form-group">
-                <label for="email">Email Address *</label>
-                <input type="email" id="email" name="email" required>
-            </div>
-
-            <div class="form-group">
-                <label for="phone">Phone Number</label>
-                <input type="tel" id="phone" name="phone" pattern="[0-9\s\-\(\)\+]+" title="Please enter a valid phone number">
-            </div>
-
-            <div class="form-group">
-                <label for="company">Company Name</label>
-                <input type="text" id="company" name="company">
-            </div>
-
-            <div class="form-group">
-                <label for="service">Service Interested In</label>
-                <select id="service" name="service">
-                    <option value="">Select a service</option>
-                    <option value="email-security">Email Security Assessment</option>
-                    <option value="cybersecurity">Cybersecurity Consulting</option>
-                    <option value="it-support">IT Support Services</option>
-                    <option value="other">Other</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="message">Message *</label>
-                <textarea id="message" name="message" required minlength="10" maxlength="1000"></textarea>
-            </div>
-
-            <button type="submit" class="submit-btn">Send Message</button>
-        </form>
-
-        <div class="contact-info">
-            <h3>Contact Information</h3>
-            <div class="contact-details">
-                <p><i>📧</i> Email: info@strayaco.com.au</p>
-                <p><i>📱</i> Phone: +61 2 1234 5678</p>
-                <p><i>📍</i> Address: Sydney, NSW, Australia</p>
-                <p><i>⏰</i> Business Hours: Mon-Fri 9am-5pm AEST</p>
+            <div class="contact-content">
+                <!-- Contact Form -->
+                <div class="contact-form">
+                    <form action="https://formspree.io/f/xgonzwod" method="POST">
+                        <div class="form-group">
+                            <label for="name">Full Name *</label>
+                            <input type="text" id="name" name="name" required minlength="2" maxlength="100">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email Address *</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="phone">Phone Number</label>
+                            <input type="tel" id="phone" name="phone" pattern="[0-9\s\-\(\)\+]+" title="Please enter a valid phone number">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="company">Company Name</label>
+                            <input type="text" id="company" name="company">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="service">Service Interested In</label>
+                            <select id="service" name="service">
+                                <option value="">Select a service</option>
+                                <option value="email-security">Email Security Assessment</option>
+                                <option value="cybersecurity">Cybersecurity Consulting</option>
+                                <option value="it-support">IT Support Services</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="message">Message *</label>
+                            <textarea id="message" name="message" required minlength="10" maxlength="1000"></textarea>
+                        </div>
+                        
+                        <button type="submit" class="submit-btn">Send Message</button>
+                    </form>
+                </div>
+                
+                <!-- Contact Information -->
+                <div class="contact-info">
+                    <h3>Contact Information</h3>
+                    
+                    <div class="contact-details">
+                        <div class="contact-item">
+                            <i class="fas fa-envelope"></i>
+                            <div>
+                                <h4>Email</h4>
+                                <p>info@strayaco.com.au</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-item">
+                            <i class="fas fa-phone"></i>
+                            <div>
+                                <h4>Phone</h4>
+                                <p>+61 2 1234 5678</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <div>
+                                <h4>Address</h4>
+                                <p>Sydney, NSW, Australia</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="business-hours">
+                        <h4>Business Hours</h4>
+                        <div class="hours-list">
+                            <p><span>Monday - Friday</span> <span>9:00 AM - 5:00 PM</span></p>
+                            <p><span>Saturday</span> <span>10:00 AM - 2:00 PM</span></p>
+                            <p><span>Sunday</span> <span>Closed</span></p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
+    </section>
 
+    <!-- Footer -->
     <footer>
-        © Straya Co Pty Ltd | Cybersecurity & IT Services
+        <div class="footer-container">
+            <p>&copy; 2024 Straya Co Pty Ltd. All rights reserved.</p>
+            <p>IT Consulting & Cybersecurity Services for Australian Businesses</p>
+            <div class="footer-links">
+                <a href="privacy.html">Privacy Policy</a> | 
+                <a href="terms.html">Terms of Service</a> | 
+                <a href="contact.html">Contact Us</a>
+            </div>
+        </div>
     </footer>
 
     <script>
-        // Form validation and submission
-        document.querySelector('.contact-form').addEventListener('submit', function(e) {
+        // Form submission feedback
+        document.querySelector('form').addEventListener('submit', function(e) {
             const submitBtn = this.querySelector('.submit-btn');
             submitBtn.disabled = true;
             submitBtn.textContent = 'Sending...';
             
-            // Formspree will handle the rest
-            // You can add custom validation here if needed
+            // Formspree will handle the submission
+            // You'll be redirected to Formspree's success page
         });
     </script>
 </body>
