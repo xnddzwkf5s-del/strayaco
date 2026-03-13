@@ -3,67 +3,388 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hello World - Pang</title>
+    <title>JWC Property Group | Your Home, Our Expertise, Your Future</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 40px 20px;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
             line-height: 1.6;
             color: #333;
+            background-color: #f8f9fa;
         }
-        h1 {
-            color: #2c3e50;
-            border-bottom: 3px solid #3498db;
-            padding-bottom: 10px;
-        }
+        
         .container {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 30px;
-            margin-top: 30px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
         }
-        .success {
-            color: #27ae60;
+        
+        header {
+            background: linear-gradient(135deg, #1a365d 0%, #2d3748 100%);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+        }
+        
+        .logo {
+            font-size: 2.5rem;
             font-weight: bold;
+            margin-bottom: 1rem;
+            letter-spacing: 2px;
         }
-        .timestamp {
-            color: #7f8c8d;
-            font-size: 0.9em;
-            margin-top: 20px;
+        
+        .tagline {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+        }
+        
+        nav {
+            background: #2d3748;
+            padding: 1rem 0;
+        }
+        
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            color: #63b3ed;
+        }
+        
+        .hero {
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 4rem 2rem;
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+        }
+        
+        .services {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .service-card {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+        }
+        
+        .service-card h3 {
+            color: #2d3748;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+        
+        .service-card p {
+            color: #4a5568;
+            margin-bottom: 1.5rem;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: #3182ce;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #2c5282;
+        }
+        
+        .testimonial {
+            background: #edf2f7;
+            padding: 3rem;
+            border-radius: 8px;
+            margin: 3rem 0;
+            font-style: italic;
+            position: relative;
+        }
+        
+        .testimonial:before {
+            content: '"';
+            font-size: 4rem;
+            color: #cbd5e0;
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+        }
+        
+        .testimonial-author {
+            text-align: right;
+            margin-top: 1rem;
+            font-weight: bold;
+            color: #4a5568;
+        }
+        
+        .quick-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+        
+        .link-section h3 {
+            color: #2d3748;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #3182ce;
+        }
+        
+        .link-section ul {
+            list-style: none;
+        }
+        
+        .link-section li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .link-section a {
+            color: #4a5568;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .link-section a:hover {
+            color: #3182ce;
+        }
+        
+        .contact-info {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin: 3rem 0;
+        }
+        
+        .contact-info h2 {
+            color: #2d3748;
+            margin-bottom: 1.5rem;
+        }
+        
+        .contact-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .contact-item i {
+            font-size: 1.5rem;
+            color: #3182ce;
+        }
+        
+        footer {
+            background: #2d3748;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+        
+        @media (max-width: 768px) {
+            .nav-links {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <h1>Welcome Vincent to Sydney 2026! 🎉</h1>
-    <div class="container">
-        <p>This is a simple test website for the <strong>Pang</strong> repository.</p>
-        <p>If you're seeing this, the publishing workflow is working correctly!</p>
-        <p class="success">✅ Deployment successful</p>
-        
-        <h2>Latest Content</h2>
-        <p><a href="jwc-property-group-summary.md">JWC Property Group Summary</a> - Real estate agency analysis</p>
-        
-        <p>Next steps could include:</p>
-        <ul>
-            <li>Adding more pages</li>
-            <li>Styling with CSS frameworks</li>
-            <li>Adding blog posts</li>
-            <li>Integrating with a static site generator</li>
-        </ul>
-    </div>
-    <div class="timestamp">
-        Published: <span id="date"></span>
+    <header>
+        <div class="container">
+            <div class="logo">JWC PROPERTY GROUP</div>
+            <div class="tagline">Your Home, Our Expertise, Your Future</div>
+        </div>
+    </header>
+    
+    <nav>
+        <div class="container">
+            <ul class="nav-links">
+                <li><a href="#buy">Buy</a></li>
+                <li><a href="#sell">Sell</a></li>
+                <li><a href="#sold">Sold</a></li>
+                <li><a href="#lease">Lease</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <div class="hero">
+        <div class="container">
+            <h1>We are a premier real estate agency</h1>
+            <p>With a long-standing reputation for delivering exceptional results to clients throughout South Yarra and beyond.</p>
+        </div>
     </div>
     
-    <script>
-        document.getElementById('date').textContent = new Date().toLocaleString('en-AU', {
-            timeZone: 'Australia/Sydney',
-            dateStyle: 'full',
-            timeStyle: 'long'
-        });
-    </script>
+    <div class="container">
+        <h2 style="text-align: center; margin-bottom: 2rem; color: #2d3748;">Our Services</h2>
+        
+        <div class="services">
+            <div class="service-card">
+                <h3>Appraisal</h3>
+                <p>Accurate valuation and expert insight on the value of your property.</p>
+                <a href="#" class="btn">Find out more</a>
+            </div>
+            
+            <div class="service-card">
+                <h3>Property Management</h3>
+                <p>Delivering peace of mind to rental providers and renters alike.</p>
+                <a href="#" class="btn">Find out more</a>
+            </div>
+            
+            <div class="service-card">
+                <h3>Projects</h3>
+                <p>Connected with industry to offer you the best in off-the-plan opportunities.</p>
+                <a href="#" class="btn">Find out more</a>
+            </div>
+            
+            <div class="service-card">
+                <h3>Rentals</h3>
+                <p>From property maintenance, rental providers and those looking to rent.</p>
+                <a href="#" class="btn">Find out more</a>
+            </div>
+        </div>
+        
+        <div class="testimonial">
+            <p>Claudine have been very helpful and kind and really put in a lot of effort to help me sell my home. She has gone above and beyond by being so proactive and working beyond her office hours to facilitate the buyers request to ensure that everything is smooth sailing for this sale. I really appreciate all her effort and hard work.</p>
+            <div class="testimonial-author">- Steven Lim</div>
+        </div>
+        
+        <div class="quick-links">
+            <div class="link-section">
+                <h3>Buy</h3>
+                <ul>
+                    <li><a href="#">Properties for sale</a></li>
+                    <li><a href="#">Open for inspection</a></li>
+                    <li><a href="#">Current projects</a></li>
+                </ul>
+            </div>
+            
+            <div class="link-section">
+                <h3>Sell</h3>
+                <ul>
+                    <li><a href="#">Request appraisal</a></li>
+                    <li><a href="#">Sold properties</a></li>
+                </ul>
+            </div>
+            
+            <div class="link-section">
+                <h3>Lease</h3>
+                <ul>
+                    <li><a href="#">Properties for lease</a></li>
+                    <li><a href="#">Lease my property</a></li>
+                    <li><a href="#">Current renters</a></li>
+                </ul>
+            </div>
+            
+            <div class="link-section">
+                <h3>About Us</h3>
+                <ul>
+                    <li><a href="#">Our Team</a></li>
+                    <li><a href="#">Contact us</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="contact-info">
+            <h2>Contact Us</h2>
+            <div class="contact-details">
+                <div class="contact-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <div>
+                        <strong>Address</strong><br>
+                        South Yarra VIC 3141<br>
+                        <a href="https://maps.google.com/?q=South+Yarra+VIC+3141" target="_blank">Google Maps</a>
+                    </div>
+                </div>
+                
+                <div class="contact-item">
+                    <i class="fas fa-phone"></i>
+                    <div>
+                        <strong>Phone</strong><br>
+                        03 9028 8592
+                    </div>
+                </div>
+                
+                <div class="contact-item">
+                    <i class="fas fa-envelope"></i>
+                    <div>
+                        <strong>Email</strong><br>
+                        info@jwc.com.au
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 JWC Property Group. All rights reserved.</p>
+            <p>This is a replica of the JWC Property Group website for demonstration purposes.</p>
+            <p style="margin-top: 1rem; font-size: 0.9rem; opacity: 0.8;">
+                Original content from <a href="https://www.jwc.com.au" style="color: #63b3ed;">jwc.com.au</a> | 
+                Published to GitHub Pages
+            </p>
+        </div>
+    </footer>
 </body>
 </html>
