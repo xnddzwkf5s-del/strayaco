@@ -15,6 +15,77 @@
             line-height: 1.6;
         }
 
+        /* NAVBAR */
+        .navbar {
+            background: #0f4c81;
+            padding: 15px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .nav-logo {
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav-menu li {
+            margin-left: 30px;
+        }
+
+        .nav-menu a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+
+        .nav-menu a:hover,
+        .nav-menu a.active {
+            color: #4da6ff;
+        }
+
+        /* FOOTER */
+        footer {
+            background: #0f4c81;
+            color: white;
+            padding: 30px 0;
+            margin-top: 60px;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .footer-links a {
+            color: #4da6ff;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
+
         /* HERO */
         .hero {
             background: linear-gradient(135deg, #0f4c81, #1b78c3);
@@ -149,8 +220,19 @@
     </style>
 </head>
 <body>
-    <!-- Navigation will be included from header -->
-    <div id="navbar-placeholder"></div>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">Straya Co Pty Ltd</a>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="services.html">Services</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="blog.html" class="active">Blog</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
 
     <section class="hero">
         <h1>Email Security: Why It Matters for Australian Businesses</h1>
@@ -249,22 +331,17 @@
         </section>
     </div>
 
-    <!-- Footer will be included from footer -->
-    <div id="footer-placeholder"></div>
-
-    <script>
-        // Load navigation and footer
-        fetch('navbar.html')
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById('navbar-placeholder').innerHTML = data;
-            });
-
-        fetch('footer.html')
-            .then(response => response.text())
-            .then(data => {
-                document.getElementById('footer-placeholder').innerHTML = data;
-            });
-    </script>
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2024 Straya Co Pty Ltd. All rights reserved.</p>
+            <p>IT Consulting & Cybersecurity Services for Australian Businesses</p>
+            <div class="footer-links">
+                <a href="privacy.html">Privacy Policy</a> | 
+                <a href="terms.html">Terms of Service</a> | 
+                <a href="contact.html">Contact Us</a>
+            </div>
+        </div>
+    </footer>
 </body>
 </html>
