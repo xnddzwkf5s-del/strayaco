@@ -429,5 +429,26 @@
             </div>
         </div>
     </footer>
+    
+    <script>
+        // Email protection from spam bots - JavaScript + HTML entities
+        function protectEmail() {
+            const emailUser = 'vincent';
+            const emailDomain = 'strayaco.com.au';
+            const emailFull = emailUser + '@' + emailDomain;
+            
+            // HTML entity encoded version for extra protection
+            const encodedEmail = 'vincent&#64;strayaco&#46;com&#46;au';
+            
+            // Update all email links with combined protection
+            const emailElements = document.querySelectorAll('#email-link, .email-link');
+            emailElements.forEach(el => {
+                el.innerHTML = `<a href="mailto:${emailFull}">${encodedEmail}</a>`;
+            });
+        }
+        
+        // Run when page loads
+        document.addEventListener('DOMContentLoaded', protectEmail);
+    </script>
 </body>
 </html>
