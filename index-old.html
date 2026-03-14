@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Straya Co Pty Ltd - Secure. Automate. Empower Your Business IT</title>
+    <style>
+        :root {
+            --primary: #0056b3;
+            --secondary: #ff6600;
+            --dark: #333;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header & Navigation */
+        header {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            text-decoration: none;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+        
+        nav a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        nav a:hover {
+            color: var(--primary);
+        }
+        
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(135deg, var(--primary) 0%, #003d82 100%);
+            color: white;
+            padding: 5rem 0;
+            text-align: center;
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .hero p {
+            font-size: 1.25rem;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            opacity: 0.9;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: var(--secondary);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,102,0,0.3);
+        }
+        
+        /* Services Section */
+        .services {
+            padding: 5rem 0;
+            background: var(--light);
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .section-title h2 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .service-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .service-card h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+        
+        .service-card ul {
+            list-style: none;
+            margin: 1rem 0;
+        }
+        
+        .service-card li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .service-card li:last-child {
+            border-bottom: none;
+        }
+        
+        /* Credentials Section */
+        .credentials {
+            padding: 4rem 0;
+            text-align: center;
+            background: white;
+        }
+        
+        .credentials p {
+            font-size: 1.2rem;
+            color: var(--gray);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 3rem 0;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .footer-section h3 {
+            color: var(--secondary);
+            margin-bottom: 1rem;
+        }
+        
+        .footer-section ul {
+            list-style: none;
+        }
+        
+        .footer-section li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer-section a {
+            color: #ccc;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-section a:hover {
+            color: white;
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid #444;
+            color: #999;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 1rem;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container nav-container">
+            <a href="/" class="logo">Straya Co Pty Ltd</a>
+            <nav>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="services.html">Services</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="blog.html">Resources</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <h1>Secure, automate, and take the hassle out of your business IT</h1>
+            <p>We're the tech mates who help Australian businesses sort out their email security, get docs doing the hard yakka, and set up IT that actually works.</p>
+            <a href="contact.html" class="cta-button">Let's have a chat</a>
+        </div>
+    </section>
+
+    <!-- Services Snapshot -->
+    <section class="services">
+        <div class="container">
+            <div class="section-title">
+                <h2>Our Key Services</h2>
+                <p>Comprehensive IT solutions for Australian businesses</p>
+            </div>
+            
+            <div class="services-grid">
+                <div class="service-card">
+                    <h3>Email Security That Actually Works</h3>
+                    <p>Stop pretending your emails are getting through. We'll help you sort out DMARC, SPF, and DKIM so your messages land where they should—and scammers get chucked in the too-hard basket.</p>
+                    <ul>
+                        <li>DMARC, SPF & DKIM setup & monitoring</li>
+                        <li>Email deliverability that actually works</li>
+                        <li>Phishing protection & reporting</li>
+                    </ul>
+                    <a href="services.html#email" class="cta-button" style="background: var(--primary);">Secure Your Emails</a>
+                </div>
+                
+                <div class="service-card">
+                    <h3>Make Your Office Docs Do the Heavy Lifting</h3>
+                    <p>Sick of repeating the same boring tasks? We'll automate your paperwork, pull data from PDFs without the headache, and streamline your reporting so your crew can focus on the important stuff.</p>
+                    <ul>
+                        <li>PDF data extraction without the headache</li>
+                        <li>Excel automation & reporting</li>
+                        <li>Workflow integration for your team</li>
+                    </ul>
+                    <a href="services.html#automation" class="cta-button" style="background: var(--primary);">Automate Your Workflow</a>
+                </div>
+                
+                <div class="service-card">
+                    <h3>New Biz? We'll Get You Sorted Online</h3>
+                    <p>Just starting out? From grabbing your domain name to launching your website and setting up proper business emails, we'll get you up and running without the drama.</p>
+                    <ul>
+                        <li>Domain name registration & hosting</li>
+                        <li>Proper business email setup</li>
+                        <li>Website setup & launch</li>
+                    </ul>
+                    <a href="services.html#setup" class="cta-button" style="background: var(--primary);">Get Your Biz Online</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Who We Are -->
+    <section class="credentials">
+        <div class="container">
+            <p><strong>Straya Co Pty Ltd is run by a bunch of certified experts (think Azure Solutions Architects and CISSP security legends) who reckon Australian businesses deserve top-notch tech without the wanky corporate speak.</strong></p>
+        </div>
+    </section>
+
+    <!-- Ready to Get Started? -->
+    <section class="services" style="background: white; padding: 4rem 0;">
+        <div class="container">
+            <div class="section-title">
+                <h2>Ready to Get Started?</h2>
+                <p>Whether you need to lock down your emails, automate the boring bits, or get your new business online—give us a hoy.</p>
+            </div>
+            <div style="text-align: center; margin-top: 2rem;">
+                <a href="contact.html" class="cta-button">Get in touch</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Straya Co Pty Ltd</h3>
+                    <p>Sydney's trusted IT consulting partner for secure and efficient business solutions.</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="services.html">Services</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="blog.html">Resources</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Contact</h3>
+                    <ul>
+                        <li>Email: <span id="email-link"></span></li>
+                        <li>Location: Sydney, Australia</li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Legal</h3>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms & Conditions</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>© 2026 Straya Co Pty Ltd — Sydney, Australia</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // Email protection from spam bots - JavaScript + HTML entities
+        function protectEmail() {
+            const emailUser = 'vincent';
+            const emailDomain = 'strayaco.com.au';
+            const emailFull = emailUser + '@' + emailDomain;
+            
+            // HTML entity encoded version for extra protection
+            const encodedEmail = 'vincent&#64;strayaco&#46;com&#46;au';
+            
+            // Update all email links with combined protection
+            const emailElements = document.querySelectorAll('#email-link, .email-link');
+            emailElements.forEach(el => {
+                el.innerHTML = `<a href="mailto:${emailFull}">${encodedEmail}</a>`;
+            });
+        }
+        
+        // Run when page loads
+        document.addEventListener('DOMContentLoaded', protectEmail);
+    </script>
+</body>
+</html>

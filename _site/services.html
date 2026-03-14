@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Services - Straya Co Pty Ltd</title>
+    <style>
+        :root {
+            --primary: #0056b3;
+            --secondary: #ff6600;
+            --dark: #333;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header & Navigation */
+        header {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            text-decoration: none;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+        
+        nav a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        nav a:hover {
+            color: var(--primary);
+        }
+        
+        /* Page Header */
+        .page-header {
+            background: linear-gradient(135deg, var(--primary) 0%, #003d82 100%);
+            color: white;
+            padding: 4rem 0;
+            text-align: center;
+        }
+        
+        .page-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .page-header p {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+            opacity: 0.9;
+        }
+        
+        /* Service Sections */
+        .service-section {
+            padding: 4rem 0;
+        }
+        
+        .service-section:nth-child(even) {
+            background: var(--light);
+        }
+        
+        .service-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+        
+        .service-text h2 {
+            color: var(--primary);
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .service-text h3 {
+            color: var(--secondary);
+            margin: 1.5rem 0 1rem;
+            font-size: 1.3rem;
+        }
+        
+        .service-text ul {
+            list-style: none;
+            margin: 1rem 0;
+        }
+        
+        .service-text li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .service-text li:last-child {
+            border-bottom: none;
+        }
+        
+        .service-cta {
+            margin-top: 2rem;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: var(--secondary);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,102,0,0.3);
+        }
+        
+        .service-visual {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .service-visual h3 {
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 3rem 0;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .footer-section h3 {
+            color: var(--secondary);
+            margin-bottom: 1rem;
+        }
+        
+        .footer-section ul {
+            list-style: none;
+        }
+        
+        .footer-section li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer-section a {
+            color: #ccc;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        .footer-section a:hover {
+            color: white;
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid #444;
+            color: #999;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 1rem;
+            }
+            
+            .service-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+            
+            .page-header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Straya Co Pty Ltd</a>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="services.html">Services</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="blog.html">Resources</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Page Header -->
+    <section class="page-header">
+        <div class="container">
+            <h1>Stuff We're Deadly At</h1>
+            <p>Practical tech help for Aussie businesses</p>
+        </div>
+    </section>
+
+    <!-- Email Security Section -->
+    <section id="email" class="service-section">
+        <div class="container">
+            <div class="service-content">
+                <div class="service-text">
+                    <h2>Email Security (Because Getting Hacked Is a Right Pain in the Arse)</h2>
+                    <p><strong>The Gist of It</strong><br>
+                    Email's still how business gets done—and unfortunately, it's also how a bunch of flogs try to ruin your day. We help Aussie businesses keep the scammers at bay, make sure your emails actually land where they're meant to, and stop you from being the next "oh no, not again" story at the pub.</p>
+                    
+                    <h3>What We Actually Do for You</h3>
+                    <ul>
+                        <li><strong>DMARC Setup & Monitoring</strong> — Stop random idiots pretending to be you and sending dodgy invoices to your customers. It's your domain—keep it that way.</li>
+                        <li><strong>SPF & DKIM Configuration</strong> — Get your email authentication sorted so you don't end up in the spam folder next to the Nigerian prince offers.</li>
+                        <li><strong>Email Deliverability Tune-Ups</strong> — If your important emails keep bouncing or vanishing into the void, we'll find out why and fix the bloody thing.</li>
+                        <li><strong>Phishing Protection That Actually Works</strong> — Catch the suspicious crap before your team accidentally clicks something they really, really shouldn't.</li>
+                    </ul>
+                    
+                    <h3>Why Bother?</h3>
+                    <ul>
+                        <li>Your brand looks professional, not like it's run from someone's garage</li>
+                        <li>Less time wondering "did that email actually send?"</li>
+                        <li>Your staff don't get tricked into handing over the keys to the castle</li>
+                        <li>You can actually say "yeah we're compliant with cyber standards" without crossing your fingers</li>
+                    </ul>
+                    
+                    <p><strong>Look, Here's the Thing</strong><br>
+                    Security isn't funny when it goes wrong. But sorting it out doesn't have to be a boring slog with a bunch of wanky consultants who talk at you for hours. We know our stuff, we'll get it sorted, and we won't make you feel like an idiot along the way.</p>
+                    
+                    <div class="service-cta">
+                        <a href="contact.html" class="cta-button">Reckon it's time to take this seriously? Give us a hoy.</a>
+                    </div>
+                </div>
+                
+                <div class="service-visual">
+                    <h3>Email Security Package</h3>
+                    <p>Complete protection for your business communications</p>
+                    <ul>
+                        <li>Initial setup & configuration</li>
+                        <li>Ongoing monitoring & reporting</li>
+                        <li>24/7 threat detection</li>
+                        <li>Monthly security reports</li>
+                        <li>Emergency response support</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Office Automation Section -->
+    <section id="automation" class="service-section">
+        <div class="container">
+            <div class="service-content">
+                <div class="service-visual">
+                    <h3>Automation Solutions</h3>
+                    <p>Streamline your business processes</p>
+                    <ul>
+                        <li>Custom workflow design</li>
+                        <li>Integration with existing systems</li>
+                        <li>Training & documentation</li>
+                        <li>Ongoing support & maintenance</li>
+                        <li>Performance optimization</li>
+                    </ul>
+                </div>
+                
+                <div class="service-text">
+                    <h2>Making Your Docs Do the Heavy Lifting</h2>
+                    <p><strong>Tired of Manual Data Entry?</strong><br>
+                    Look, there's nothing wrong with a bit of elbow grease, but when your team spends half their week copying and pasting from PDFs or wrestling with spreadsheets, something's gotta give. We help businesses automate the boring stuff so your people can actually do the work you pay them for.</p>
+                    
+                    <h3>Here's How We Lend a Hand</h3>
+                    <ul>
+                        <li><strong>PDF Data Extraction That Doesn't Suck</strong> — Got invoices, reports, or forms stuck in PDFs? We'll pull that data out and pop it straight into Excel, databases, or whatever you're using—no retyping required.</li>
+                        <li><strong>Excel Automation So You Can Knock Off on Time</strong> — Stop manually updating the same spreadsheets every Friday arvo. We'll set up automations that do the heavy lifting while you're having a cuppa.</li>
+                        <li><strong>Workflows That Actually Flow</strong> — Emails getting lost? Approvals taking forever? We'll connect the dots so your documents move from one person to the next without you having to chase anyone up.</li>
+                    </ul>
+                    
+                    <h3>Why You'll Thank Us Later</h3>
+                    <ul>
+                        <li>Get hours back in your week—hours you could spend on actual business stuff, or frankly, just leaving on time for once</li>
+                        <li>Stop making silly mistakes because someone typed a number in wrong at 4pm on a Friday</li>
+                        <li>Everything runs smoother, which means less stress and fewer "does anyone know where the Smith file went?" moments</li>
+                        <li>Your smart people can stop doing admin work and start doing the thinking work they're actually good at</li>
+                    </ul>
+                    
+                    <p><strong>The Honest Truth</strong><br>
+                    Automation sounds dead boring until you realise it means you can stop doing the same mind-numbing tasks on repeat. We're not here to replace your team—we're here to free them up so they can actually enjoy their job. And maybe get home in time for dinner.</p>
+                    
+                    <div class="service-cta">
+                        <a href="contact.html" class="cta-button">Show me what I can stop doing</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- IT Setup Section -->
+    <section id="setup" class="service-section">
+        <div class="container">
+            <div class="service-content">
+                <div class="service-text">
+                    <h2>New Business? Let's Get You Sorted Online</h2>
+                    <p><strong>Starting Something Fresh? Good On Ya.</strong><br>
+                    Launching a new business is exciting—and bloody hard work. The last thing you need is IT headaches before you've even opened the doors. We help Australian startups get their digital foundations right from day one, so you can focus on actually running your business.</p>
+                    
+                    <h3>Here's What We'll Sort Out for You</h3>
+                    <ul>
+                        <li><strong>Domain Names & Hosting That Don't Let You Down</strong> — We'll help you grab the right domain (none of that weird spelling nobody can remember) and set up hosting that won't fall over when customers actually show up.</li>
+                        <li><strong>Proper Email That Doesn't Look Dodgy</strong> — None of that @gmail or @yahoo business. We'll set you up with proper branded email accounts that look professional and keep your conversations secure.</li>
+                        <li><strong>A Website You're Actually Proud Of</strong> — Not some template that looks like every other business on the block. A proper, responsive site that makes you look like the real deal from day one.</li>
+                    </ul>
+                    
+                    <h3>Why Bother Getting It Right from the Start?</h3>
+                    <ul>
+                        <li>Skip the "wish I'd done this properly" regrets six months down the track</li>
+                        <li>Systems that actually grow with you, not hold you back</li>
+                        <li>Email and IT that won't get you in trouble when customers ask about security</li>
+                        <li>Look like you've been around for years, not minutes—builds trust straight away</li>
+                    </ul>
+                    
+                    <p><strong>The Honest Truth</strong><br>
+                    Every business has to start somewhere. But nothing screams "amateur hour" like a Gmail address and a half-finished website. We'll get you set up properly, without the jargon or the fluff, so you can hit the ground running and look good doing it.</p>
+                    
+                    <div class="service-cta">
+                        <a href="contact.html" class="cta-button">Ready to get started? Let's talk.</a>
+                    </div>
+                </div>
+                
+                <div class="service-visual">
+                    <h3>New Business Package</h3>
+                    <p>Complete IT foundation package</p>
+                    <ul>
+                        <li>Domain registration (1 year)</li>
+                        <li>Professional email accounts</li>
+                        <li>Basic website setup</li>
+                        <li>Security configuration</li>
+                        <li>30-day support package</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Straya Co Pty Ltd</h3>
+                    <p>Sydney's trusted IT consulting partner for secure and efficient business solutions.</p>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="services.html">Services</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="blog.html">Resources</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Contact</h3>
+                    <ul>
+                        <li>Email: <a href="mailto:vincent@strayaco.com.au">vincent@strayaco.com.au</a></li>
+                        <li>Location: Sydney, Australia</li>
+                    </ul>
+                </div>
+                
+                <div class="footer-section">
+                    <h3>Legal</h3>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms & Conditions</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>© 2026 Straya Co Pty Ltd — Sydney, Australia</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // Email protection from spam bots - JavaScript + HTML entities
+        function protectEmail() {
+            const emailUser = 'vincent';
+            const emailDomain = 'strayaco.com.au';
+            const emailFull = emailUser + '@' + emailDomain;
+            
+            // HTML entity encoded version for extra protection
+            const encodedEmail = 'vincent&#64;strayaco&#46;com&#46;au';
+            
+            // Update all email links with combined protection
+            const emailElements = document.querySelectorAll('#email-link, .email-link');
+            emailElements.forEach(el => {
+                el.innerHTML = `<a href="mailto:${emailFull}">${encodedEmail}</a>`;
+            });
+        }
+        
+        // Run when page loads
+        document.addEventListener('DOMContentLoaded', protectEmail);
+    </script>
+</body>
+</html>
