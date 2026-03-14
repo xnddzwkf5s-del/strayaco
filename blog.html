@@ -6,9 +6,7 @@
     <title>Why Email Security Matters More Than Ever | Straya Co Pty Ltd</title>
     <link rel="stylesheet" href="styles.css">
     <style>
-        /* Additional styles for blog page - matching services.html styling */
-
-        /* HERO */
+        /* Additional styles for blog page - matching services.html exactly */
         .hero {
             background: linear-gradient(135deg, #0f4c81, #1b78c3);
             color: white;
@@ -28,7 +26,6 @@
             opacity: 0.95;
         }
 
-        /* MAIN */
         .container {
             max-width: 1100px;
             margin: auto;
@@ -41,10 +38,10 @@
             text-align: center;
         }
 
-        /* CARDS - matching services.html card styling */
+        /* Grid matching services.html */
         .grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 30px;
             margin-top: 40px;
         }
@@ -75,7 +72,40 @@
             margin-bottom: 15px;
         }
 
-        /* HIGHLIGHT */
+        /* Content sections */
+        .content-section {
+            margin-bottom: 50px;
+        }
+
+        .content-section h2 {
+            color: #0f4c81;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 32px;
+        }
+
+        .content-section h3 {
+            color: #1b78c3;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 22px;
+        }
+
+        .content-section p {
+            font-size: 18px;
+            margin-bottom: 20px;
+            line-height: 1.8;
+        }
+
+        .content-section ul {
+            margin-bottom: 25px;
+        }
+
+        .content-section li {
+            margin-bottom: 10px;
+        }
+
+        /* Highlight box */
         .highlight {
             background: #eef4ff;
             border-left: 5px solid #1b78c3;
@@ -85,7 +115,26 @@
             font-size: 18px;
         }
 
-        /* AUSTRALIAN RESOURCES */
+        /* Benefits grid */
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .benefit-item {
+            background: #f0f7ff;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #1b78c3;
+        }
+
+        .benefit-item strong {
+            color: #0f4c81;
+        }
+
+        /* Australian resources */
         .aus-resources {
             background: #fff;
             border: 2px solid #0f4c81;
@@ -170,52 +219,6 @@
             background: #e7eefc;
             transform: translateY(-2px);
         }
-
-        /* Blog-specific styles */
-        .blog-content {
-            font-size: 18px;
-            line-height: 1.8;
-        }
-
-        .blog-content h2 {
-            color: #0f4c81;
-            margin-top: 40px;
-            margin-bottom: 20px;
-            font-size: 28px;
-        }
-
-        .blog-content h3 {
-            color: #1b78c3;
-            margin-top: 30px;
-            margin-bottom: 15px;
-            font-size: 22px;
-        }
-
-        .blog-content ul {
-            margin-bottom: 25px;
-        }
-
-        .blog-content li {
-            margin-bottom: 10px;
-        }
-
-        .benefits-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin: 30px 0;
-        }
-
-        .benefit-item {
-            background: #f0f7ff;
-            padding: 20px;
-            border-radius: 8px;
-            border-left: 4px solid #1b78c3;
-        }
-
-        .benefit-item strong {
-            color: #0f4c81;
-        }
     </style>
 </head>
 <body>
@@ -244,7 +247,7 @@
     </section>
 
     <div class="container">
-        <div class="blog-content">
+        <div class="content-section">
             <p class="intro">
                 Email remains the backbone of business communication — quotes, invoices, deals, and customer relationships all flow through it. Unfortunately, cybercriminals know this too. Today, email has become <strong>the number one entry point for cyberattacks</strong>.
             </p>
