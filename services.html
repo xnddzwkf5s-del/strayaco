@@ -206,6 +206,104 @@
             font-size: 0.875rem;
         }
         
+        /* Services Section */
+        .services-section {
+            padding: 4rem 0;
+        }
+        
+        .service-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 3rem;
+            margin-bottom: 3rem;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--gray-light);
+            display: flex;
+            gap: 2.5rem;
+            align-items: flex-start;
+            transition: var(--transition);
+        }
+        
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .service-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+        
+        .service-content {
+            flex: 1;
+        }
+        
+        .service-content h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+        
+        .service-overview {
+            font-size: 1.125rem;
+            color: var(--gray);
+            margin-bottom: 2rem;
+            line-height: 1.7;
+        }
+        
+        .service-details {
+            margin: 2rem 0;
+        }
+        
+        .service-details h3 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.25rem;
+            margin: 1.5rem 0 1rem;
+            color: var(--dark);
+        }
+        
+        .service-list,
+        .benefits-list {
+            list-style: none;
+            margin: 1rem 0 2rem;
+        }
+        
+        .service-list li,
+        .benefits-list li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+            line-height: 1.6;
+        }
+        
+        .service-list li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: bold;
+        }
+        
+        .benefits-list li::before {
+            content: "★";
+            position: absolute;
+            left: 0;
+            color: var(--secondary);
+        }
+        
+        .service-list li strong {
+            color: var(--dark);
+        }
+        
         @media (max-width: 768px) {
             .nav-container {
                 flex-direction: column;
@@ -245,17 +343,101 @@
         <section class="page-header">
             <div class="container">
                 <h1>Our Services</h1>
-                <p>Detailed information about our IT solutions for Australian businesses.</p>
+                <p>Expert IT solutions designed for Australian businesses to secure, automate, and grow.</p>
             </div>
         </section>
         
-        <section class="coming-soon">
+        <section class="services-section">
             <div class="container">
-                <h2>Page Coming Soon</h2>
-                <p>We're working on detailed service pages with pricing, case studies, and implementation details. In the meantime, check out our main services on the homepage or get in touch directly.</p>
-                <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                    <a href="/" class="btn btn-primary">Back to Home</a>
-                    <a href="contact.html" class="btn btn-primary">Contact Us</a>
+                <!-- Email Security & Deliverability -->
+                <div class="service-card" id="email-security">
+                    <div class="service-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div class="service-content">
+                        <h2>Email Security & Deliverability</h2>
+                        <p class="service-overview">Email remains the most critical communication tool for businesses, yet also the most targeted by cyber threats. We help Australian companies protect their brand, prevent phishing attacks, and improve email delivery rates.</p>
+                        
+                        <div class="service-details">
+                            <h3>Our Services</h3>
+                            <ul class="service-list">
+                                <li><strong>DMARC Setup & Monitoring</strong> — Ensure your domain is protected against email spoofing</li>
+                                <li><strong>SPF & DKIM Configuration</strong> — Align email authentication with best practices for reliable delivery</li>
+                                <li><strong>Email Deliverability Improvement</strong> — Reduce bounces and improve inbox placement</li>
+                                <li><strong>Phishing Protection & Reporting</strong> — Detect and respond to suspicious emails before they reach your staff</li>
+                            </ul>
+                            
+                            <h3>Benefits</h3>
+                            <ul class="benefits-list">
+                                <li>Strengthen your brand reputation</li>
+                                <li>Reduce email bounce rates</li>
+                                <li>Protect employees and clients from phishing</li>
+                                <li>Comply with Australian cybersecurity standards</li>
+                            </ul>
+                        </div>
+                        
+                        <a href="contact.html" class="btn btn-primary">Secure Your Emails Today</a>
+                    </div>
+                </div>
+                
+                <!-- Office Document Automation -->
+                <div class="service-card" id="automation">
+                    <div class="service-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="service-content">
+                        <h2>Office Document Automation</h2>
+                        <p class="service-overview">Manual data entry and document processing can be slow and error-prone. Our automation services empower businesses to extract, process, and report information efficiently.</p>
+                        
+                        <div class="service-details">
+                            <h3>Our Services</h3>
+                            <ul class="service-list">
+                                <li><strong>PDF Data Extraction</strong> — Pull structured data from PDFs for use in reports, databases, or Excel</li>
+                                <li><strong>Excel Automation & Reporting</strong> — Automate routine calculations and reporting tasks</li>
+                                <li><strong>Workflow Integration</strong> — Streamline document handling across teams with automated systems</li>
+                            </ul>
+                            
+                            <h3>Benefits</h3>
+                            <ul class="benefits-list">
+                                <li>Save hours of repetitive work</li>
+                                <li>Reduce errors and inconsistencies</li>
+                                <li>Improve operational efficiency</li>
+                                <li>Focus on strategic decision-making</li>
+                            </ul>
+                        </div>
+                        
+                        <a href="contact.html" class="btn btn-primary">Automate Your Workflow</a>
+                    </div>
+                </div>
+                
+                <!-- IT Setup for New Companies -->
+                <div class="service-card" id="it-setup">
+                    <div class="service-icon">
+                        <i class="fas fa-laptop-code"></i>
+                    </div>
+                    <div class="service-content">
+                        <h2>IT Setup for New Companies</h2>
+                        <p class="service-overview">Starting a new business? Get your IT right from day one. We provide complete IT setup for Australian startups, ensuring your digital presence is professional, secure, and scalable.</p>
+                        
+                        <div class="service-details">
+                            <h3>Our Services</h3>
+                            <ul class="service-list">
+                                <li><strong>Domain Registration & Hosting</strong> — Secure your company domain and hosting environment</li>
+                                <li><strong>Professional Email Setup</strong> — Establish branded email accounts with enterprise-grade security</li>
+                                <li><strong>Website Setup & Launch</strong> — Build a professional, responsive website ready to engage customers</li>
+                            </ul>
+                            
+                            <h3>Benefits</h3>
+                            <ul class="benefits-list">
+                                <li>Hassle-free IT launch for startups</li>
+                                <li>Secure and scalable systems</li>
+                                <li>Compliance-ready email and IT infrastructure</li>
+                                <li>Professional online presence that builds trust</li>
+                            </ul>
+                        </div>
+                        
+                        <a href="contact.html" class="btn btn-primary">Launch Your Business IT Today</a>
+                    </div>
                 </div>
             </div>
         </section>
