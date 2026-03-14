@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resources | Straya Co Pty Ltd</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Additional styles for resources page - matching services.html exactly */
+        .hero {
+            background: linear-gradient(135deg, #0f4c81, #1b78c3);
+            color: white;
+            padding: 80px 20px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 42px;
+            margin-bottom: 15px;
+        }
+
+        .hero p {
+            font-size: 18px;
+            max-width: 700px;
+            margin: auto;
+            opacity: 0.95;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+            padding: 40px 20px;
+        }
+
+        /* Grid matching services.html */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            transition: 0.3s;
+            border: 1px solid #eaeaea;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+            border-color: #1b78c3;
+        }
+
+        .card h3 {
+            color: #0f4c81;
+            margin-top: 0;
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+
+        .card p {
+            margin-bottom: 15px;
+        }
+
+        /* Content sections */
+        .content-section {
+            margin-bottom: 50px;
+        }
+
+        .content-section h2 {
+            color: #0f4c81;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 32px;
+        }
+
+        .content-section h3 {
+            color: #1b78c3;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            font-size: 22px;
+        }
+
+        .content-section p {
+            font-size: 18px;
+            margin-bottom: 20px;
+            line-height: 1.8;
+        }
+
+        /* Resource categories */
+        .resource-category {
+            margin-bottom: 40px;
+        }
+
+        .resource-category h3 {
+            color: #0f4c81;
+            border-bottom: 2px solid #1b78c3;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .resource-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .resource-list li {
+            margin-bottom: 15px;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .resource-list li:before {
+            content: "📄";
+            position: absolute;
+            left: 0;
+        }
+
+        .resource-list a {
+            color: #0f4c81;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .resource-list a:hover {
+            text-decoration: underline;
+        }
+
+        /* Australian resources */
+        .aus-resources {
+            background: #fff;
+            border: 2px solid #0f4c81;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 50px 0;
+        }
+
+        .aus-resources h3 {
+            color: #0f4c81;
+            margin-top: 0;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        /* CTA */
+        .cta {
+            background: #0f4c81;
+            color: white;
+            padding: 60px 30px;
+            text-align: center;
+            border-radius: 12px;
+            margin-top: 50px;
+        }
+
+        .cta h2 {
+            margin-top: 0;
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+
+        .cta p {
+            font-size: 18px;
+            max-width: 800px;
+            margin: 0 auto 25px;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: #ffffff;
+            color: #0f4c81;
+            border: none;
+            padding: 16px 32px;
+            font-size: 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 15px;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .cta-button:hover {
+            background: #e7eefc;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar sticky-header">
+        <div class="container">
+            <a href="index.html" class="logo">🇦🇺 Straya Co</a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="services.html">Services</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="resources.html" class="active">Resources</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+            <button class="menu-toggle" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <section class="hero">
+        <h1>Cybersecurity Resources for Australian Businesses</h1>
+        <p>Essential guides, tools, and information to help protect your business</p>
+    </section>
+
+    <div class="container">
+        <div class="content-section">
+            <h2>Free Resources & Guides</h2>
+            <p>Access our collection of free cybersecurity resources designed specifically for Australian businesses.</p>
+
+            <div class="grid">
+                <div class="card">
+                    <h3>Email Security Guide</h3>
+                    <p>Learn how to protect your business from phishing, spoofing, and email-based attacks with our comprehensive guide.</p>
+                    <a href="blog.html" class="cta-button" style="padding: 10px 20px; font-size: 16px;">Read Guide</a>
+                </div>
+
+                <div class="card">
+                    <h3>Essential Eight Checklist</h3>
+                    <p>Australian Cyber Security Centre's Essential Eight mitigation strategies simplified for small businesses.</p>
+                    <a href="#" class="cta-button" style="padding: 10px 20px; font-size: 16px;">Download PDF</a>
+                </div>
+
+                <div class="card">
+                    <h3>Password Security Best Practices</h3>
+                    <p>How to create strong passwords, use password managers, and implement multi-factor authentication.</p>
+                    <a href="#" class="cta-button" style="padding: 10px 20px; font-size: 16px;">View Guide</a>
+                </div>
+            </div>
+
+            <div class="aus-resources">
+                <h3>🇦🇺 Official Australian Government Resources</h3>
+                <ul class="resource-list">
+                    <li>
+                        <strong><a href="https://www.cyber.gov.au/acsc/view-all-content/essential-eight" target="_blank">Essential Eight Maturity Model</a></strong> - 
+                        The Australian Cyber Security Centre's eight essential mitigation strategies
+                    </li>
+                    <li>
+                        <strong><a href="https://www.cyber.gov.au/acsc/view-all-content/advice/email-security" target="_blank">Email Security Guidelines</a></strong> - 
+                        ACSC recommendations for securing email systems
+                    </li>
+                    <li>
+                        <strong><a href="https://www.cyber.gov.au/acsc/view-all-content/publications/small-business-cyber-security-guide" target="_blank">Small Business Cyber Security Guide</a></strong> - 
+                        Practical steps for Australian small businesses
+                    </li>
+                    <li>
+                        <strong><a href="https://www.cyber.gov.au/acsc/view-all-content/publications/cyber-security-incident-response-guide" target="_blank">Incident Response Guide</a></strong> - 
+                        What to do if you experience a cyber security incident
+                    </li>
+                </ul>
+            </div>
+
+            <div class="resource-category">
+                <h3>Tools & Templates</h3>
+                <ul class="resource-list">
+                    <li><a href="#">Security Policy Templates</a> - Ready-to-use policies for Australian businesses</li>
+                    <li><a href="#">Risk Assessment Worksheet</a> - Identify and prioritize security risks</li>
+                    <li><a href="#">Vendor Security Checklist</a> - Evaluate third-party security practices</li>
+                    <li><a href="#">Incident Response Plan Template</a> - Step-by-step response procedures</li>
+                </ul>
+            </div>
+
+            <div class="resource-category">
+                <h3>Training & Awareness</h3>
+                <ul class="resource-list">
+                    <li><a href="#">Phishing Awareness Training</a> - Free employee training materials</li>
+                    <li><a href="#">Security Awareness Posters</a> - Printable posters for your office</li>
+                    <li><a href="#">Monthly Security Newsletter</a> - Stay updated on latest threats</li>
+                    <li><a href="#">Security Quiz for Employees</a> - Test your team's knowledge</li>
+                </ul>
+            </div>
+        </div>
+
+        <section class="cta">
+            <h2>Need Help Implementing Security Measures?</h2>
+            <p>
+                Our team can help you implement these security practices and ensure your business is protected against modern threats.
+            </p>
+            <p>
+                Contact us for a free security assessment and customized recommendations for your Australian business.
+            </p>
+            <a href="contact.html" class="cta-button">Get Your Free Security Assessment</a>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Straya Co Pty Ltd</h3>
+                    <p>Helping Australian businesses stay secure in the digital age.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="index.html">Home</a></li>
+                        <li><a href="services.html">Services</a></li>
+                        <li><a href="about.html">About</a></li>
+                        <li><a href="resources.html">Resources</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact</h3>
+                    <p>Email: info@strayaco.com.au</p>
+                    <p>Phone: 1300 123 456</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Straya Co Pty Ltd. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile menu toggle
+        const menuToggle = document.querySelector('.menu-toggle');
+        const navLinks = document.querySelector('.nav-links');
+
+        menuToggle.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+            menuToggle.classList.toggle('active');
+        });
+
+        // Close menu when clicking a link
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+                menuToggle.classList.remove('active');
+            });
+        });
+    </script>
+</body>
+</html>
