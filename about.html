@@ -1,20 +1,26 @@
 <!DOCTYPE html>
 <html lang="en-AU">
 <head>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdnjs.cloudflare.com; script-src 'self'; style-src 'self' https://cdnjs.cloudflare.com; img-src 'self' data: https:;">
-    <meta http-equiv="X-Frame-Options" content="DENY">
-    <meta http-equiv="X-Content-Type-Options" content="nosniff">
-    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About Us - Straya Co Pty Ltd</title>
+    <title>About | Straya Co</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #0056b3;
-            --secondary: #ff6600;
-            --dark: #333;
-            --light: #f8f9fa;
-            --gray: #6c757d;
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #f59e0b;
+            --accent: #10b981;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --gray: #6b7280;
+            --gray-light: #e5e7eb;
+            --radius: 12px;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         * {
@@ -24,21 +30,23 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            line-height: 1.6;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.7;
             color: var(--dark);
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            min-height: 100vh;
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1280px;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 0 24px;
         }
         
-        /* Header & Navigation */
         header {
-            background: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(229, 231, 235, 0.5);
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -48,411 +56,217 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem 0;
+            padding: 1.5rem 0;
         }
         
         .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
             color: var(--primary);
             text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .logo::before {
+            content: "🇦🇺";
+            font-size: 1.5rem;
         }
         
         nav ul {
             display: flex;
             list-style: none;
-            gap: 2rem;
+            gap: 2.5rem;
         }
         
         nav a {
             text-decoration: none;
             color: var(--dark);
             font-weight: 500;
-            transition: color 0.3s;
+            font-size: 1rem;
+            padding: 0.5rem 0;
+            position: relative;
+            transition: var(--transition);
+        }
+        
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: var(--transition);
         }
         
         nav a:hover {
             color: var(--primary);
         }
         
-        /* Page Header */
-        .page-header {
-            background: linear-gradient(135deg, var(--primary) 0%, #003d82 100%);
+        nav a:hover::after {
+            width: 100%;
+        }
+        
+        .cta-nav {
+            background: var(--primary);
             color: white;
-            padding: 4rem 0;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius);
+            font-weight: 600;
+            transition: var(--transition);
+        }
+        
+        .cta-nav:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+        
+        .page-header {
+            padding: 6rem 0 4rem;
             text-align: center;
         }
         
         .page-header h1 {
-            font-size: 2.5rem;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3rem;
             margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
         .page-header p {
-            font-size: 1.2rem;
+            font-size: 1.25rem;
+            color: var(--gray);
             max-width: 600px;
             margin: 0 auto;
-            opacity: 0.9;
         }
         
-        /* About Content */
-        .about-content {
+        .coming-soon {
             padding: 4rem 0;
-        }
-        
-        .about-section {
-            margin-bottom: 3rem;
-        }
-        
-        .about-section h2 {
-            color: var(--primary);
-            font-size: 2rem;
-            margin-bottom: 1.5rem;
             text-align: center;
         }
         
-        .about-section p {
-            font-size: 1.1rem;
-            line-height: 1.8;
-            margin-bottom: 1.5rem;
-            max-width: 800px;
+        .coming-soon h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+        
+        .coming-soon p {
+            font-size: 1.125rem;
+            color: var(--gray);
+            margin-bottom: 2rem;
+            max-width: 600px;
             margin-left: auto;
             margin-right: auto;
         }
         
-        .mission-statement {
-            background: var(--light);
-            padding: 3rem;
-            border-radius: 10px;
-            text-align: center;
-            margin: 3rem 0;
-        }
-        
-        .mission-statement h3 {
-            color: var(--secondary);
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-        }
-        
-        .mission-statement p {
-            font-size: 1.2rem;
-            font-style: italic;
-            color: var(--gray);
-        }
-        
-        /* Team/Expertise Section */
-        .expertise-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            margin-top: 2rem;
-        }
-        
-        .expertise-card {
-            background: white;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        
-        .expertise-card h3 {
-            color: var(--primary);
-            margin-bottom: 1rem;
-        }
-        
-        .expertise-card p {
-            color: var(--gray);
-        }
-        
-        /* Values Section */
-        .values-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 2rem;
-            margin-top: 2rem;
-        }
-        
-        .value-card {
-            text-align: center;
-            padding: 1.5rem;
-        }
-        
-        .value-card h3 {
-            color: var(--secondary);
-            margin-bottom: 1rem;
-        }
-        
-        /* CTA Section */
-        .cta-section {
-            background: linear-gradient(135deg, var(--primary) 0%, #003d82 100%);
-            color: white;
-            padding: 4rem 0;
-            text-align: center;
-            border-radius: 10px;
-            margin: 3rem 0;
-        }
-        
-        .cta-section h2 {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-        }
-        
-        .cta-section p {
-            font-size: 1.2rem;
-            max-width: 600px;
-            margin: 0 auto 2rem;
-            opacity: 0.9;
-        }
-        
-        .cta-button {
-            display: inline-block;
-            background: var(--secondary);
-            color: white;
+        .btn {
             padding: 1rem 2rem;
-            border-radius: 5px;
+            border-radius: var(--radius);
+            font-weight: 600;
             text-decoration: none;
-            font-weight: bold;
-            font-size: 1.1rem;
-            transition: transform 0.3s, box-shadow 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+            font-size: 1rem;
         }
         
-        .cta-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255,102,0,0.3);
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: var(--shadow);
         }
         
-        /* Footer */
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+        
         footer {
             background: var(--dark);
             color: white;
-            padding: 3rem 0;
+            padding: 3rem 0 2rem;
+            margin-top: 4rem;
         }
         
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-        
-        .footer-section h3 {
-            color: var(--secondary);
-            margin-bottom: 1rem;
-        }
-        
-        .footer-section ul {
-            list-style: none;
-        }
-        
-        .footer-section li {
-            margin-bottom: 0.5rem;
-        }
-        
-        .footer-section a {
-            color: #ccc;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-        
-        .footer-section a:hover {
-            color: white;
-        }
-        
-        .copyright {
-            text-align: center;
+        .footer-bottom {
             padding-top: 2rem;
-            border-top: 1px solid #444;
-            color: #999;
+            border-top: 1px solid #374151;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 0.875rem;
         }
         
-        /* Responsive */
         @media (max-width: 768px) {
             .nav-container {
                 flex-direction: column;
-                gap: 1rem;
+                gap: 1.5rem;
             }
             
             nav ul {
                 flex-wrap: wrap;
                 justify-content: center;
-                gap: 1rem;
+                gap: 1.5rem;
             }
             
             .page-header h1 {
-                font-size: 2rem;
-            }
-            
-            .mission-statement {
-                padding: 2rem;
+                font-size: 2.5rem;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
     <header>
         <div class="container nav-container">
-            <a href="index.html" class="logo">Straya Co Pty Ltd</a>
+            <a href="/" class="logo">Straya Co</a>
             <nav>
                 <ul>
-                    <li><a href="index.html">Home</a></li>
+                    <li><a href="/">Home</a></li>
                     <li><a href="services.html">Services</a></li>
                     <li><a href="about.html">About</a></li>
                     <li><a href="blog.html">Resources</a></li>
                     <li><a href="contact.html">Contact</a></li>
                 </ul>
             </nav>
+            <a href="contact.html" class="btn cta-nav">Get Started</a>
         </div>
     </header>
 
-    <!-- Page Header -->
-    <section class="page-header">
-        <div class="container">
-            <h1>Sydney's Trusted IT Consulting Partner</h1>
-            <p>Enterprise-grade IT solutions for Australian businesses</p>
-        </div>
-    </section>
-
-    <!-- About Content -->
-    <section class="about-content">
-        <div class="container">
-            <div class="about-section">
-                <h2>About Straya Co Pty Ltd</h2>
-                <p>Straya Co Pty Ltd is a Sydney-based IT consulting company helping Australian businesses secure, automate, and grow their IT infrastructure. Our team includes Azure Certified Solution Architects and CISSP-certified cybersecurity experts, delivering enterprise-grade solutions without the enterprise price.</p>
-                
-                <p>Founded with the vision of making professional IT consulting accessible to businesses of all sizes, we combine deep technical expertise with practical business understanding. We specialise in the unique needs of Australian businesses, ensuring compliance with local regulations and best practices.</p>
+    <main>
+        <section class="page-header">
+            <div class="container">
+                <h1>About Straya Co</h1>
+                <p>Learn about our mission to help Australian businesses with practical IT solutions.</p>
             </div>
-            
-            <div class="mission-statement">
-                <h3>Our Mission</h3>
-                <p>Empower businesses with secure and efficient IT solutions tailored for Australian regulations and practices.</p>
-            </div>
-            
-            <div class="about-section">
-                <h2>Our Expertise</h2>
-                <p>We bring together a team of certified professionals with decades of combined experience across enterprise IT, cybersecurity, and business automation.</p>
-                
-                <div class="expertise-grid">
-                    <div class="expertise-card">
-                        <h3>Azure Certified</h3>
-                        <p>Certified Solution Architects with deep expertise in Microsoft Azure cloud platforms and services.</p>
-                    </div>
-                    
-                    <div class="expertise-card">
-                        <h3>CISSP Certified</h3>
-                        <p>Cybersecurity experts certified in information security best practices and threat protection.</p>
-                    </div>
-                    
-                    <div class="expertise-card">
-                        <h3>Australian Focus</h3>
-                        <p>Specialised knowledge of Australian business regulations, compliance requirements, and market needs.</p>
-                    </div>
-                    
-                    <div class="expertise-card">
-                        <h3>Enterprise Experience</h3>
-                        <p>Proven track record delivering large-scale IT solutions for organisations across Australia.</p>
-                    </div>
+        </section>
+        
+        <section class="coming-soon">
+            <div class="container">
+                <h2>Page Coming Soon</h2>
+                <p>We're working on our about page with company history, team information, and our approach to IT consulting. In the meantime, check out our services or get in touch to learn more about how we work.</p>
+                <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                    <a href="/" class="btn btn-primary">Back to Home</a>
+                    <a href="services.html" class="btn btn-primary">Our Services</a>
                 </div>
             </div>
-            
-            <div class="about-section">
-                <h2>Our Values</h2>
-                <p>These principles guide everything we do at Straya Co Pty Ltd:</p>
-                
-                <div class="values-grid">
-                    <div class="value-card">
-                        <h3>Trust & Integrity</h3>
-                        <p>We build lasting relationships based on honesty and reliability.</p>
-                    </div>
-                    
-                    <div class="value-card">
-                        <h3>Excellence</h3>
-                        <p>We deliver high-quality solutions that exceed expectations.</p>
-                    </div>
-                    
-                    <div class="value-card">
-                        <h3>Innovation</h3>
-                        <p>We leverage cutting-edge technology to solve business challenges.</p>
-                    </div>
-                    
-                    <div class="value-card">
-                        <h3>Partnership</h3>
-                        <p>We work collaboratively with our clients as true partners.</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="cta-section">
-                <h2>Ready to Transform Your IT?</h2>
-                <p>Partner with Sydney's trusted IT consulting experts. Let's discuss how we can help secure, automate, and grow your business.</p>
-                <a href="contact.html" class="cta-button">Get in Touch Today</a>
-            </div>
-        </div>
-    </section>
+        </section>
+    </main>
 
-    <!-- Footer -->
     <footer>
         <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>Straya Co Pty Ltd</h3>
-                    <p>Sydney's trusted IT consulting partner for secure and efficient business solutions.</p>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>Quick Links</h3>
-                    <ul>
-                        <li><a href="index.html">Home</a></li>
-                        <li><a href="services.html">Services</a></li>
-                        <li><a href="about.html">About</a></li>
-                        <li><a href="blog.html">Resources</a></li>
-                        <li><a href="contact.html">Contact</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>Contact</h3>
-                    <ul>
-                        <li>Email: <a href="mailto:vincent@strayaco.com.au">vincent@strayaco.com.au</a></li>
-                        <li>Location: Sydney, Australia</li>
-                    </ul>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>Legal</h3>
-                    <ul>
-                        <li><a href="#">Privacy Policy</a></li>
-                        <li><a href="#">Terms & Conditions</a></li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="copyright">
-                <p>© 2026 Straya Co Pty Ltd — Sydney, Australia</p>
+            <div class="footer-bottom">
+                <p>© 2026 Straya Co Pty Ltd — Sydney, Australia. All rights reserved.</p>
             </div>
         </div>
     </footer>
-    
-    <script>
-        // Email protection from spam bots - JavaScript + HTML entities
-        function protectEmail() {
-            const emailUser = 'vincent';
-            const emailDomain = 'strayaco.com.au';
-            const emailFull = emailUser + '@' + emailDomain;
-            
-            // HTML entity encoded version for extra protection
-            const encodedEmail = 'vincent&#64;strayaco&#46;com&#46;au';
-            
-            // Update all email links with combined protection
-            const emailElements = document.querySelectorAll('#email-link, .email-link');
-            emailElements.forEach(el => {
-                el.innerHTML = `<a href="mailto:${emailFull}">${encodedEmail}</a>`;
-            });
-        }
-        
-        // Run when page loads
-        document.addEventListener('DOMContentLoaded', protectEmail);
-    </script>
 </body>
 </html>

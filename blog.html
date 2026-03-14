@@ -1,327 +1,272 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-AU">
 <head>
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdnjs.cloudflare.com; script-src 'self'; style-src 'self' https://cdnjs.cloudflare.com; img-src 'self' data: https:;">
-    <meta http-equiv="X-Frame-Options" content="DENY">
-    <meta http-equiv="X-Content-Type-Options" content="nosniff">
-    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Why Email Security Matters | Straya Co Pty Ltd</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Resources | Straya Co</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #f59e0b;
+            --accent: #10b981;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --gray: #6b7280;
+            --gray-light: #e5e7eb;
+            --radius: 12px;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        * {
             margin: 0;
-            background: #f5f7fb;
-            color: #333;
+            padding: 0;
+            box-sizing: border-box;
         }
-
-        /* NAVBAR */
-        .navbar {
-            background: #0f4c81;
-            padding: 15px 0;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.7;
+            color: var(--dark);
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            min-height: 100vh;
         }
-
-        .nav-container {
-            max-width: 1200px;
+        
+        .container {
+            max-width: 1280px;
             margin: 0 auto;
+            padding: 0 24px;
+        }
+        
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .nav-container {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0 20px;
+            padding: 1.5rem 0;
         }
-
-        .nav-logo {
-            color: white;
-            font-size: 24px;
-            font-weight: bold;
+        
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary);
             text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-
-        .nav-menu {
+        
+        .logo::before {
+            content: "🇦🇺";
+            font-size: 1.5rem;
+        }
+        
+        nav ul {
             display: flex;
             list-style: none;
-            margin: 0;
-            padding: 0;
+            gap: 2.5rem;
         }
-
-        .nav-menu li {
-            margin-left: 30px;
-        }
-
-        .nav-menu a {
-            color: white;
+        
+        nav a {
             text-decoration: none;
-            font-size: 16px;
-            transition: color 0.3s;
-        }
-
-        .nav-menu a:hover,
-        .nav-menu a.active {
-            color: #4da6ff;
-        }
-
-        /* HERO */
-        .hero {
-            background: linear-gradient(135deg, #0f4c81, #1b78c3);
-            color: white;
-            padding: 80px 20px;
-            text-align: center;
-        }
-
-        .hero h1 {
-            font-size: 42px;
-            margin-bottom: 15px;
-        }
-
-        .hero p {
-            font-size: 18px;
-            max-width: 700px;
-            margin: auto;
-            opacity: 0.95;
-        }
-
-        /* MAIN */
-        .container {
-            max-width: 1100px;
-            margin: auto;
-            padding: 40px 20px;
-        }
-
-        .intro {
-            font-size: 18px;
-            margin-bottom: 40px;
-            text-align: center;
-            line-height: 1.6;
-        }
-
-        /* CARDS */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 25px;
-            margin-top: 30px;
-        }
-
-        .card {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-            transition: 0.25s;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.12);
-        }
-
-        .card h3 {
-            color: #0f4c81;
-            margin-top: 0;
-        }
-
-        /* HIGHLIGHT */
-        .highlight {
-            background: #eef4ff;
-            border-left: 5px solid #1b78c3;
-            padding: 20px;
-            border-radius: 6px;
-            margin: 40px 0;
-            font-size: 18px;
-            line-height: 1.6;
-        }
-
-        /* AUSTRALIAN RESOURCES */
-        .aus-resources {
-            background: #fff;
-            border: 2px solid #0f4c81;
-            border-radius: 10px;
-            padding: 25px;
-            margin: 40px 0;
-        }
-
-        .aus-resources h3 {
-            color: #0f4c81;
-            margin-top: 0;
-        }
-
-        .aus-resources ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .aus-resources li {
-            margin-bottom: 15px;
-            padding-left: 25px;
+            color: var(--dark);
+            font-weight: 500;
+            font-size: 1rem;
+            padding: 0.5rem 0;
             position: relative;
+            transition: var(--transition);
         }
-
-        .aus-resources li:before {
-            content: "🇦🇺";
+        
+        nav a::after {
+            content: '';
             position: absolute;
+            bottom: 0;
             left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: var(--transition);
         }
-
-        /* CTA */
-        .cta {
-            background: #0f4c81;
+        
+        nav a:hover {
+            color: var(--primary);
+        }
+        
+        nav a:hover::after {
+            width: 100%;
+        }
+        
+        .cta-nav {
+            background: var(--primary);
             color: white;
-            padding: 50px 30px;
-            text-align: center;
-            border-radius: 10px;
-            margin-top: 40px;
-        }
-
-        .cta h2 {
-            margin-top: 0;
-        }
-
-        .cta-button {
-            display: inline-block;
-            background: #ffffff;
-            color: #0f4c81;
-            border: none;
-            padding: 14px 28px;
-            font-size: 16px;
-            border-radius: 6px;
-            cursor: pointer;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius);
             font-weight: 600;
-            margin-top: 15px;
-            text-decoration: none;
+            transition: var(--transition);
         }
-
-        .cta-button:hover {
-            background: #e7eefc;
+        
+        .cta-nav:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
         }
-
-        /* FOOTER */
-        footer {
+        
+        .page-header {
+            padding: 6rem 0 4rem;
             text-align: center;
-            padding: 25px;
-            font-size: 14px;
-            background: #eef1f6;
-            margin-top: 60px;
+        }
+        
+        .page-header h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .page-header p {
+            font-size: 1.25rem;
+            color: var(--gray);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .coming-soon {
+            padding: 4rem 0;
+            text-align: center;
+        }
+        
+        .coming-soon h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: var(--dark);
+        }
+        
+        .coming-soon p {
+            font-size: 1.125rem;
+            color: var(--gray);
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: var(--radius);
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+            font-size: 1rem;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: var(--shadow);
+        }
+        
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 3rem 0 2rem;
+            margin-top: 4rem;
+        }
+        
+        .footer-bottom {
+            padding-top: 2rem;
+            border-top: 1px solid #374151;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 0.875rem;
+        }
+        
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+            
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 1.5rem;
+            }
+            
+            .page-header h1 {
+                font-size: 2.5rem;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="nav-container">
-            <a href="index.html" class="nav-logo">Straya Co Pty Ltd</a>
-            <ul class="nav-menu">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="services.html">Services</a></li>
-                <li><a href="about.html">About</a></li>
-                <li><a href="blog.html" class="active">Blog</a></li>
-                <li><a href="contact.html">Contact</a></li>
-            </ul>
+    <header>
+        <div class="container nav-container">
+            <a href="/" class="logo">Straya Co</a>
+            <nav>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="services.html">Services</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="blog.html">Resources</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+            <a href="contact.html" class="btn cta-nav">Get Started</a>
         </div>
-    </nav>
+    </header>
 
-    <section class="hero">
-        <h1>Email Security: Why It Matters for Modern Businesses</h1>
-        <p>Email might seem like everyday business communication, but it's actually the number one way cybercriminals break into companies.</p>
-    </section>
-
-    <div class="container">
-        <p class="intro">
-            From phishing scams to fake invoices and stolen passwords, attackers love email because it's often the easiest door into a business network. 
-            That's why modern organisations need strong email security — not just spam filtering.
-        </p>
-
-        <div class="grid">
-            <div class="card">
-                <h3>Protect Your Brand</h3>
-                <p>
-                    Without proper protection, attackers can send emails pretending to be from your company. 
-                    This can damage trust with customers, partners, and suppliers.
-                </p>
-                <p>
-                    Email authentication technologies ensure only authorised systems can send email from your domain.
-                </p>
+    <main>
+        <section class="page-header">
+            <div class="container">
+                <h1>Resources & Blog</h1>
+                <p>Helpful articles, guides, and insights for Australian businesses.</p>
             </div>
-
-            <div class="card">
-                <h3>Stop Phishing Attacks</h3>
-                <p>
-                    Phishing emails are getting harder to detect. Attackers copy real brands, internal messages, and even executives.
-                </p>
-                <p>
-                    Advanced filtering helps detect suspicious links, malicious attachments, and impersonation attempts before staff click them.
-                </p>
-            </div>
-
-            <div class="card">
-                <h3>Passwords Aren't Enough</h3>
-                <p>
-                    If a phishing email steals a password, attackers can log straight into company accounts.
-                </p>
-                <p>
-                    Modern authentication methods like passkeys and security keys prevent stolen passwords from being used.
-                </p>
-            </div>
-
-            <div class="card">
-                <h3>Ongoing Monitoring</h3>
-                <p>
-                    Cyber threats evolve constantly. Email security needs continuous monitoring to detect spoofing attempts, malware campaigns, and suspicious activity.
-                </p>
-                <p>
-                    Regular analysis keeps your email environment secure and reliable.
-                </p>
-            </div>
-        </div>
-
-        <div class="highlight">
-            A secure email environment means your emails are trusted, threats are filtered out, and attackers can't easily steal your staff accounts.
-        </div>
-
-        <!-- AUSTRALIAN RESOURCES -->
-        <div class="aus-resources">
-            <h3>Australian Government Cybersecurity Resources</h3>
-            <p>Stay informed with official Australian cybersecurity guidance:</p>
-            <ul>
-                <li>
-                    <strong><a href="https://www.cyber.gov.au/acsc/view-all-content/essential-eight" target="_blank" rel="noopener noreferrer" rel="noopener noreferrer">Essential Eight Maturity Model</a></strong> - 
-                    The Australian Cyber Security Centre's (ACSC) eight essential mitigation strategies to protect your organisation
-                </li>
-                <li>
-                    <strong><a href="https://www.cyber.gov.au/protect-yourself/securing-your-email/email-security?ss=true" target="_blank" rel="noopener noreferrer" rel="noopener noreferrer">Email Security Guidelines</a></strong> - 
-                    ACSC recommendations for securing email systems
-                </li>
-                <li>
-                    <strong><a href="https://www.cyber.gov.au/business-government/protecting-devices-systems/hardening-systems-applications/email-hardening/how-to-combat-fake-emails" target="_blank" rel="noopener noreferrer" rel="noopener noreferrer">How to combat fake emails</a></strong> - 
-                    Implement SPF, DKIM and DMARC
-                </li>
-                <li>
-                    <strong><a href="https://www.cyber.gov.au/acsc/view-all-content/publications/small-business-cyber-security-guide" target="_blank" rel="noopener noreferrer" rel="noopener noreferrer">Small Business Cyber Security Guide</a></strong> - 
-                    Practical steps for Australian small businesses
-                </li>
-                <li>
-                    <strong><a href="https://www.cyber.gov.au/acsc/report" target="_blank" rel="noopener noreferrer" rel="noopener noreferrer">Report Cybercrime</a></strong> - 
-                    Report cybersecurity incidents to the ACSC
-                </li>
-            </ul>
-        </div>
-
-        <section class="cta">
-            <h2>Not Sure If Your Email Is Secure?</h2>
-            <p>
-                Many businesses think their email is secure until a phishing attack or domain spoofing incident occurs.
-            </p>
-            <p>
-                Our email security assessment checks your authentication setup, phishing protections, and identity security.
-            </p>
-            <a href="contact.html" class="cta-button">Get In Touch</a>
         </section>
-    </div>
+        
+        <section class="coming-soon">
+            <div class="container">
+                <h2>Page Coming Soon</h2>
+                <p>We're working on our resources section with blog posts, guides, and helpful content for Australian businesses navigating IT challenges. Check back soon for practical advice on email security, automation, and business technology.</p>
+                <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                    <a href="/" class="btn btn-primary">Back to Home</a>
+                    <a href="contact.html" class="btn btn-primary">Get in Touch</a>
+                </div>
+            </div>
+        </section>
+    </main>
 
     <footer>
-        © Straya Co Pty Ltd | Cybersecurity & IT Services
+        <div class="container">
+            <div class="footer-bottom">
+                <p>© 2026 Straya Co Pty Ltd — Sydney, Australia. All rights reserved.</p>
+            </div>
+        </div>
     </footer>
 </body>
 </html>

@@ -3,14 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resources - Straya Co Pty Ltd</title>
+    <title>Resources | Straya Co</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #0056b3;
-            --secondary: #ff6600;
-            --dark: #333;
-            --light: #f8f9fa;
-            --gray: #6c757d;
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #f59e0b;
+            --accent: #10b981;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --gray: #6b7280;
+            --gray-light: #e5e7eb;
+            --radius: 12px;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
         * {
@@ -20,21 +30,23 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            line-height: 1.6;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.7;
             color: var(--dark);
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            min-height: 100vh;
         }
         
         .container {
-            max-width: 1200px;
+            max-width: 1280px;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 0 24px;
         }
         
-        /* Header & Navigation */
         header {
-            background: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(229, 231, 235, 0.5);
             position: sticky;
             top: 0;
             z-index: 1000;
@@ -44,535 +56,217 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem 0;
+            padding: 1.5rem 0;
         }
         
         .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
             color: var(--primary);
             text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .logo::before {
+            content: "🇦🇺";
+            font-size: 1.5rem;
         }
         
         nav ul {
             display: flex;
             list-style: none;
-            gap: 2rem;
+            gap: 2.5rem;
         }
         
         nav a {
             text-decoration: none;
             color: var(--dark);
             font-weight: 500;
-            transition: color 0.3s;
+            font-size: 1rem;
+            padding: 0.5rem 0;
+            position: relative;
+            transition: var(--transition);
+        }
+        
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: var(--transition);
         }
         
         nav a:hover {
             color: var(--primary);
         }
         
-        /* Page Header */
-        .page-header {
-            background: linear-gradient(135deg, var(--primary) 0%, #003d82 100%);
+        nav a:hover::after {
+            width: 100%;
+        }
+        
+        .cta-nav {
+            background: var(--primary);
             color: white;
-            padding: 4rem 0;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius);
+            font-weight: 600;
+            transition: var(--transition);
+        }
+        
+        .cta-nav:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+        
+        .page-header {
+            padding: 6rem 0 4rem;
             text-align: center;
         }
         
         .page-header h1 {
-            font-size: 2.5rem;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 3rem;
             margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
         .page-header p {
-            font-size: 1.2rem;
+            font-size: 1.25rem;
+            color: var(--gray);
             max-width: 600px;
             margin: 0 auto;
-            opacity: 0.9;
         }
         
-        /* Resources Content */
-        .resources-content {
+        .coming-soon {
             padding: 4rem 0;
-        }
-        
-        .intro-text {
             text-align: center;
-            max-width: 800px;
-            margin: 0 auto 3rem;
-            font-size: 1.1rem;
-            color: var(--gray);
         }
         
-        /* Articles Grid */
-        .articles-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-bottom: 4rem;
-        }
-        
-        .article-card {
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
-        }
-        
-        .article-card:hover {
-            transform: translateY(-5px);
-        }
-        
-        .article-image {
-            height: 200px;
-            background: var(--light);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--primary);
-            font-size: 3rem;
-        }
-        
-        .article-content {
-            padding: 1.5rem;
-        }
-        
-        .article-content h3 {
-            color: var(--primary);
+        .coming-soon h2 {
+            font-size: 2rem;
             margin-bottom: 1rem;
-            font-size: 1.3rem;
+            color: var(--dark);
         }
         
-        .article-content p {
+        .coming-soon p {
+            font-size: 1.125rem;
             color: var(--gray);
-            margin-bottom: 1rem;
-            line-height: 1.6;
-        }
-        
-        .article-meta {
-            display: flex;
-            justify-content: space-between;
-            color: #999;
-            font-size: 0.9rem;
-            margin-top: 1rem;
-            padding-top: 1rem;
-            border-top: 1px solid #eee;
-        }
-        
-        /* Topics Section */
-        .topics-section {
-            background: var(--light);
-            padding: 3rem;
-            border-radius: 10px;
-            margin-bottom: 3rem;
-        }
-        
-        .topics-section h2 {
-            color: var(--primary);
-            text-align: center;
             margin-bottom: 2rem;
-            font-size: 1.8rem;
-        }
-        
-        .topics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-        }
-        
-        .topic-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 8px;
-            text-align: center;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-        }
-        
-        .topic-card h3 {
-            color: var(--secondary);
-            margin-bottom: 0.5rem;
-            font-size: 1.1rem;
-        }
-        
-        /* Newsletter Section */
-        .newsletter-section {
-            background: linear-gradient(135deg, var(--primary) 0%, #003d82 100%);
-            color: white;
-            padding: 3rem;
-            border-radius: 10px;
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-        
-        .newsletter-section h2 {
-            font-size: 1.8rem;
-            margin-bottom: 1rem;
-        }
-        
-        .newsletter-section p {
             max-width: 600px;
-            margin: 0 auto 2rem;
-            opacity: 0.9;
+            margin-left: auto;
+            margin-right: auto;
         }
         
-        .newsletter-form {
-            max-width: 500px;
-            margin: 0 auto;
-            display: flex;
-            gap: 1rem;
-        }
-        
-        .newsletter-form input {
-            flex: 1;
-            padding: 0.8rem 1rem;
-            border: none;
-            border-radius: 5px;
+        .btn {
+            padding: 1rem 2rem;
+            border-radius: var(--radius);
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
             font-size: 1rem;
         }
         
-        .newsletter-form button {
-            background: var(--secondary);
+        .btn-primary {
+            background: var(--primary);
             color: white;
-            border: none;
-            padding: 0.8rem 2rem;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: background 0.3s;
+            box-shadow: var(--shadow);
         }
         
-        .newsletter-form button:hover {
-            background: #e55a00;
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-lg);
         }
         
-        /* CTA Button */
-        .cta-button {
-            display: inline-block;
-            background: var(--secondary);
-            color: white;
-            padding: 1rem 2rem;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 1.1rem;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        
-        .cta-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255,102,0,0.3);
-        }
-        
-        /* Footer */
         footer {
             background: var(--dark);
             color: white;
-            padding: 3rem 0;
+            padding: 3rem 0 2rem;
+            margin-top: 4rem;
         }
         
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-        
-        .footer-section h3 {
-            color: var(--secondary);
-            margin-bottom: 1rem;
-        }
-        
-        .footer-section ul {
-            list-style: none;
-        }
-        
-        .footer-section li {
-            margin-bottom: 0.5rem;
-        }
-        
-        .footer-section a {
-            color: #ccc;
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-        
-        .footer-section a:hover {
-            color: white;
-        }
-        
-        .copyright {
-            text-align: center;
+        .footer-bottom {
             padding-top: 2rem;
-            border-top: 1px solid #444;
-            color: #999;
+            border-top: 1px solid #374151;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 0.875rem;
         }
         
-        /* Responsive */
         @media (max-width: 768px) {
             .nav-container {
                 flex-direction: column;
-                gap: 1rem;
+                gap: 1.5rem;
             }
             
             nav ul {
                 flex-wrap: wrap;
                 justify-content: center;
-                gap: 1rem;
+                gap: 1.5rem;
             }
             
             .page-header h1 {
-                font-size: 2rem;
-            }
-            
-            .newsletter-form {
-                flex-direction: column;
-            }
-            
-            .topics-section {
-                padding: 2rem;
+                font-size: 2.5rem;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
     <header>
         <div class="container nav-container">
-            <a href="index.html" class="logo">Straya Co Pty Ltd</a>
+            <a href="/" class="logo">Straya Co</a>
             <nav>
                 <ul>
-                    <li><a href="index.html">Home</a></li>
+                    <li><a href="/">Home</a></li>
                     <li><a href="services.html">Services</a></li>
                     <li><a href="about.html">About</a></li>
                     <li><a href="blog.html">Resources</a></li>
                     <li><a href="contact.html">Contact</a></li>
                 </ul>
             </nav>
+            <a href="contact.html" class="btn cta-nav">Get Started</a>
         </div>
     </header>
 
-    <!-- Page Header -->
-    <section class="page-header">
-        <div class="container">
-            <h1>IT Resources & Insights</h1>
-            <p>Expert advice and practical guides for Australian businesses</p>
-        </div>
-    </section>
+    <main>
+        <section class="page-header">
+            <div class="container">
+                <h1>Resources & Blog</h1>
+                <p>Helpful articles, guides, and insights for Australian businesses.</p>
+            </div>
+        </section>
+        
+        <section class="coming-soon">
+            <div class="container">
+                <h2>Page Coming Soon</h2>
+                <p>We're working on our resources section with blog posts, guides, and helpful content for Australian businesses navigating IT challenges. Check back soon for practical advice on email security, automation, and business technology.</p>
+                <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                    <a href="/" class="btn btn-primary">Back to Home</a>
+                    <a href="contact.html" class="btn btn-primary">Get in Touch</a>
+                </div>
+            </div>
+        </section>
+    </main>
 
-    <!-- Resources Content -->
-    <section class="resources-content">
-        <div class="container">
-            <div class="intro-text">
-                <p>Stay informed with our latest insights on IT security, automation, and business technology. Our resources are tailored specifically for Australian businesses and compliance requirements.</p>
-            </div>
-            
-            <!-- Featured Articles -->
-            <h2 style="color: var(--primary); margin-bottom: 2rem; text-align: center;">Featured Articles</h2>
-            
-            <div class="articles-grid">
-                <div class="article-card">
-                    <div class="article-image">
-                        🔒
-                    </div>
-                    <div class="article-content">
-                        <h3>Why DMARC is Essential for Australian Businesses</h3>
-                        <p>Learn how DMARC protects your brand from email spoofing and improves deliverability. Essential reading for any Australian business sending emails.</p>
-                        <div class="article-meta">
-                            <span>Email Security</span>
-                            <span>10 min read</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="article-card">
-                    <div class="article-image">
-                        ⚙️
-                    </div>
-                    <div class="article-content">
-                        <h3>Automating Your Office Documents: A Step-by-Step Guide</h3>
-                        <p>Practical guide to automating repetitive office tasks using modern tools and techniques. Save hours each week with our proven approach.</p>
-                        <div class="article-meta">
-                            <span>Automation</span>
-                            <span>15 min read</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="article-card">
-                    <div class="article-image">
-                        🚀
-                    </div>
-                    <div class="article-content">
-                        <h3>Essential IT Setup Checklist for New Companies in Sydney</h3>
-                        <p>Complete checklist for launching your business IT infrastructure the right way. Avoid common pitfalls and ensure compliance from day one.</p>
-                        <div class="article-meta">
-                            <span>IT Setup</span>
-                            <span>12 min read</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="article-card">
-                    <div class="article-image">
-                        🛡️
-                    </div>
-                    <div class="article-content">
-                        <h3>Cybersecurity Basics Every Australian Business Should Know</h3>
-                        <p>Essential cybersecurity practices to protect your business from common threats. Simple steps that make a big difference.</p>
-                        <div class="article-meta">
-                            <span>Security</span>
-                            <span>8 min read</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="article-card">
-                    <div class="article-image">
-                        ☁️
-                    </div>
-                    <div class="article-content">
-                        <h3>Cloud Migration Strategies for Australian SMEs</h3>
-                        <p>How to successfully migrate your business to the cloud while maintaining security and compliance with Australian regulations.</p>
-                        <div class="article-meta">
-                            <span>Cloud</span>
-                            <span>18 min read</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="article-card">
-                    <div class="article-image">
-                        📊
-                    </div>
-                    <div class="article-content">
-                        <h3>Data Backup Best Practices for Business Continuity</h3>
-                        <p>Ensure your business can recover from data loss with our comprehensive backup strategy guide tailored for Australian businesses.</p>
-                        <div class="article-meta">
-                            <span>Backup</span>
-                            <span>10 min read</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Topics Section -->
-            <div class="topics-section">
-                <h2>Browse by Topic</h2>
-                <div class="topics-grid">
-                    <div class="topic-card">
-                        <h3>Email Security</h3>
-                        <p>DMARC, SPF, DKIM, deliverability</p>
-                    </div>
-                    
-                    <div class="topic-card">
-                        <h3>Office Automation</h3>
-                        <p>PDF extraction, Excel, workflows</p>
-                    </div>
-                    
-                    <div class="topic-card">
-                        <h3>IT Setup</h3>
-                        <p>Domains, hosting, email setup</p>
-                    </div>
-                    
-                    <div class="topic-card">
-                        <h3>Cybersecurity</h3>
-                        <p>Threat protection, compliance</p>
-                    </div>
-                    
-                    <div class="topic-card">
-                        <h3>Cloud Services</h3>
-                        <p>Azure, migration, optimization</p>
-                    </div>
-                    
-                    <div class="topic-card">
-                        <h3>Business Continuity</h3>
-                        <p>Backup, recovery, planning</p>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Newsletter Section -->
-            <div class="newsletter-section">
-                <h2>Stay Updated</h2>
-                <p>Subscribe to our newsletter for the latest IT insights, security tips, and automation strategies tailored for Australian businesses.</p>
-                <form class="newsletter-form">
-                    <input type="email" placeholder="Your email address" required>
-                    <button type="submit">Subscribe</button>
-                </form>
-                <p style="font-size: 0.9rem; margin-top: 1rem;">No spam. Unsubscribe anytime.</p>
-            </div>
-            
-            <!-- CTA -->
-            <div style="text-align: center; margin-top: 3rem;">
-                <p style="margin-bottom: 1.5rem; font-size: 1.1rem;">Need specific IT advice for your business?</p>
-                <a href="contact.html" class="cta-button">Schedule a Consultation</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
     <footer>
         <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>Straya Co Pty Ltd</h3>
-                    <p>Sydney's trusted IT consulting partner for secure and efficient business solutions.</p>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>Quick Links</h3>
-                    <ul>
-                        <li><a href="index.html">Home</a></li>
-                        <li><a href="services.html">Services</a></li>
-                        <li><a href="about.html">About</a></li>
-                        <li><a href="blog.html">Resources</a></li>
-                        <li><a href="contact.html">Contact</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>Contact</h3>
-                    <ul>
-                        <li>Email: <a href="mailto:vincent@strayaco.com.au">vincent@strayaco.com.au</a></li>
-                        <li>Location: Sydney, Australia</li>
-                    </ul>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>Legal</h3>
-                    <ul>
-                        <li><a href="#">Privacy Policy</a></li>
-                        <li><a href="#">Terms & Conditions</a></li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="copyright">
-                <p>© 2026 Straya Co Pty Ltd — Sydney, Australia</p>
+            <div class="footer-bottom">
+                <p>© 2026 Straya Co Pty Ltd — Sydney, Australia. All rights reserved.</p>
             </div>
         </div>
     </footer>
-    
-    <script>
-        // Email protection from spam bots - JavaScript + HTML entities
-        function protectEmail() {
-            const emailUser = 'vincent';
-            const emailDomain = 'strayaco.com.au';
-            const emailFull = emailUser + '@' + emailDomain;
-            
-            // HTML entity encoded version for extra protection
-            const encodedEmail = 'vincent&#64;strayaco&#46;com&#46;au';
-            
-            // Update all email links with combined protection
-            const emailElements = document.querySelectorAll('#email-link, .email-link');
-            emailElements.forEach(el => {
-                el.innerHTML = `<a href="mailto:${emailFull}">${encodedEmail}</a>`;
-            });
-        }
-        
-        // Run when page loads
-        document.addEventListener('DOMContentLoaded', protectEmail);
-    </script>
 </body>
 </html>

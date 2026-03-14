@@ -1,590 +1,383 @@
 <!DOCTYPE html>
-<html lang="en-AU">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact Us - Straya Co Pty Ltd</title>
+    <title>Contact Us | Straya Co Pty Ltd</title>
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://cdnjs.cloudflare.com; script-src 'self'; style-src 'self' https://cdnjs.cloudflare.com; img-src 'self' data: https:;">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root {
-            --primary: #0056b3;
-            --secondary: #ff6600;
-            --dark: #333;
-            --light: #f8f9fa;
-            --gray: #6c757d;
-        }
-        
+        /* Copy of your index.html styles */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
-            color: var(--dark);
+            color: #333;
+            background-color: #f8f9fa;
         }
-        
-        .container {
+
+        /* Navigation */
+        nav {
+            background: #0f4c81;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .nav-container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 20px;
-        }
-        
-        /* Header & Navigation */
-        header {
-            background: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-        
-        .nav-container {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem 0;
         }
-        
+
         .logo {
+            color: white;
             font-size: 1.5rem;
             font-weight: bold;
-            color: var(--primary);
             text-decoration: none;
         }
-        
-        nav ul {
+
+        .nav-menu {
             display: flex;
             list-style: none;
-            gap: 2rem;
         }
-        
-        nav a {
+
+        .nav-menu li {
+            margin-left: 2rem;
+        }
+
+        .nav-menu a {
+            color: white;
             text-decoration: none;
-            color: var(--dark);
             font-weight: 500;
             transition: color 0.3s;
         }
-        
-        nav a:hover {
-            color: var(--primary);
+
+        .nav-menu a:hover,
+        .nav-menu a.active {
+            color: #4da6ff;
         }
-        
-        /* Page Header */
-        .page-header {
-            background: linear-gradient(135deg, var(--primary) 0%, #003d82 100%);
-            color: white;
-            padding: 4rem 0;
+
+        /* Contact Section */
+        .contact-section {
+            padding: 4rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .contact-header {
             text-align: center;
+            margin-bottom: 3rem;
         }
-        
-        .page-header h1 {
+
+        .contact-header h1 {
+            color: #0f4c81;
             font-size: 2.5rem;
             margin-bottom: 1rem;
         }
-        
-        .page-header p {
-            font-size: 1.2rem;
+
+        .contact-header p {
+            color: #666;
+            font-size: 1.1rem;
             max-width: 600px;
             margin: 0 auto;
-            opacity: 0.9;
         }
-        
+
         /* Contact Content */
         .contact-content {
-            padding: 4rem 0;
-        }
-        
-        .contact-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 3rem;
+            margin-top: 2rem;
         }
-        
-        /* Contact Form */
-        .contact-form h2 {
-            color: var(--primary);
-            margin-bottom: 1.5rem;
-            font-size: 1.8rem;
+
+        @media (max-width: 768px) {
+            .contact-content {
+                grid-template-columns: 1fr;
+            }
         }
-        
+
+        /* Form */
+        .contact-form {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
         .form-group {
             margin-bottom: 1.5rem;
         }
-        
+
         .form-group label {
             display: block;
             margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: var(--dark);
+            color: #0f4c81;
+            font-weight: 600;
         }
-        
+
         .form-group input,
         .form-group textarea,
         .form-group select {
             width: 100%;
-            padding: 0.8rem 1rem;
-            border: 1px solid #ddd;
+            padding: 0.75rem;
+            border: 2px solid #ddd;
             border-radius: 5px;
             font-size: 1rem;
             font-family: inherit;
-            transition: border-color 0.3s;
         }
-        
+
         .form-group input:focus,
         .form-group textarea:focus,
         .form-group select:focus {
             outline: none;
-            border-color: var(--primary);
+            border-color: #0f4c81;
         }
-        
+
         .form-group textarea {
             min-height: 150px;
             resize: vertical;
         }
-        
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-        
-        .submit-button {
-            background: var(--secondary);
+
+        .submit-btn {
+            background: #0f4c81;
             color: white;
             border: none;
-            padding: 1rem 2rem;
+            padding: 0.75rem 2rem;
+            font-size: 1rem;
             border-radius: 5px;
-            font-size: 1.1rem;
-            font-weight: bold;
             cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
+            font-weight: 600;
             width: 100%;
+            transition: background 0.3s;
         }
-        
-        .submit-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255,102,0,0.3);
+
+        .submit-btn:hover {
+            background: #1b78c3;
         }
-        
+
         /* Contact Info */
         .contact-info {
-            background: var(--light);
+            background: white;
             padding: 2rem;
-            border-radius: 10px;
-        }
-        
-        .contact-info h2 {
-            color: var(--primary);
-            margin-bottom: 1.5rem;
-            font-size: 1.8rem;
-        }
-        
-        .info-item {
-            margin-bottom: 2rem;
-            padding-bottom: 2rem;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        .info-item:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-        
-        .info-item h3 {
-            color: var(--secondary);
-            margin-bottom: 0.5rem;
-            font-size: 1.2rem;
-        }
-        
-        .info-item p {
-            color: var(--gray);
-            line-height: 1.6;
-        }
-        
-        .info-item a {
-            color: var(--primary);
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-        
-        .info-item a:hover {
-            color: var(--secondary);
-        }
-        
-        /* Service Areas */
-        .service-areas {
-            margin-top: 2rem;
-        }
-        
-        .service-areas h3 {
-            color: var(--primary);
-            margin-bottom: 1rem;
-        }
-        
-        .areas-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 0.5rem;
-            list-style: none;
-        }
-        
-        .areas-list li {
-            padding: 0.5rem;
-            background: white;
-            border-radius: 5px;
-            text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        /* FAQ Section */
-        .faq-section {
-            margin-top: 4rem;
-            padding-top: 4rem;
-            border-top: 1px solid #eee;
-        }
-        
-        .faq-section h2 {
-            color: var(--primary);
-            text-align: center;
-            margin-bottom: 2rem;
-            font-size: 1.8rem;
-        }
-        
-        .faq-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-        
-        .faq-item {
-            background: white;
-            padding: 1.5rem;
             border-radius: 10px;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
-        
-        .faq-item h3 {
-            color: var(--secondary);
+
+        .contact-info h3 {
+            color: #0f4c81;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .contact-item i {
+            color: #0f4c81;
+            font-size: 1.25rem;
+            margin-right: 1rem;
+            margin-top: 0.25rem;
+        }
+
+        .contact-item h4 {
+            margin-bottom: 0.25rem;
+            color: #333;
+        }
+
+        .contact-item p {
+            color: #666;
+        }
+
+        .business-hours {
+            background: #eef4ff;
+            padding: 1.5rem;
+            border-radius: 5px;
+            margin-top: 2rem;
+        }
+
+        .business-hours h4 {
+            color: #0f4c81;
             margin-bottom: 1rem;
-            font-size: 1.1rem;
         }
-        
-        .faq-item p {
-            color: var(--gray);
-            line-height: 1.6;
+
+        .hours-list p {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
         }
-        
-        /* CTA Section */
-        .cta-section {
-            background: linear-gradient(135deg, var(--primary) 0%, #003d82 100%);
+
+        .hours-list span:last-child {
+            font-weight: 600;
+            color: #0f4c81;
+        }
+
+        /* Footer */
+        footer {
+            background: #0f4c81;
             color: white;
-            padding: 3rem;
-            border-radius: 10px;
+            padding: 2rem;
             text-align: center;
             margin-top: 4rem;
         }
-        
-        .cta-section h2 {
-            font-size: 1.8rem;
-            margin-bottom: 1rem;
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
         }
-        
-        .cta-section p {
-            max-width: 600px;
-            margin: 0 auto 2rem;
-            opacity: 0.9;
-        }
-        
-        .cta-button {
-            display: inline-block;
-            background: var(--secondary);
-            color: white;
-            padding: 1rem 2rem;
-            border-radius: 5px;
-            text-decoration: none;
-            font-weight: bold;
-            font-size: 1.1rem;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-        
-        .cta-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255,102,0,0.3);
-        }
-        
-        /* Footer */
-        footer {
-            background: var(--dark);
-            color: white;
-            padding: 3rem 0;
-        }
-        
-        .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            margin-bottom: 2rem;
-        }
-        
-        .footer-section h3 {
-            color: var(--secondary);
-            margin-bottom: 1rem;
-        }
-        
-        .footer-section ul {
-            list-style: none;
-        }
-        
-        .footer-section li {
+
+        footer p {
             margin-bottom: 0.5rem;
         }
-        
-        .footer-section a {
-            color: #ccc;
+
+        .footer-links a {
+            color: #4da6ff;
             text-decoration: none;
-            transition: color 0.3s;
+            margin: 0 0.5rem;
         }
-        
-        .footer-section a:hover {
-            color: white;
-        }
-        
-        .copyright {
-            text-align: center;
-            padding-top: 2rem;
-            border-top: 1px solid #444;
-            color: #999;
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .nav-container {
-                flex-direction: column;
-                gap: 1rem;
-            }
-            
-            nav ul {
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 1rem;
-            }
-            
-            .page-header h1 {
-                font-size: 2rem;
-            }
-            
-            .contact-grid {
-                grid-template-columns: 1fr;
-                gap: 2rem;
-            }
-            
-            .form-row {
-                grid-template-columns: 1fr;
-                gap: 0;
-            }
+
+        .footer-links a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header>
-        <div class="container nav-container">
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
             <a href="index.html" class="logo">Straya Co Pty Ltd</a>
-            <nav>
-                <ul>
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="services.html">Services</a></li>
-                    <li><a href="about.html">About</a></li>
-                    <li><a href="blog.html">Resources</a></li>
-                    <li><a href="contact.html">Contact</a></li>
-                </ul>
-            </nav>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="services.html">Services</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="blog.html">Blog</a></li>
+                <li><a href="contact.html" class="active">Contact</a></li>
+            </ul>
         </div>
-    </header>
+    </nav>
 
-    <!-- Page Header -->
-    <section class="page-header">
-        <div class="container">
-            <h1>Let's Talk About Your IT Needs</h1>
-            <p>Get in touch with our expert team for a consultation on how we can help secure, automate, and grow your business IT.</p>
+    <!-- Contact Section -->
+    <section class="contact-section">
+        <div class="contact-header">
+            <h1>Get In Touch</h1>
+            <p>Have questions about our cybersecurity services? Send us a message and we'll get back to you within 24 hours.</p>
         </div>
-    </section>
 
-    <!-- Contact Content -->
-    <section class="contact-content">
-        <div class="container">
-            <div class="contact-grid">
-                <!-- Contact Form -->
-                <div class="contact-form">
-                    <h2>Send Us a Message</h2>
-                    <form id="contactForm">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="name">Full Name *</label>
-                                <input type="text" id="name" name="name" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="company">Company</label>
-                                <input type="text" id="company" name="company">
-                            </div>
-                        </div>
-                        
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="email">Email Address *</label>
-                                <input type="email" id="email" name="email" required>
-                            </div>
-                            
-                            <div class="form-group">
-                                <label for="phone">Phone Number</label>
-                                <input type="tel" id="phone" name="phone">
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="service">Service Interest</label>
-                            <select id="service" name="service">
-                                <option value="">Select a service</option>
-                                <option value="email">Email Security & Deliverability</option>
-                                <option value="automation">Office Document Automation</option>
-                                <option value="setup">IT Setup for New Companies</option>
-                                <option value="multiple">Multiple Services</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="message">Your Message *</label>
-                            <textarea id="message" name="message" required placeholder="Tell us about your IT needs, challenges, or questions..."></textarea>
-                        </div>
-                        
-                        <button type="submit" class="submit-button">Send Message</button>
-                    </form>
+        <div class="contact-content">
+            <!-- Contact Form -->
+            <div class="contact-form">
+                <form action="https://formspree.io/f/xgonzwod" method="POST">
+                    <div class="form-group">
+                        <label for="name">Full Name *</label>
+                        <input type="text" id="name" name="name" required minlength="2" maxlength="100">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">Phone Number</label>
+                        <input type="tel" id="phone" name="phone" pattern="[0-9\s\-\(\)\+]+" title="Please enter a valid phone number">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="company">Company Name</label>
+                        <input type="text" id="company" name="company">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="service">Service Interested In</label>
+                        <select id="service" name="service">
+                            <option value="">Select a service</option>
+                            <option value="email-security">Email Security Assessment</option>
+                            <option value="cybersecurity">Cybersecurity Consulting</option>
+                            <option value="it-support">IT Support Services</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="message">Message *</label>
+                        <textarea id="message" name="message" required minlength="10" maxlength="1000"></textarea>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">Send Message</button>
+                </form>
+            </div>
+            
+            <!-- Contact Information -->
+            <div class="contact-info">
+                <h3>Contact Information</h3>
+                
+                <div class="contact-item">
+                    <i class="fas fa-envelope"></i>
+                    <div>
+                        <h4>Email</h4>
+                        <p>info@strayaco.com.au</p>
+                    </div>
                 </div>
                 
-                <!-- Contact Info -->
-                <div class="contact-info">
-                    <h2>Contact Information</h2>
-                    
-                    <div class="info-item">
-                        <h3>Email</h3>
-                        <p><a href="mailto:vincent@strayaco.com.au">vincent@strayaco.com.au</a></p>
-                        <p>We typically respond within 24 hours on business days.</p>
-                    </div>
-                    
-                    <div class="info-item">
-                        <h3>Location</h3>
-                        <p>Sydney, Australia</p>
-                        <p>Serving businesses across Sydney and throughout Australia.</p>
-                    </div>
-                    
-                    <div class="info-item">
-                        <h3>Business Hours</h3>
-                        <p>Monday - Friday: 9:00 AM - 5:00 PM AEST</p>
-                        <p>Emergency support available for existing clients.</p>
-                    </div>
-                    
-                    <div class="service-areas">
-                        <h3>Service Areas</h3>
-                        <ul class="areas-list">
-                            <li>Sydney CBD</li>
-                            <li>North Sydney</li>
-                            <li>Parramatta</li>
-                            <li>Chatswood</li>
-                            <li>Macquarie Park</li>
-                            <li>Australia-wide</li>
-                        </ul>
+                <div class="contact-item">
+                    <i class="fas fa-phone"></i>
+                    <div>
+                        <h4>Phone</h4>
+                        <p>+61 2 1234 5678</p>
                     </div>
                 </div>
-            </div>
-            
-            <!-- FAQ Section -->
-            <div class="faq-section">
-                <h2>Frequently Asked Questions</h2>
-                <div class="faq-grid">
-                    <div class="faq-item">
-                        <h3>What happens after I submit the contact form?</h3>
-                        <p>We'll review your enquiry and contact you within 24 hours to schedule a consultation call. During this call, we'll discuss your specific needs and provide initial recommendations.</p>
-                    </div>
-                    
-                    <div class="faq-item">
-                        <h3>Do you offer free consultations?</h3>
-                        <p>Yes, we offer a free 30-minute initial consultation to understand your business needs and determine how we can help. This consultation helps us provide accurate recommendations.</p>
-                    </div>
-                    
-                    <div class="faq-item">
-                        <h3>What types of businesses do you work with?</h3>
-                        <p>We work with businesses of all sizes across Australia, from startups to established enterprises. Our solutions are scalable to meet different needs and budgets.</p>
-                    </div>
-                    
-                    <div class="faq-item">
-                        <h3>How quickly can you start a project?</h3>
-                        <p>Most projects can begin within 1-2 weeks of agreement. Emergency security issues can be addressed within 24-48 hours for urgent cases.</p>
+                
+                <div class="contact-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <div>
+                        <h4>Address</h4>
+                        <p>Sydney, NSW, Australia</p>
                     </div>
                 </div>
-            </div>
-            
-            <!-- CTA Section -->
-            <div class="cta-section">
-                <h2>Ready to Transform Your IT?</h2>
-                <p>Partner with Sydney's trusted IT consulting experts. Let's discuss how we can help secure, automate, and grow your business.</p>
-                <a href="tel:+61400000000" class="cta-button">Call Us Now</a>
+                
+                <div class="business-hours">
+                    <h4>Business Hours</h4>
+                    <div class="hours-list">
+                        <p><span>Monday - Friday</span> <span>9:00 AM - 5:00 PM</span></p>
+                        <p><span>Saturday</span> <span>10:00 AM - 2:00 PM</span></p>
+                        <p><span>Sunday</span> <span>Closed</span></p>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
     <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>Straya Co Pty Ltd</h3>
-                    <p>Sydney's trusted IT consulting partner for secure and efficient business solutions.</p>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>Quick Links</h3>
-                    <ul>
-                        <li><a href="index.html">Home</a></li>
-                        <li><a href="services.html">Services</a></li>
-                        <li><a href="about.html">About</a></li>
-                        <li><a href="blog.html">Resources</a></li>
-                        <li><a href="contact.html">Contact</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>Contact</h3>
-                    <ul>
-                        <li>Email: <a href="mailto:vincent@strayaco.com.au">vincent@strayaco.com.au</a></li>
-                        <li>Location: Sydney, Australia</li>
-                    </ul>
-                </div>
-                
-                <div class="footer-section">
-                    <h3>Legal</h3>
-                    <ul>
-                        <li><a href="#">Privacy Policy</a></li>
-                        <li><a href="#">Terms & Conditions</a></li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="copyright">
-                <p>© 2026 Straya Co Pty Ltd — Sydney, Australia</p>
+        <div class="footer-container">
+            <p>&copy; 2024 Straya Co Pty Ltd. All rights reserved.</p>
+            <p>IT Consulting & Cybersecurity Services for Australian Businesses</p>
+            <div class="footer-links">
+                <a href="privacy.html">Privacy Policy</a> | 
+                <a href="terms.html">Terms of Service</a> | 
+                <a href="contact.html">Contact Us</a>
             </div>
         </div>
     </footer>
-    
+
     <script>
-        document.getElementById('contactForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert('Thank you for your message! We will contact you within 24 hours.');
-            this.reset();
+        // Form submission feedback
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const submitBtn = this.querySelector('.submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Sending...';
         });
     </script>
 </body>
