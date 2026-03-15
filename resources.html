@@ -1,345 +1,727 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-AU">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Resources | Straya Co Pty Ltd</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Resources | Straya Co</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        /* Additional styles for resources page - matching services.html exactly */
-        .hero {
-            background: linear-gradient(135deg, #0f4c81, #1b78c3);
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #f59e0b;
+            --accent: #10b981;
+            --dark: #1f2937;
+            --light: #f9fafb;
+            --gray: #6b7280;
+            --gray-light: #e5e7eb;
+            --radius: 12px;
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.7;
+            color: var(--dark);
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            min-height: 100vh;
+        }
+        
+        h1, h2, h3, h4 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+        
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+        
+        /* Header */
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: var(--transition);
+        }
+        
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 0;
+        }
+        
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .logo::before {
+            content: "🇦🇺";
+            font-size: 1.5rem;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2.5rem;
+        }
+        
+        nav a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            font-size: 1rem;
+            padding: 0.5rem 0;
+            position: relative;
+            transition: var(--transition);
+        }
+        
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: var(--transition);
+        }
+        
+        nav a:hover {
+            color: var(--primary);
+        }
+        
+        nav a:hover::after {
+            width: 100%;
+        }
+        
+        nav a.active {
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        nav a.active::after {
+            width: 100%;
+        }
+        
+        .cta-nav {
+            background: var(--primary);
             color: white;
-            padding: 80px 20px;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius);
+            font-weight: 600;
+            transition: var(--transition);
+        }
+        
+        .cta-nav:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+        
+        /* Hero */
+        .hero {
+            padding: 8rem 0 6rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            z-index: -1;
+        }
+        
+        .hero h1 {
+            font-size: 4rem;
+            color: white;
+            margin-bottom: 1.5rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .hero p {
+            font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+        
+        /* Coming Soon Section */
+        .coming-soon {
+            padding: 6rem 0;
             text-align: center;
         }
-
-        .hero h1 {
-            font-size: 42px;
-            margin-bottom: 15px;
+        
+        .coming-soon-content {
+            max-width: 600px;
+            margin: 0 auto;
         }
-
-        .hero p {
-            font-size: 18px;
-            max-width: 700px;
-            margin: auto;
-            opacity: 0.95;
+        
+        .coming-soon h2 {
+            font-size: 3rem;
+            color: var(--dark);
+            margin-bottom: 1.5rem;
         }
-
-        .container {
-            max-width: 1100px;
-            margin: auto;
-            padding: 40px 20px;
-        }
-
-        /* Grid matching services.html */
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
-            margin-top: 40px;
-        }
-
-        .card {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
-            transition: 0.3s;
-            border: 1px solid #eaeaea;
-        }
-
-        .card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.12);
-            border-color: #1b78c3;
-        }
-
-        .card h3 {
-            color: #0f4c81;
-            margin-top: 0;
-            font-size: 22px;
-            margin-bottom: 15px;
-        }
-
-        .card p {
-            margin-bottom: 15px;
-        }
-
-        /* Content sections */
-        .content-section {
-            margin-bottom: 50px;
-        }
-
-        .content-section h2 {
-            color: #0f4c81;
-            margin-top: 0;
-            margin-bottom: 20px;
-            font-size: 32px;
-        }
-
-        .content-section h3 {
-            color: #1b78c3;
-            margin-top: 30px;
-            margin-bottom: 15px;
-            font-size: 22px;
-        }
-
-        .content-section p {
-            font-size: 18px;
-            margin-bottom: 20px;
+        
+        .coming-soon p {
+            font-size: 1.25rem;
+            color: var(--gray);
+            margin-bottom: 3rem;
             line-height: 1.8;
         }
-
-        /* Resource categories */
-        .resource-category {
-            margin-bottom: 40px;
+        
+        .construction-icon {
+            font-size: 4rem;
+            margin-bottom: 2rem;
         }
-
-        .resource-category h3 {
-            color: #0f4c81;
-            border-bottom: 2px solid #1b78c3;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }
-
-        .resource-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .resource-list li {
-            margin-bottom: 15px;
-            padding-left: 25px;
-            position: relative;
-        }
-
-        .resource-list li:before {
-            content: "📄";
-            position: absolute;
-            left: 0;
-        }
-
-        .resource-list a {
-            color: #0f4c81;
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .resource-list a:hover {
-            text-decoration: underline;
-        }
-
-        /* Australian resources */
-        .aus-resources {
-            background: #fff;
-            border: 2px solid #0f4c81;
-            border-radius: 12px;
-            padding: 30px;
-            margin: 50px 0;
-        }
-
-        .aus-resources h3 {
-            color: #0f4c81;
-            margin-top: 0;
-            font-size: 24px;
-            margin-bottom: 20px;
-        }
-
-        /* CTA */
-        .cta {
-            background: #0f4c81;
-            color: white;
-            padding: 60px 30px;
-            text-align: center;
-            border-radius: 12px;
-            margin-top: 50px;
-        }
-
-        .cta h2 {
-            margin-top: 0;
-            font-size: 32px;
-            margin-bottom: 20px;
-        }
-
-        .cta p {
-            font-size: 18px;
-            max-width: 800px;
-            margin: 0 auto 25px;
-        }
-
-        .cta-button {
+        
+        /* Buttons */
+        .btn {
             display: inline-block;
-            background: #ffffff;
-            color: #0f4c81;
-            border: none;
-            padding: 16px 32px;
-            font-size: 18px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            margin-top: 15px;
+            background: var(--primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius);
             text-decoration: none;
-            transition: 0.3s;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1rem;
         }
-
-        .cta-button:hover {
-            background: #e7eefc;
+        
+        .btn:hover {
+            background: var(--primary-dark);
             transform: translateY(-2px);
         }
-    </style>
+        
+        .btn-secondary {
+            background: var(--secondary);
+        }
+        
+        .btn-secondary:hover {
+            background: #eab308;
+        }
+        
+        .btn-large {
+            padding: 1rem 2rem;
+            font-size: 1.125rem;
+        }
+        
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 5rem 0 2rem;
+        }
+        
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+        
+        .footer-col h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+            color: white;
+        }
+        
+        .footer-col ul {
+            list-style: none;
+        }
+        
+        .footer-col li {
+            margin-bottom: 0.75rem;
+        }
+        
+        .footer-col a {
+            color: #d1d5db;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        
+        .footer-col a:hover {
+            color: white;
+            padding-left: 5px;
+        }
+        
+        .footer-bottom {
+            padding-top: 2rem;
+            border-top: 1px solid #374151;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 0.875rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+            
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 1.5rem;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero p {
+                font-size: 1.125rem;
+            }
+            
+            .coming-soon h2 {
+                font-size: 2.5rem;
+            }
+            
+            .coming-soon p {
+                font-size: 1.125rem;
+            }
+        }
+
+        .content-section {
+            padding: 4rem 0;
+        }
+        
+        .section-header {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 4rem;
+        }
+        
+        .section-header h2 {
+            font-size: 2.5rem;
+            color: var(--dark);
+            margin-bottom: 1.5rem;
+        }
+        
+        .section-header p {
+            font-size: 1.25rem;
+            color: var(--gray);
+            line-height: 1.8;
+        }
+        
+        .service-card {
+            background: white;
+            border-radius: var(--radius);
+            padding: 3rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 2rem;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .service-icon {
+            font-size: 3rem;
+            flex-shrink: 0;
+        }
+        
+        .service-content {
+            flex: 1;
+        }
+        
+        .service-content h3 {
+            font-size: 1.75rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        .service-content > p {
+            color: var(--gray);
+            margin-bottom: 2rem;
+            font-size: 1.125rem;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .feature-item {
+            background: var(--light);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            border: 1px solid var(--gray-light);
+        }
+        
+        .feature-item h4 {
+            font-size: 1.125rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .feature-item p {
+            color: var(--dark);
+            font-size: 0.95rem;
+        }
+        
+        .benefits-section {
+            text-align: center;
+            margin: 4rem 0;
+        }
+        
+        .benefits-section h3 {
+            font-size: 2rem;
+            color: var(--dark);
+            margin-bottom: 3rem;
+        }
+        
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+        
+        .benefit-card {
+            background: white;
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        
+        .benefit-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .benefit-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .benefit-card h4 {
+            font-size: 1.25rem;
+            color: var(--primary);
+            margin-bottom: 0.75rem;
+        }
+        
+        .benefit-card p {
+            color: var(--gray);
+        }
+        
+        .cta-section {
+            text-align: center;
+            padding: 4rem;
+            margin-bottom: 4rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: var(--radius);
+            margin-top: 3rem;
+        }
+        
+        .cta-section h3 {
+            font-size: 2rem;
+            color: white;
+            margin-bottom: 1rem;
+        }
+        
+        .cta-section p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 1.25rem;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .cta-section .btn {
+            background: white;
+            color: var(--primary);
+        }
+        
+        .cta-section .btn:hover {
+            background: var(--light);
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 768px) {
+            .service-card {
+                flex-direction: column;
+                padding: 2rem;
+            }
+            
+            .service-icon {
+                font-size: 2.5rem;
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .benefits-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .cta-section {
+                padding: 3rem 1.5rem;
+            }
+            
+            .cta-section h3 {
+                font-size: 1.75rem;
+            }
+        }
+        </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav class="navbar sticky-header">
-        <div class="container">
-            <a href="index.html" class="logo">🇦🇺 Straya Co</a>
-            <ul class="nav-links">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="services.html">Services</a></li>
-                <li><a href="about.html">About</a></li>
-                <li><a href="resources.html" class="active">Resources</a></li>
-                <li><a href="contact.html">Contact</a></li>
-            </ul>
-            <button class="menu-toggle" aria-label="Toggle menu">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
+    <!-- Header -->
+    <header>
+        <div class="container nav-container">
+            <a href="index.html" class="logo">Straya Co</a>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="services.html">Services</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="resources.html" class="active">Resources</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+            <a href="contact.html" class="btn cta-nav">Get Started</a>
         </div>
-    </nav>
+    </header>
 
+    <!-- Hero -->
     <section class="hero">
-        <h1>Cybersecurity Resources for Australian Businesses</h1>
-        <p>Essential guides, tools, and information to help protect your business</p>
+        <div class="container">
+            <h1>Resources</h1>
+            <p>Tools, guides, and insights to help your Australian business thrive</p>
+        </div>
     </section>
 
-    <div class="container">
-        <div class="content-section">
-            <h2>Free Resources & Guides</h2>
-            <p>Access our collection of free cybersecurity resources designed specifically for Australian businesses.</p>
-
-            <div class="grid">
-                <div class="card">
-                    <h3>Email Security Guide</h3>
-                    <p>Learn how to protect your business from phishing, spoofing, and email-based attacks with our comprehensive guide.</p>
-                    <a href="blog.html" class="cta-button" style="padding: 10px 20px; font-size: 16px;">Read Guide</a>
-                </div>
-
-                <div class="card">
-                    <h3>Essential Eight Checklist</h3>
-                    <p>Australian Cyber Security Centre's Essential Eight mitigation strategies simplified for small businesses.</p>
-                    <a href="#" class="cta-button" style="padding: 10px 20px; font-size: 16px;">Download PDF</a>
-                </div>
-
-                <div class="card">
-                    <h3>Password Security Best Practices</h3>
-                    <p>How to create strong passwords, use password managers, and implement multi-factor authentication.</p>
-                    <a href="#" class="cta-button" style="padding: 10px 20px; font-size: 16px;">View Guide</a>
+    <!-- Email Security Content -->
+    <section class="content-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Email Security: Protecting Your Business Starts Here</h2>
+                <p>Email drives modern business—and it's also the #1 entry point for cyberattacks. From phishing to CEO impersonation, criminals target your inbox. We help organizations build a layered defense that protects reputation, employees, and customers.</p>
+            </div>
+            
+            <!-- Email Authentication -->
+            <div class="service-card">
+                <div class="service-icon">🔐</div>
+                <div class="service-content">
+                    <h3>Lock the Front Door: Email Authentication</h3>
+                    <p>Attackers impersonate trusted brands to scam customers. We prevent this with three standards:</p>
+                    
+                    <div class="feature-grid">
+                        <div class="feature-item">
+                            <h4>SPF (Sender Policy Framework)</h4>
+                            <p>Specifies which servers can send email from your domain.</p>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <h4>DKIM (DomainKeys Identified Mail)</h4>
+                            <p>Adds a tamper-proof digital signature to every outgoing message.</p>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <h4>DMARC (Domain-based Message Authentication, Reporting & Conformance)</h4>
+                            <p>Tells receiving servers to reject emails that fail authentication, stopping spoofing cold.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <div class="aus-resources">
-                <h3>🇦🇺 Official Australian Government Resources</h3>
-                <ul class="resource-list">
-                    <li>
-                        <strong><a href="https://www.cyber.gov.au/acsc/view-all-content/essential-eight" target="_blank">Essential Eight Maturity Model</a></strong> - 
-                        The Australian Cyber Security Centre's eight essential mitigation strategies
-                    </li>
-                    <li>
-                        <strong><a href="https://www.cyber.gov.au/acsc/view-all-content/advice/email-security" target="_blank">Email Security Guidelines</a></strong> - 
-                        ACSC recommendations for securing email systems
-                    </li>
-                    <li>
-                        <strong><a href="https://www.cyber.gov.au/acsc/view-all-content/publications/small-business-cyber-security-guide" target="_blank">Small Business Cyber Security Guide</a></strong> - 
-                        Practical steps for Australian small businesses
-                    </li>
-                    <li>
-                        <strong><a href="https://www.cyber.gov.au/acsc/view-all-content/publications/cyber-security-incident-response-guide" target="_blank">Incident Response Guide</a></strong> - 
-                        What to do if you experience a cyber security incident
-                    </li>
-                </ul>
+            
+            <!-- Phishing-Resistant Authentication -->
+            <div class="service-card">
+                <div class="service-icon">🛡️</div>
+                <div class="service-content">
+                    <h3>Protect Your People: Phishing-Resistant Authentication</h3>
+                    <p>Passwords alone won't stop today's sophisticated scams. We implement:</p>
+                    
+                    <div class="feature-grid">
+                        <div class="feature-item">
+                            <h4>FIDO2 Security Keys</h4>
+                            <p>Physical keys that render stolen passwords useless.</p>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <h4>Passwordless Passkeys</h4>
+                            <p>Biometric logins that simply won't work on fake phishing sites.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-
-            <div class="resource-category">
-                <h3>Tools & Templates</h3>
-                <ul class="resource-list">
-                    <li><a href="#">Security Policy Templates</a> - Ready-to-use policies for Australian businesses</li>
-                    <li><a href="#">Risk Assessment Worksheet</a> - Identify and prioritize security risks</li>
-                    <li><a href="#">Vendor Security Checklist</a> - Evaluate third-party security practices</li>
-                    <li><a href="#">Incident Response Plan Template</a> - Step-by-step response procedures</li>
-                </ul>
+            
+            <!-- Advanced Threat Protection -->
+            <div class="service-card">
+                <div class="service-icon">🔍</div>
+                <div class="service-content">
+                    <h3>Catch What Gets Through: Advanced Threat Protection</h3>
+                    <p>We deploy tools that inspect every message:</p>
+                    
+                    <div class="feature-grid">
+                        <div class="feature-item">
+                            <h4>Malicious Attachments</h4>
+                            <p>Suspicious files are opened in a secure sandbox to neutralize malware.</p>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <h4>Dangerous Links</h4>
+                            <p>Links are checked in real-time at the moment of click.</p>
+                        </div>
+                        
+                        <div class="feature-item">
+                            <h4>Impersonation Defense</h4>
+                            <p>Detects CEO fraud and lookalike domains before they cause damage.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-
-            <div class="resource-category">
-                <h3>Training & Awareness</h3>
-                <ul class="resource-list">
-                    <li><a href="#">Phishing Awareness Training</a> - Free employee training materials</li>
-                    <li><a href="#">Security Awareness Posters</a> - Printable posters for your office</li>
-                    <li><a href="#">Monthly Security Newsletter</a> - Stay updated on latest threats</li>
-                    <li><a href="#">Security Quiz for Employees</a> - Test your team's knowledge</li>
-                </ul>
+            
+            <!-- Ongoing Security -->
+            <div class="service-card">
+                <div class="service-icon">📈</div>
+                <div class="service-content">
+                    <h3>Security is Ongoing</h3>
+                    <p>As you add new tools and platforms, your security posture evolves. We provide continuous monitoring to ensure settings remain watertight and new gaps don't emerge.</p>
+                </div>
+            </div>
+            
+            <!-- Benefits -->
+            <div class="benefits-section">
+                <h3>What You Gain</h3>
+                <div class="benefits-grid">
+                    <div class="benefit-card">
+                        <div class="benefit-icon">📨</div>
+                        <h4>Trusted Delivery</h4>
+                        <p>Your emails reach the inbox, not spam.</p>
+                    </div>
+                    
+                    <div class="benefit-card">
+                        <div class="benefit-icon">🏢</div>
+                        <h4>Brand Protection</h4>
+                        <p>Customers trust your domain is genuine.</p>
+                    </div>
+                    
+                    <div class="benefit-card">
+                        <div class="benefit-icon">✅</div>
+                        <h4>Reduced Risk</h4>
+                        <p>Phishing and account takeover are neutralized.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Call to Action -->
+            <div class="cta-section">
+                <h3>Don't let email be your weak link.</h3>
+                <p>Let's build a defense that protects your reputation and future.</p>
+                <a href="contact.html" class="btn btn-large">Get Protected Today</a>
             </div>
         </div>
-
-        <section class="cta">
-            <h2>Need Help Implementing Security Measures?</h2>
-            <p>
-                Our team can help you implement these security practices and ensure your business is protected against modern threats.
-            </p>
-            <p>
-                Contact us for a free security assessment and customized recommendations for your Australian business.
-            </p>
-            <a href="contact.html" class="cta-button">Get Your Free Security Assessment</a>
-        </section>
-    </div>
+    </section>
+    
 
     <!-- Footer -->
-    <footer class="footer">
+    <footer>
         <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3>Straya Co Pty Ltd</h3>
-                    <p>Helping Australian businesses stay secure in the digital age.</p>
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h3>Straya Co</h3>
+                    <p>Sydney's trusted IT consulting partner for secure and efficient business solutions.</p>
                 </div>
-                <div class="footer-section">
-                    <h3>Quick Links</h3>
+                
+                <div class="footer-col">
+                    <h3>Services</h3>
                     <ul>
-                        <li><a href="index.html">Home</a></li>
-                        <li><a href="services.html">Services</a></li>
-                        <li><a href="about.html">About</a></li>
-                        <li><a href="resources.html">Resources</a></li>
-                        <li><a href="contact.html">Contact</a></li>
+                        <li><a href="services.html#email">Email Security</a></li>
+                        <li><a href="services.html#automation">Automation</a></li>
+                        <li><a href="services.html#setup">Business Setup</a></li>
+                        <li><a href="services.html">All Services</a></li>
                     </ul>
                 </div>
-                <div class="footer-section">
+                
+                <div class="footer-col">
+                    <h3>Company</h3>
+                    <ul>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="resources.html">Resources</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
                     <h3>Contact</h3>
-                    <p>Email: info@strayaco.com.au</p>
-                    <p>Phone: 1300 123 456</p>
+                    <ul>
+                        <li>Email: <span id="email-link"></span></li>
+                        <li>Location: Sydney, Australia</li>
+                        <li>ABN: 89 642 689 076</li>
+                    </ul>
                 </div>
             </div>
+            
             <div class="footer-bottom">
-                <p>&copy; 2024 Straya Co Pty Ltd. All rights reserved.</p>
+                <p>© 2026 Straya Co Pty Ltd — Sydney, Australia. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
     <script>
-        // Mobile menu toggle
-        const menuToggle = document.querySelector('.menu-toggle');
-        const navLinks = document.querySelector('.nav-links');
-
-        menuToggle.addEventListener('click', () => {
-            navLinks.classList.toggle('active');
-            menuToggle.classList.toggle('active');
-        });
-
-        // Close menu when clicking a link
-        document.querySelectorAll('.nav-links a').forEach(link => {
-            link.addEventListener('click', () => {
-                navLinks.classList.remove('active');
-                menuToggle.classList.remove('active');
+        function protectEmail() {
+            const emailUser = 'vincent';
+            const emailDomain = 'strayaco.com.au';
+            const emailFull = emailUser + '@' + emailDomain;
+            const encodedEmail = 'vincent&#64;strayaco&#46;com&#46;au';
+            document.querySelectorAll('#email-link').forEach(el => {
+                el.innerHTML = `<a href="mailto:${emailFull}" style="color: #d1d5db;">${encodedEmail}</a>`;
             });
+        }
+        function animateOnScroll() {
+            const elements = document.querySelectorAll('.animate');
+            elements.forEach(el => {
+                const rect = el.getBoundingClientRect();
+                if (rect.top < window.innerHeight - 100) {
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }
+            });
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            protectEmail();
+            animateOnScroll();
+            window.addEventListener('scroll', animateOnScroll);
         });
     </script>
 </body>

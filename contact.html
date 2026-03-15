@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contact | Straya Co</title>
+    <title>Contact | Straya Co | Email Security, Automation & IT Setup</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
             --primary: #2563eb;
@@ -38,12 +37,19 @@
             min-height: 100vh;
         }
         
+        h1, h2, h3, h4 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+        
         .container {
             max-width: 1280px;
             margin: 0 auto;
             padding: 0 24px;
         }
         
+        /* Header */
         header {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -51,6 +57,7 @@
             position: sticky;
             top: 0;
             z-index: 1000;
+            transition: var(--transition);
         }
         
         .nav-container {
@@ -103,113 +110,149 @@
             transition: var(--transition);
         }
         
-        nav a:hover::after,
-        nav a.active::after {
-            width: 100%;
+        nav a:hover { color: var(--primary); }
+        nav a:hover::after, nav a.active::after { width: 100%; }
+        nav a.active { color: var(--primary); font-weight: 600; }
+        
+        .cta-nav {
+            background: var(--primary);
+            color: white !important;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius);
+            font-weight: 600;
+            transition: var(--transition);
+            text-decoration: none;
         }
         
-        nav a:hover,
-        nav a.active {
-            color: var(--primary);
+        .cta-nav:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
         }
         
+        .cta-nav::after { display: none; }
+        
+        /* Hero */
         .hero {
             padding: 6rem 0 4rem;
             text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            z-index: -1;
         }
         
         .hero h1 {
-            font-family: 'Space Grotesk', sans-serif;
             font-size: 3.5rem;
-            font-weight: 700;
+            color: white;
             margin-bottom: 1.5rem;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
         }
         
         .hero p {
             font-size: 1.25rem;
-            color: var(--gray);
-            max-width: 700px;
-            margin: 0 auto 3rem;
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 600px;
+            margin: 0 auto 2rem;
         }
         
-        .contact-section {
+        /* Contact Layout */
+        .contact-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
             padding: 4rem 0;
         }
         
-        .contact-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 3rem;
-            margin-top: 3rem;
+        @media (max-width: 768px) {
+            .contact-layout {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
         }
         
-        .contact-card {
-            background: white;
-            border-radius: var(--radius);
-            padding: 2.5rem;
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-            border: 1px solid var(--gray-light);
-        }
-        
-        .contact-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-lg);
-        }
-        
-        .contact-icon {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        /* Contact Info */
+        .contact-info h2 {
+            font-size: 2.5rem;
             margin-bottom: 1.5rem;
-            color: white;
-            font-size: 1.5rem;
-        }
-        
-        .contact-card h3 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
             color: var(--dark);
         }
         
-        .contact-card p {
+        .contact-info p {
             color: var(--gray);
-            margin-bottom: 1.5rem;
-            line-height: 1.6;
+            margin-bottom: 2rem;
+            font-size: 1.125rem;
         }
         
-        .contact-info {
-            margin-top: 1.5rem;
+        .contact-details {
+            margin: 2rem 0;
         }
         
         .contact-item {
             display: flex;
             align-items: flex-start;
             gap: 1rem;
-            margin-bottom: 1rem;
+            margin-bottom: 1.5rem;
         }
         
-        .contact-item i {
-            color: var(--primary);
+        .contact-icon {
+            background: var(--primary);
+            color: white;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 1.25rem;
-            margin-top: 0.25rem;
+            flex-shrink: 0;
         }
         
+        .contact-text h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.25rem;
+            color: var(--dark);
+        }
+        
+        .contact-text p {
+            margin: 0;
+            color: var(--gray);
+        }
+        
+        .contact-text a {
+            color: var(--primary);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+        
+        .contact-text a:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+        
+        /* Contact Form */
         .contact-form {
             background: white;
-            border-radius: var(--radius);
             padding: 3rem;
+            border-radius: var(--radius);
             box-shadow: var(--shadow);
-            margin-top: 3rem;
+        }
+        
+        .contact-form h2 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--dark);
         }
         
         .form-group {
@@ -223,31 +266,93 @@
             color: var(--dark);
         }
         
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        
         .form-group input,
-        .form-group textarea,
-        .form-group select {
+        .form-group select,
+        .form-group textarea {
             width: 100%;
-            padding: 1rem;
-            border: 1px solid var(--gray-light);
+            padding: 0.75rem 1rem;
+            border: 1.5px solid var(--gray-light);
             border-radius: var(--radius);
             font-family: 'Inter', sans-serif;
             font-size: 1rem;
-            transition: var(--transition);
+            color: var(--dark);
+            background: var(--light);
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
         
         .form-group input:focus,
-        .form-group textarea:focus,
-        .form-group select:focus {
+        .form-group select:focus,
+        .form-group textarea:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            background: white;
         }
         
+        .btn-block {
+            width: 100%;
+            display: block;
+            text-align: center;
+            padding: 1rem;
+            font-size: 1.1rem;
+        }
+        
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .team-member {
+            background: white;
+            border-radius: var(--radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            text-align: center;
+            border: 1px solid var(--gray-light);
+        }
+        
+        .team-member h4 {
+            font-size: 1.25rem;
+            color: var(--dark);
+            margin: 1rem 0 0.5rem;
+        }
+        
+        .team-member p {
+            color: var(--gray);
+            font-size: 0.95rem;
+        }
+        
+        .certifications {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+        
+        .cert-badge {
+            background: var(--light);
+            border: 1px solid var(--gray-light);
+            border-radius: 20px;
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        /* Buttons */
         .btn {
             display: inline-block;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            background: var(--primary);
             color: white;
-            padding: 1rem 2rem;
+            padding: 0.75rem 1.5rem;
             border-radius: var(--radius);
             text-decoration: none;
             font-weight: 600;
@@ -258,66 +363,52 @@
         }
         
         .btn:hover {
+            background: var(--primary-dark);
             transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
         }
         
-        .btn-secondary {
-            background: linear-gradient(135deg, var(--secondary) 0%, #e67e22 100%);
-        }
+        /* FAQ */
+        .faq-section { padding: 4rem 0 5rem; }
+        .faq-section > h2 { font-size: 2.5rem; margin-bottom: 3rem; color: var(--dark); text-align: center; }
+        .faq-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; max-width: 1000px; margin: 0 auto; }
+        .faq-item { background: white; padding: 2rem; border-radius: var(--radius); box-shadow: var(--shadow); border-top: 3px solid var(--primary); }
+        .faq-item h3 { font-size: 1.125rem; color: var(--dark); margin-bottom: 0.75rem; }
+        .faq-item p { color: var(--gray); font-size: 0.95rem; }
         
+        /* Footer */
         footer {
             background: var(--dark);
             color: white;
-            padding: 4rem 0 2rem;
-            margin-top: 6rem;
+            padding: 5rem 0 2rem;
         }
         
-        .footer-content {
+        .footer-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 3rem;
             margin-bottom: 3rem;
         }
         
-        .footer-section h3 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.25rem;
-            margin-bottom: 1.5rem;
-            color: white;
-        }
+        .footer-col h3 { font-size: 1.25rem; margin-bottom: 1.5rem; color: white; }
+        .footer-col p { color: #d1d5db; font-size: 0.9rem; }
+        .footer-col ul { list-style: none; }
+        .footer-col li { margin-bottom: 0.75rem; }
+        .footer-col a { color: #d1d5db; text-decoration: none; transition: var(--transition); }
+        .footer-col a:hover { color: white; padding-left: 5px; }
         
-        .footer-section p,
-        .footer-section a {
-            color: var(--gray-light);
-            line-height: 1.6;
-            margin-bottom: 1rem;
-            display: block;
-            text-decoration: none;
-            transition: var(--transition);
-        }
-        
-        .footer-section a:hover {
-            color: white;
-            padding-left: 0.5rem;
-        }
-        
-        .copyright {
-            text-align: center;
+        .footer-bottom {
             padding-top: 2rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            color: var(--gray);
-            font-size: 0.9rem;
+            border-top: 1px solid #374151;
+            text-align: center;
+            color: #9ca3af;
+            font-size: 0.875rem;
         }
         
+        /* Responsive */
         @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-            
             .nav-container {
                 flex-direction: column;
-                gap: 1.5rem;
+                gap: 1rem;
             }
             
             nav ul {
@@ -326,8 +417,12 @@
                 gap: 1.5rem;
             }
             
-            .contact-grid {
-                grid-template-columns: 1fr;
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero p {
+                font-size: 1.125rem;
             }
             
             .contact-form {
@@ -340,16 +435,17 @@
     <!-- Header -->
     <header>
         <div class="container nav-container">
-            <a href="/" class="logo">Straya Co</a>
+            <a href="index.html" class="logo">Straya Co</a>
             <nav>
                 <ul>
-                    <li><a href="/">Home</a></li>
-                    <li><a href="/about.html">About</a></li>
-                    <li><a href="/services.html">Services</a></li>
-                    <li><a href="/blog.html">Resources</a></li>
-                    <li><a href="/contact.html" class="active">Contact</a></li>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="services.html">Services</a></li>
+                    <li><a href="about.html">About</a></li>
+                    <li><a href="resources.html">Resources</a></li>
+                    <li><a href="contact.html" class="active">Contact</a></li>
                 </ul>
             </nav>
+            <a href="contact.html" class="btn cta-nav">Get Started</a>
         </div>
     </header>
 
@@ -357,174 +453,272 @@
     <section class="hero">
         <div class="container">
             <h1>Get in Touch</h1>
-            <p>Ready to transform your business with modern IT solutions? Contact our team for a free consultation.</p>
+            <p>Ready to secure, automate, or grow your Australian business? Let's chat about how we can help.</p>
         </div>
     </section>
 
-    <!-- Contact Section -->
-    <section class="contact-section">
-        <div class="container">
-            <div class="contact-grid">
-                <div class="contact-card">
-                    <div class="contact-icon">
-                        <i class="fas fa-map-marker-alt"></i>
+    <!-- Main Content -->
+    <main class="container">
+        <div class="contact-layout">
+            <!-- Contact Information -->
+            <div class="contact-info">
+                <h2>Contact Information</h2>
+                <p>We're here to help Australian businesses with email security, automation, and IT setup. Get in touch using any of the methods below.</p>
+                
+                <div class="contact-details">
+                    <div class="contact-item">
+                        <div class="contact-icon">📍</div>
+                        <div class="contact-text">
+                            <h3>Location</h3>
+                            <p>Sydney, Australia<br>Serving businesses across Australia</p>
+                        </div>
                     </div>
-                    <h3>Our Location</h3>
-                    <p>Based in Sydney, serving businesses across Australia</p>
-                    <div class="contact-info">
-                        <div class="contact-item">
-                            <i class="fas fa-building"></i>
-                            <div>
-                                <strong>Straya Co Pty Ltd</strong><br>
-                                Cherrybrook, NSW 2126<br>
-                                Australia
-                            </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">📧</div>
+                        <div class="contact-text">
+                            <h3>Email</h3>
+                            <p><a href="mailto:vincent@strayaco.com.au">vincent@strayaco.com.au</a><br>Response within 24 hours</p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">📞</div>
+                        <div class="contact-text">
+                            <h3>Phone</h3>
+                            <p><a href="tel:+61280000000">+61 2 8000 0000</a><br>Monday-Friday, 9am-5pm AEST</p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">💬</div>
+                        <div class="contact-text">
+                            <h3>Live Chat</h3>
+                            <p>Available during business hours<br>Click the chat icon in the corner</p>
                         </div>
                     </div>
                 </div>
-
-                <div class="contact-card">
-                    <div class="contact-icon">
-                        <i class="fas fa-phone-alt"></i>
-                    </div>
-                    <h3>Phone & Email</h3>
-                    <p>Reach out directly for immediate assistance</p>
-                    <div class="contact-info">
-                        <div class="contact-item">
-                            <i class="fas fa-phone"></i>
-                            <div>
-                                <strong>Phone</strong><br>
-                                <a href="tel:+61400000000">+61 400 000 000</a>
-                            </div>
-                        </div>
-                        <div class="contact-item">
-                            <i class="fas fa-envelope"></i>
-                            <div>
-                                <strong>Email</strong><br>
-                                <a href="mailto:info@strayaco.com.au">info@strayaco.com.au</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="contact-card">
-                    <div class="contact-icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <h3>Business Hours</h3>
-                    <p>We're here when you need us</p>
-                    <div class="contact-info">
-                        <div class="contact-item">
-                            <i class="fas fa-calendar-alt"></i>
-                            <div>
-                                <strong>Monday - Friday</strong><br>
-                                9:00 AM - 5:00 PM AEST
-                            </div>
-                        </div>
-                        <div class="contact-item">
-                            <i class="fas fa-calendar-check"></i>
-                            <div>
-                                <strong>Weekends</strong><br>
-                                By appointment
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                
+                <h3 style="margin-top: 2rem; margin-bottom: 1rem;">Business Hours</h3>
+                <p style="color: var(--gray);">
+                    Monday-Friday: 9:00 AM - 5:00 PM AEST<br>
+                    Saturday-Sunday: By appointment only
+                </p>
             </div>
-
+            
+            <!-- Contact Form -->
             <div class="contact-form">
-                <h2 style="margin-bottom: 2rem; font-family: 'Space Grotesk', sans-serif;">Send us a Message</h2>
-                <form id="contactForm">
-                    <div class="form-group">
-                        <label for="name">Full Name *</label>
-                        <input type="text" id="name" name="name" required placeholder="Your name">
+                <h2>Send a Message</h2>
+                <form action="https://formspree.io/f/xgonzwod" method="POST">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="firstName">First Name *</label>
+                            <input type="text" id="firstName" name="firstName" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="lastName">Last Name *</label>
+                            <input type="text" id="lastName" name="lastName" required>
+                        </div>
                     </div>
                     
                     <div class="form-group">
                         <label for="email">Email Address *</label>
-                        <input type="email" id="email" name="email" required placeholder="your.email@example.com">
+                        <input type="email" id="email" name="email" required>
                     </div>
                     
                     <div class="form-group">
                         <label for="phone">Phone Number</label>
-                        <input type="tel" id="phone" name="phone" placeholder="+61 400 000 000">
+                        <input type="tel" id="phone" name="phone">
                     </div>
                     
                     <div class="form-group">
-                        <label for="company">Company</label>
-                        <input type="text" id="company" name="company" placeholder="Your company name">
+                        <label for="company">Company Name</label>
+                        <input type="text" id="company" name="company">
                     </div>
                     
                     <div class="form-group">
-                        <label for="service">Service Interest</label>
-                        <select id="service" name="service">
+                        <label for="service">Service Interest *</label>
+                        <select id="service" name="service" required>
                             <option value="">Select a service</option>
-                            <option value="cybersecurity">Cybersecurity</option>
-                            <option value="cloud">Cloud Migration</option>
-                            <option value="automation">IT Automation</option>
-                            <option value="consulting">IT Consulting</option>
-                            <option value="support">Managed IT Support</option>
+                            <option value="email-security">Email Security & DMARC</option>
+                            <option value="automation">Office Automation</option>
+                            <option value="it-setup">IT Setup & Migration</option>
+                            <option value="multiple">Multiple Services</option>
                             <option value="other">Other</option>
                         </select>
                     </div>
                     
                     <div class="form-group">
                         <label for="message">Message *</label>
-                        <textarea id="message" name="message" rows="5" required placeholder="Tell us about your project or requirements..."></textarea>
+                        <textarea id="message" name="message" rows="5" required></textarea>
                     </div>
                     
-                    <button type="submit" class="btn">Send Message</button>
+                    <!-- Formspree hidden fields -->
+                    <input type="hidden" name="_subject" value="New Contact Form Submission - Straya Co">
+                    <input type="hidden" name="_replyto" value="vincent@strayaco.com.au">
+                    <input type="hidden" name="_cc" value="vincent@strayaco.com.au">
+                    
+                    <button type="submit" class="btn btn-block">Send Message</button>
+                    
+                    <!-- Formspree success/error handling -->
+                    <div id="form-message" style="display: none; margin-top: 1rem; padding: 1rem; border-radius: var(--radius); text-align: center;"></div>
                 </form>
+                
+                <!-- Formspree JavaScript for better UX -->
+                <script>
+                    const form = document.querySelector('form[action="https://formspree.io/f/xgonzwod"]');
+                    const formMessage = document.getElementById('form-message');
+                    
+                    form.addEventListener('submit', async (e) => {
+                        e.preventDefault();
+                        
+                        const submitButton = form.querySelector('button[type="submit"]');
+                        const originalText = submitButton.textContent;
+                        submitButton.textContent = 'Sending...';
+                        submitButton.disabled = true;
+                        
+                        try {
+                            const formData = new FormData(form);
+                            const response = await fetch(form.action, {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                    'Accept': 'application/json'
+                                }
+                            });
+                            
+                            if (response.ok) {
+                                formMessage.textContent = 'Thank you! Your message has been sent successfully.';
+                                formMessage.style.background = '#10b98120';
+                                formMessage.style.color = '#10b981';
+                                formMessage.style.border = '1px solid #10b981';
+                                formMessage.style.display = 'block';
+                                form.reset();
+                            } else {
+                                throw new Error('Form submission failed');
+                            }
+                        } catch (error) {
+                            formMessage.textContent = 'Oops! There was a problem sending your message. Please try again or email us directly.';
+                            formMessage.style.background = '#ef444420';
+                            formMessage.style.color = '#ef4444';
+                            formMessage.style.border = '1px solid #ef4444';
+                            formMessage.style.display = 'block';
+                        } finally {
+                            submitButton.textContent = originalText;
+                            submitButton.disabled = false;
+                            
+                            // Scroll to message
+                            formMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                        }
+                    });
+                </script>
             </div>
         </div>
-    </section>
+        
+        <!-- FAQ Section -->
+        <section class="faq-section">
+            <h2>Frequently Asked Questions</h2>
+            
+            <div class="faq-grid">
+                <div class="faq-item">
+                    <h3>What areas do you serve?</h3>
+                    <p>We serve businesses across Australia, with a focus on Sydney, Melbourne, Brisbane, Perth, and Adelaide. Remote support is available nationwide.</p>
+                </div>
+                
+                <div class="faq-item">
+                    <h3>How quickly can you respond?</h3>
+                    <p>We respond to all inquiries within 24 hours during business days. Emergency support is available for existing clients.</p>
+                </div>
+                
+                <div class="faq-item">
+                    <h3>Do you offer free consultations?</h3>
+                    <p>Yes! We offer a free 30-minute consultation to discuss your needs and how we can help your business.</p>
+                </div>
+                
+                <div class="faq-item">
+                    <h3>What industries do you work with?</h3>
+                    <p>We work with businesses across all industries — from professional services and retail to healthcare and construction. If you use email and documents, we can help.</p>
+                </div>
+                
+                <div class="faq-item">
+                    <h3>How much do your services cost?</h3>
+                    <p>Pricing varies based on the scope of work. Contact us for a free quote tailored to your specific needs and budget.</p>
+                </div>
+                
+                <div class="faq-item">
+                    <h3>Can you work with our existing IT team?</h3>
+                    <p>Absolutely. We frequently collaborate with in-house IT teams and other providers to deliver the best outcome for your business.</p>
+                </div>
+            </div>
+        </section>
+    </main>
 
     <!-- Footer -->
     <footer>
         <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
+            <div class="footer-grid">
+                <div class="footer-col">
                     <h3>Straya Co</h3>
-                    <p>Modern IT solutions for Australian businesses. Secure, automate, and empower your operations with our expert team.</p>
+                    <p>Sydney's trusted IT consulting partner for secure and efficient business solutions.</p>
                 </div>
-                
-                <div class="footer-section">
-                    <h3>Quick Links</h3>
-                    <a href="/">Home</a>
-                    <a href="/about.html">About Us</a>
-                    <a href="/services.html">Services</a>
-                    <a href="/blog.html">Resources</a>
-                    <a href="/contact.html">Contact</a>
-                </div>
-                
-                <div class="footer-section">
+                <div class="footer-col">
                     <h3>Services</h3>
-                    <a href="/services.html#cybersecurity">Cybersecurity</a>
-                    <a href="/services.html#cloud">Cloud Migration</a>
-                    <a href="/services.html#automation">IT Automation</a>
-                    <a href="/services.html#consulting">IT Consulting</a>
-                    <a href="/services.html#support">Managed IT Support</a>
+                    <ul>
+                        <li><a href="services.html#email">Email Security</a></li>
+                        <li><a href="services.html#automation">Automation</a></li>
+                        <li><a href="services.html#setup">Business Setup</a></li>
+                        <li><a href="services.html">All Services</a></li>
+                    </ul>
                 </div>
-                
-                <div class="footer-section">
-                    <h3>Connect</h3>
-                    <a href="mailto:info@strayaco.com.au">info@strayaco.com.au</a>
-                    <a href="tel:+61400000000">+61 400 000 000</a>
-                    <p>Sydney, Australia</p>
+                <div class="footer-col">
+                    <h3>Company</h3>
+                    <ul>
+                        <li><a href="about.html">About Us</a></li>
+                        <li><a href="resources.html">Resources</a></li>
+                        <li><a href="contact.html">Contact</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h3>Contact</h3>
+                    <ul>
+                        <li>Email: <span id="email-link"></span></li>
+                        <li>Location: Sydney, Australia</li>
+                        <li>ABN: 89 642 689 076</li>
+                    </ul>
                 </div>
             </div>
-            
-            <div class="copyright">
-                <p>&copy; 2024 Straya Co Pty Ltd. All rights reserved.</p>
+            <div class="footer-bottom">
+                <p>© 2026 Straya Co Pty Ltd — Sydney, Australia. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
     <script>
-        document.getElementById('contactForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            alert('Thank you for your message! We\'ll get back to you within 24 hours.');
-            this.reset();
+        function protectEmail() {
+            const emailUser = 'vincent';
+            const emailDomain = 'strayaco.com.au';
+            const emailFull = emailUser + '@' + emailDomain;
+            const encodedEmail = 'vincent&#64;strayaco&#46;com&#46;au';
+            document.querySelectorAll('#email-link').forEach(el => {
+                el.innerHTML = `<a href="mailto:${emailFull}" style="color: #d1d5db;">${encodedEmail}</a>`;
+            });
+        }
+        function animateOnScroll() {
+            const elements = document.querySelectorAll('.animate');
+            elements.forEach(el => {
+                const rect = el.getBoundingClientRect();
+                if (rect.top < window.innerHeight - 100) {
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }
+            });
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            protectEmail();
+            animateOnScroll();
+            window.addEventListener('scroll', animateOnScroll);
         });
     </script>
 </body>
