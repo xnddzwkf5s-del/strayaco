@@ -4,715 +4,220 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact | Straya Co | Email Security, Automation & IT Setup</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --secondary: #f59e0b;
-            --accent: #10b981;
-            --dark: #1f2937;
-            --light: #f9fafb;
-            --gray: #6b7280;
-            --gray-light: #e5e7eb;
-            --radius: 12px;
-            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
-            --shadow-lg: 0 20px 40px -10px rgba(0, 0, 0, 0.15);
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            line-height: 1.7;
-            color: var(--dark);
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
-            min-height: 100vh;
-        }
-        
-        h1, h2, h3, h4 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 600;
-            line-height: 1.2;
-        }
-        
-        .container {
-            max-width: 1280px;
-            margin: 0 auto;
-            padding: 0 24px;
-        }
-        
-        /* Header */
-        header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(229, 231, 235, 0.5);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            transition: var(--transition);
-        }
-        
-        .nav-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1.5rem 0;
-        }
-        
-        .logo {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: var(--primary);
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .logo::before {
-            content: "🇦🇺";
-            font-size: 1.5rem;
-        }
-        
-        nav ul {
-            display: flex;
-            list-style: none;
-            gap: 2.5rem;
-        }
-        
-        nav a {
-            text-decoration: none;
-            color: var(--dark);
-            font-weight: 500;
-            font-size: 1rem;
-            padding: 0.5rem 0;
-            position: relative;
-            transition: var(--transition);
-        }
-        
-        nav a::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--primary);
-            transition: var(--transition);
-        }
-        
-        nav a:hover { color: var(--primary); }
-        nav a:hover::after, nav a.active::after { width: 100%; }
-        nav a.active { color: var(--primary); font-weight: 600; }
-        
-        .cta-nav {
-            background: var(--primary);
-            color: white !important;
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--radius);
-            font-weight: 600;
-            transition: var(--transition);
-            text-decoration: none;
-        }
-        
-        .cta-nav:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow);
-        }
-        
-        .cta-nav::after { display: none; }
-        
-        /* Hero */
-        .hero {
-            padding: 6rem 0 4rem;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            z-index: -1;
-        }
-        
-        .hero h1 {
-            font-size: 3.5rem;
-            color: white;
-            margin-bottom: 1.5rem;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
-        .hero p {
-            font-size: 1.25rem;
-            color: rgba(255, 255, 255, 0.9);
-            max-width: 600px;
-            margin: 0 auto 2rem;
-        }
-        
-        /* Contact Layout */
-        .contact-layout {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4rem;
-            padding: 4rem 0;
-        }
-        
-        @media (max-width: 768px) {
-            .contact-layout {
-                grid-template-columns: 1fr;
-                gap: 3rem;
-            }
-        }
-        
-        /* Contact Info */
-        .contact-info h2 {
-            font-size: 2.5rem;
-            margin-bottom: 1.5rem;
-            color: var(--dark);
-        }
-        
-        .contact-info p {
-            color: var(--gray);
-            margin-bottom: 2rem;
-            font-size: 1.125rem;
-        }
-        
-        .contact-details {
-            margin: 2rem 0;
-        }
-        
-        .contact-item {
-            display: flex;
-            align-items: flex-start;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .contact-icon {
-            background: var(--primary);
-            color: white;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-            flex-shrink: 0;
-        }
-        
-        .contact-text h3 {
-            font-size: 1.25rem;
-            margin-bottom: 0.25rem;
-            color: var(--dark);
-        }
-        
-        .contact-text p {
-            margin: 0;
-            color: var(--gray);
-        }
-        
-        .contact-text a {
-            color: var(--primary);
-            text-decoration: none;
-            transition: var(--transition);
-        }
-        
-        .contact-text a:hover {
-            color: var(--primary-dark);
-            text-decoration: underline;
-        }
-        
-        /* Contact Form */
-        .contact-form {
-            background: white;
-            padding: 3rem;
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-        }
-        
-        .contact-form h2 {
-            font-size: 2rem;
-            margin-bottom: 1.5rem;
-            color: var(--dark);
-        }
-        
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: var(--dark);
-        }
-        
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-        
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border: 1.5px solid var(--gray-light);
-            border-radius: var(--radius);
-            font-family: 'Inter', sans-serif;
-            font-size: 1rem;
-            color: var(--dark);
-            background: var(--light);
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-            background: white;
-        }
-        
-        .btn-block {
-            width: 100%;
-            display: block;
-            text-align: center;
-            padding: 1rem;
-            font-size: 1.1rem;
-        }
-        
-        .team-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-        
-        .team-member {
-            background: white;
-            border-radius: var(--radius);
-            padding: 2rem;
-            box-shadow: var(--shadow);
-            text-align: center;
-            border: 1px solid var(--gray-light);
-        }
-        
-        .team-member h4 {
-            font-size: 1.25rem;
-            color: var(--dark);
-            margin: 1rem 0 0.5rem;
-        }
-        
-        .team-member p {
-            color: var(--gray);
-            font-size: 0.95rem;
-        }
-        
-        .certifications {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            justify-content: center;
-            margin-top: 1rem;
-        }
-        
-        .cert-badge {
-            background: var(--light);
-            border: 1px solid var(--gray-light);
-            border-radius: 20px;
-            padding: 0.25rem 0.75rem;
-            font-size: 0.75rem;
-            font-weight: 500;
-            color: var(--dark);
-        }
-        
-        /* Buttons */
-        .btn {
-            display: inline-block;
-            background: var(--primary);
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border-radius: var(--radius);
-            text-decoration: none;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            transition: var(--transition);
-            font-size: 1rem;
-        }
-        
-        .btn:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-        }
-        
-        /* FAQ */
-        .faq-section { padding: 4rem 0 5rem; }
-        .faq-section > h2 { font-size: 2.5rem; margin-bottom: 3rem; color: var(--dark); text-align: center; }
-        .faq-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; max-width: 1000px; margin: 0 auto; }
-        .faq-item { background: white; padding: 2rem; border-radius: var(--radius); box-shadow: var(--shadow); border-top: 3px solid var(--primary); }
-        .faq-item h3 { font-size: 1.125rem; color: var(--dark); margin-bottom: 0.75rem; }
-        .faq-item p { color: var(--gray); font-size: 0.95rem; }
-        
-        /* Footer */
-        footer {
-            background: var(--dark);
-            color: white;
-            padding: 5rem 0 2rem;
-        }
-        
-        .footer-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 3rem;
-            margin-bottom: 3rem;
-        }
-        
-        .footer-col h3 { font-size: 1.25rem; margin-bottom: 1.5rem; color: white; }
-        .footer-col p { color: #d1d5db; font-size: 0.9rem; }
-        .footer-col ul { list-style: none; }
-        .footer-col li { margin-bottom: 0.75rem; }
-        .footer-col a { color: #d1d5db; text-decoration: none; transition: var(--transition); }
-        .footer-col a:hover { color: white; padding-left: 5px; }
-        
-        .footer-bottom {
-            padding-top: 2rem;
-            border-top: 1px solid #374151;
-            text-align: center;
-            color: #9ca3af;
-            font-size: 0.875rem;
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .nav-container {
-                flex-direction: column;
-                gap: 1rem;
-            }
-            
-            nav ul {
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 1.5rem;
-            }
-            
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-            
-            .hero p {
-                font-size: 1.125rem;
-            }
-            
-            .contact-form {
-                padding: 2rem;
-            }
-        }
+        :root{--dark:#1a1a2e;--gold:#c9a96e;--gold-dark:#b8945a;--cream:#f8f6f1;--white:#fff;--gray:#6b7280;--gray-light:#e8e4dd;--radius:4px;--radius-lg:12px;--shadow:0 4px 20px rgba(0,0,0,0.08);--shadow-lg:0 20px 60px rgba(0,0,0,0.15);--transition:all 0.35s cubic-bezier(0.4,0,0.2,1);}
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Inter',sans-serif;color:var(--dark);background:var(--white);line-height:1.7;overflow-x:hidden;}
+        h1,h2,h3,h4{font-family:'Playfair Display',serif;font-weight:600;line-height:1.2;}
+        .container{max-width:1200px;margin:0 auto;padding:0 32px;}
+        a{text-decoration:none;color:inherit;}
+        #site-header{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(26,26,46,0.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,169,110,0.2);}
+        .header-inner{max-width:1200px;margin:0 auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:80px;}
+        .logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--white);}
+        .logo span{color:var(--gold);}
+        nav ul{display:flex;list-style:none;gap:2rem;}
+        nav a{color:rgba(255,255,255,0.85);font-size:0.85rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;transition:var(--transition);}
+        nav a:hover,nav a.active{color:var(--gold);}
+        .btn-cta{background:var(--gold);color:var(--dark);padding:0.6rem 1.5rem;border-radius:var(--radius);font-size:0.82rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;transition:var(--transition);}
+        .btn-cta:hover{background:var(--gold-dark);}
+        .nav-icon{display:flex;flex-direction:column;justify-content:space-between;width:26px;height:20px;cursor:pointer;z-index:1100;flex-shrink:0;}
+        .nav-icon span{display:block;height:2px;width:100%;background:#fff;border-radius:9px;transition:all 0.25s ease-in-out;transform-origin:left center;}
+        .nav-icon.open span:nth-child(1){transform:rotate(45deg);top:-3px;left:3px;position:relative;}
+        .nav-icon.open span:nth-child(2){width:0;opacity:0;}
+        .nav-icon.open span:nth-child(3){transform:rotate(-45deg);top:16px;left:3px;position:relative;}
+        .backdrop{display:none;position:fixed;width:100%;height:100%;z-index:99;background:rgba(0,0,0,0.5);top:0;left:0;}
+        .backdrop.open{display:block;}
+        .slide-navigation{right:-420px;transition:right 0.4s ease;width:420px;max-width:100vw;position:fixed;top:0;height:100vh;background:#001d35;z-index:100;padding:7rem 3rem 3rem;overflow-y:auto;}
+        .slide-navigation.open{right:0;}
+        .slide-navigation .nav-icon{position:absolute;top:30px;right:20px;}
+        .slide-nav-logo{margin-bottom:2.5rem;font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--white);}
+        .slide-nav-logo span{color:var(--gold);}
+        .slide-nav-grid{display:grid;grid-template-columns:1fr 1fr;gap:2rem 3rem;}
+        .slide-nav-title{color:var(--gold);font-size:0.72rem;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;margin-bottom:1rem;padding-bottom:0.6rem;border-bottom:1px solid rgba(201,169,110,0.25);}
+        .slide-nav-links{list-style:none;padding:0;margin:0;}
+        .slide-nav-links a{display:block;color:rgba(255,255,255,0.8);font-size:0.95rem;padding:0.5rem 0;transition:var(--transition);border-bottom:1px solid rgba(255,255,255,0.04);}
+        .slide-nav-links a:hover{color:var(--gold);padding-left:0.4rem;}
+
+        .hero{position:relative;height:50vh;min-height:380px;display:flex;align-items:center;justify-content:center;text-align:center;background:linear-gradient(135deg,#1a1a2e 0%,#0f3460 100%);}
+        .hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23c9a96e' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");}
+        .hero-content{position:relative;z-index:1;padding:0 32px;}
+        .hero-label{display:inline-block;color:var(--gold);font-size:0.78rem;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;margin-bottom:1.25rem;border:1px solid rgba(201,169,110,0.4);padding:0.4rem 1.2rem;border-radius:2px;}
+        .hero h1{font-size:clamp(2.5rem,5vw,4rem);color:var(--white);font-weight:700;}
+        .hero p{color:rgba(255,255,255,0.75);font-size:1.05rem;margin-top:1rem;}
+
+        .section{padding:6rem 0;}
+        .section-cream{background:var(--cream);}
+        .gold-divider{width:60px;height:2px;background:var(--gold);margin:1.25rem auto;}
+        .gold-divider-left{width:60px;height:2px;background:var(--gold);margin:1.25rem 0;}
+
+        .contact-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:5rem;align-items:start;}
+        .contact-info .label{font-size:0.78rem;font-weight:600;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);}
+        .contact-info h2{font-size:2.2rem;margin:0.75rem 0 0.5rem;}
+        .contact-info>p{color:var(--gray);margin-bottom:2rem;}
+        .contact-detail{display:flex;align-items:flex-start;gap:1rem;margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--gray-light);}
+        .contact-detail:last-of-type{border-bottom:none;}
+        .detail-icon{font-size:1.3rem;flex-shrink:0;margin-top:0.1rem;}
+        .detail-label{font-size:0.75rem;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold);margin-bottom:0.25rem;}
+        .detail-value{color:var(--dark);font-size:0.95rem;}
+        .detail-value a{color:var(--dark);transition:var(--transition);}
+        .detail-value a:hover{color:var(--gold);}
+
+        .contact-form-wrap{background:var(--cream);border-radius:var(--radius-lg);padding:3rem;box-shadow:var(--shadow);}
+        .contact-form-wrap h3{font-size:1.6rem;margin-bottom:0.5rem;}
+        .contact-form-wrap>p{color:var(--gray);font-size:0.92rem;margin-bottom:2rem;}
+        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+        .form-group{margin-bottom:1.25rem;}
+        .form-group label{display:block;font-size:0.8rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--dark);margin-bottom:0.5rem;}
+        .form-group input,.form-group textarea,.form-group select{width:100%;padding:0.85rem 1rem;border:1.5px solid var(--gray-light);border-radius:var(--radius);font-family:'Inter',sans-serif;font-size:0.95rem;color:var(--dark);background:var(--white);transition:border-color 0.2s,box-shadow 0.2s;}
+        .form-group input:focus,.form-group textarea:focus,.form-group select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,169,110,0.15);}
+        .form-group textarea{height:130px;resize:vertical;}
+        .btn-submit{width:100%;background:var(--gold);color:var(--dark);border:none;cursor:pointer;padding:1rem;border-radius:var(--radius);font-family:'Inter',sans-serif;font-size:0.92rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;transition:var(--transition);}
+        .btn-submit:hover{background:var(--gold-dark);transform:translateY(-1px);}
+
+        footer{background:var(--dark);color:var(--white);padding:5rem 0 2rem;}
+        .footer-inner{max-width:1200px;margin:0 auto;padding:0 32px;}
+        .footer-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:3rem;margin-bottom:3rem;}
+        .footer-brand{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--white);margin-bottom:1rem;}
+        .footer-brand span{color:var(--gold);}
+        .footer-col p{color:rgba(255,255,255,0.55);font-size:0.88rem;line-height:1.9;}
+        .footer-col h4{font-family:'Inter',sans-serif;font-size:0.75rem;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);margin-bottom:1.5rem;}
+        .footer-col ul{list-style:none;}
+        .footer-col li{margin-bottom:0.7rem;font-size:0.88rem;color:rgba(255,255,255,0.55);}
+        .footer-col a{color:rgba(255,255,255,0.55);transition:var(--transition);}
+        .footer-col a:hover{color:var(--gold);}
+        .footer-bottom{border-top:1px solid rgba(255,255,255,0.08);padding-top:2rem;text-align:center;color:rgba(255,255,255,0.35);font-size:0.82rem;}
+
+        @media(max-width:1024px){.contact-grid{grid-template-columns:1fr;gap:3rem;}.footer-grid{grid-template-columns:repeat(2,1fr);}}
+        @media(max-width:991px){nav ul{display:none;}}
+        @media(max-width:768px){.form-row{grid-template-columns:1fr;}.footer-grid{grid-template-columns:1fr;}.container{padding:0 20px;}.header-inner{padding:0 20px;}.footer-inner{padding:0 20px;}.slide-navigation{width:100%;}.slide-nav-grid{grid-template-columns:1fr;gap:1.5rem;}}
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <header>
-        <div class="container nav-container">
-            <a href="index.html" class="logo">Straya Co</a>
-            <nav>
-                <ul>
-                    <li><a href="index.html">Home</a></li>
-                    <li><a href="services.html">Services</a></li>
-                    <li><a href="about.html">About</a></li>
-                    <li><a href="resources.html">Resources</a></li>
-                    <li><a href="contact.html" class="active">Contact</a></li>
-                </ul>
-            </nav>
-            <a href="contact.html" class="btn cta-nav">Get Started</a>
-        </div>
-    </header>
+<header id="site-header">
+    <div class="header-inner">
+        <a href="index.html" class="logo">Straya <span>Co</span></a>
+        <nav><ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="services.html">Services</a></li>
+            <li><a href="about.html">About</a></li>
+            <li><a href="resources.html">Resources</a></li>
+            <li><a href="contact.html" class="active">Contact</a></li>
+        </ul></nav>
+        <a href="contact.html" class="btn-cta">Get Started</a>
+        <div class="nav-icon" id="navIcon"><span></span><span></span><span></span></div>
+    </div>
+</header>
 
-    <!-- Hero -->
-    <section class="hero">
-        <div class="container">
-            <h1>Get in Touch</h1>
-            <p>Ready to secure, automate, or grow your Australian business? Let's chat about how we can help.</p>
-        </div>
-    </section>
+<section class="hero">
+    <div class="hero-content">
+        <span class="hero-label">Straya Co</span>
+        <h1>Get in Touch</h1>
+        <p>Ready to secure, automate, or grow your Australian business? Let's chat.</p>
+    </div>
+</section>
 
-    <!-- Main Content -->
-    <main class="container">
-        <div class="contact-layout">
-            <!-- Contact Information -->
+<section class="section">
+    <div class="container">
+        <div class="contact-grid">
             <div class="contact-info">
-                <h2>Contact Information</h2>
+                <div class="label">Contact Information</div>
+                <h2>We're Here to Help</h2>
+                <div class="gold-divider-left"></div>
                 <p>We're here to help Australian businesses with email security, automation, and IT setup. Get in touch using any of the methods below.</p>
-                
-                <div class="contact-details">
-                    <div class="contact-item">
-                        <div class="contact-icon">📍</div>
-                        <div class="contact-text">
-                            <h3>Location</h3>
-                            <p>Sydney, Australia<br>Serving businesses across Australia</p>
-                        </div>
-                    </div>
-                    
-                    <div class="contact-item">
-                        <div class="contact-icon">📧</div>
-                        <div class="contact-text">
-                            <h3>Email</h3>
-                            <p><a href="mailto:vincent@strayaco.com.au">vincent@strayaco.com.au</a><br>Response within 24 hours</p>
-                        </div>
-                    </div>
-                    
-                    
-                    <div class="contact-item">
-                        <div class="contact-icon">💬</div>
-                        <div class="contact-text">
-                            <h3>Live Chat</h3>
-                            <p>Available during business hours<br>Click the chat icon in the corner</p>
-                        </div>
+
+                <div class="contact-detail">
+                    <div class="detail-icon">📍</div>
+                    <div>
+                        <div class="detail-label">Location</div>
+                        <div class="detail-value">Sydney, Australia<br><span style="color:var(--gray);font-size:0.88rem;">Serving businesses across Australia</span></div>
                     </div>
                 </div>
-                
-                <h3 style="margin-top: 2rem; margin-bottom: 1rem;">Business Hours</h3>
-                <p style="color: var(--gray);">
-                    Monday-Friday: 9:00 AM - 5:00 PM AEST<br>
-                    Saturday-Sunday: By appointment only
-                </p>
+                <div class="contact-detail">
+                    <div class="detail-icon">📧</div>
+                    <div>
+                        <div class="detail-label">Email</div>
+                        <div class="detail-value"><a href="mailto:vincent@strayaco.com.au">vincent@strayaco.com.au</a><br><span style="color:var(--gray);font-size:0.88rem;">Response within 24 hours</span></div>
+                    </div>
+                </div>
+                <div class="contact-detail">
+                    <div class="detail-icon">🕐</div>
+                    <div>
+                        <div class="detail-label">Business Hours</div>
+                        <div class="detail-value">Monday–Friday: 9:00 AM – 5:00 PM AEST<br>Saturday–Sunday: By appointment only</div>
+                    </div>
+                </div>
             </div>
-            
-            <!-- Contact Form -->
-            <div class="contact-form">
-                <h2>Send a Message</h2>
+
+            <div class="contact-form-wrap">
+                <h3>Send a Message</h3>
+                <p>Fill in the form below and we'll get back to you shortly.</p>
                 <form action="https://formspree.io/f/xgonzwod" method="POST">
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="firstName">First Name *</label>
-                            <input type="text" id="firstName" name="firstName" required>
+                            <label for="firstname">First Name *</label>
+                            <input type="text" id="firstname" name="firstname" required>
                         </div>
-                        
                         <div class="form-group">
-                            <label for="lastName">Last Name *</label>
-                            <input type="text" id="lastName" name="lastName" required>
+                            <label for="lastname">Last Name *</label>
+                            <input type="text" id="lastname" name="lastname" required>
                         </div>
                     </div>
-                    
                     <div class="form-group">
                         <label for="email">Email Address *</label>
                         <input type="email" id="email" name="email" required>
                     </div>
-                    
                     <div class="form-group">
                         <label for="phone">Phone Number</label>
                         <input type="tel" id="phone" name="phone">
                     </div>
-                    
                     <div class="form-group">
                         <label for="company">Company Name</label>
                         <input type="text" id="company" name="company">
                     </div>
-                    
                     <div class="form-group">
                         <label for="service">Service Interest *</label>
                         <select id="service" name="service" required>
                             <option value="">Select a service</option>
-                            <option value="email-security">Email Security & DMARC</option>
-                            <option value="automation">Office Automation</option>
-                            <option value="it-setup">IT Setup & Migration</option>
-                            <option value="multiple">Multiple Services</option>
-                            <option value="other">Other</option>
+                            <option>Email Security & DMARC</option>
+                            <option>Office Automation</option>
+                            <option>IT Setup & Migration</option>
+                            <option>Multiple Services</option>
+                            <option>Other</option>
                         </select>
                     </div>
-                    
                     <div class="form-group">
                         <label for="message">Message *</label>
-                        <textarea id="message" name="message" rows="5" required></textarea>
+                        <textarea id="message" name="message" required placeholder="Tell us about your business and what you need help with..."></textarea>
                     </div>
-                    
-                    <!-- Formspree hidden fields -->
-                    <input type="hidden" name="_subject" value="New Contact Form Submission - Straya Co">
-                    <input type="hidden" name="_replyto" value="vincent@strayaco.com.au">
-                    <input type="hidden" name="_cc" value="vincent@strayaco.com.au">
-                    
-                    <button type="submit" class="btn btn-block">Send Message</button>
-                    
-                    <!-- Formspree success/error handling -->
-                    <div id="form-message" style="display: none; margin-top: 1rem; padding: 1rem; border-radius: var(--radius); text-align: center;"></div>
+                    <button type="submit" class="btn-submit">Send Message</button>
                 </form>
-                
-                <!-- Formspree JavaScript for better UX -->
-                <script>
-                    const form = document.querySelector('form[action="https://formspree.io/f/xgonzwod"]');
-                    const formMessage = document.getElementById('form-message');
-                    
-                    form.addEventListener('submit', async (e) => {
-                        e.preventDefault();
-                        
-                        const submitButton = form.querySelector('button[type="submit"]');
-                        const originalText = submitButton.textContent;
-                        submitButton.textContent = 'Sending...';
-                        submitButton.disabled = true;
-                        
-                        try {
-                            const formData = new FormData(form);
-                            const response = await fetch(form.action, {
-                                method: 'POST',
-                                body: formData,
-                                headers: {
-                                    'Accept': 'application/json'
-                                }
-                            });
-                            
-                            if (response.ok) {
-                                formMessage.textContent = 'Thank you! Your message has been sent successfully.';
-                                formMessage.style.background = '#10b98120';
-                                formMessage.style.color = '#10b981';
-                                formMessage.style.border = '1px solid #10b981';
-                                formMessage.style.display = 'block';
-                                form.reset();
-                            } else {
-                                throw new Error('Form submission failed');
-                            }
-                        } catch (error) {
-                            formMessage.textContent = 'Oops! There was a problem sending your message. Please try again or email us directly.';
-                            formMessage.style.background = '#ef444420';
-                            formMessage.style.color = '#ef4444';
-                            formMessage.style.border = '1px solid #ef4444';
-                            formMessage.style.display = 'block';
-                        } finally {
-                            submitButton.textContent = originalText;
-                            submitButton.disabled = false;
-                            
-                            // Scroll to message
-                            formMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                        }
-                    });
-                </script>
             </div>
         </div>
-        
-        <!-- FAQ Section -->
-        <section class="faq-section">
-            <h2>Frequently Asked Questions</h2>
-            
-            <div class="faq-grid">
-                <div class="faq-item">
-                    <h3>What areas do you serve?</h3>
-                    <p>We serve businesses across Australia, with a focus on Sydney, Melbourne, Brisbane, Perth, and Adelaide. Remote support is available nationwide.</p>
-                </div>
-                
-                <div class="faq-item">
-                    <h3>How quickly can you respond?</h3>
-                    <p>We respond to all inquiries within 24 hours during business days. Emergency support is available for existing clients.</p>
-                </div>
-                
-                <div class="faq-item">
-                    <h3>Do you offer free consultations?</h3>
-                    <p>Yes! We offer a free 30-minute consultation to discuss your needs and how we can help your business.</p>
-                </div>
-                
-                <div class="faq-item">
-                    <h3>What industries do you work with?</h3>
-                    <p>We work with businesses across all industries — from professional services and retail to healthcare and construction. If you use email and documents, we can help.</p>
-                </div>
-                
-                <div class="faq-item">
-                    <h3>How much do your services cost?</h3>
-                    <p>Pricing varies based on the scope of work. Contact us for a free quote tailored to your specific needs and budget.</p>
-                </div>
-                
-                <div class="faq-item">
-                    <h3>Can you work with our existing IT team?</h3>
-                    <p>Absolutely. We frequently collaborate with in-house IT teams and other providers to deliver the best outcome for your business.</p>
-                </div>
-            </div>
-        </section>
-    </main>
+    </div>
+</section>
 
-    <!-- Footer -->
-    <footer>
-        <div class="container">
-            <div class="footer-grid">
-                <div class="footer-col">
-                    <h3>Straya Co</h3>
-                    <p>Sydney's trusted IT consulting partner for secure and efficient business solutions.</p>
-                </div>
-                <div class="footer-col">
-                    <h3>Services</h3>
-                    <ul>
-                        <li><a href="services.html#email">Email Security</a></li>
-                        <li><a href="services.html#automation">Automation</a></li>
-                        <li><a href="services.html#setup">Business Setup</a></li>
-                        <li><a href="services.html">All Services</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h3>Company</h3>
-                    <ul>
-                        <li><a href="about.html">About Us</a></li>
-                        <li><a href="resources.html">Resources</a></li>
-                        <li><a href="contact.html">Contact</a></li>
-                        <li><a href="#">Privacy Policy</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h3>Contact</h3>
-                    <ul>
-                        <li>Email: <span id="email-link"></span></li>
-                        <li>Location: Sydney, Australia</li>
-                        <li>ABN: 89 642 689 076</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>© 2026 Straya Co Pty Ltd — Sydney, Australia. All rights reserved.</p>
-            </div>
+<footer>
+    <div class="footer-inner">
+        <div class="footer-grid">
+            <div class="footer-col"><div class="footer-brand">Straya <span>Co</span></div><p>Sydney-based IT consulting helping Australian businesses secure, automate, and grow.</p><p style="margin-top:0.75rem;">ABN: 89 642 689 076</p></div>
+            <div class="footer-col"><h4>Services</h4><ul><li><a href="services.html">Email Security & DMARC</a></li><li><a href="services.html">Office Automation</a></li><li><a href="services.html">IT Setup & Migration</a></li></ul></div>
+            <div class="footer-col"><h4>Company</h4><ul><li><a href="about.html">About Us</a></li><li><a href="resources.html">Resources</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+            <div class="footer-col"><h4>Contact</h4><ul><li>Sydney, Australia</li><li><a href="mailto:vincent@strayaco.com.au">vincent@strayaco.com.au</a></li></ul></div>
         </div>
-    </footer>
+        <div class="footer-bottom"><p>© 2026 Straya Co Pty Ltd — Sydney, Australia. All rights reserved.</p></div>
+    </div>
+</footer>
 
-    <script>
-        function protectEmail() {
-            const emailUser = 'vincent';
-            const emailDomain = 'strayaco.com.au';
-            const emailFull = emailUser + '@' + emailDomain;
-            const encodedEmail = 'vincent&#64;strayaco&#46;com&#46;au';
-            document.querySelectorAll('#email-link').forEach(el => {
-                el.innerHTML = `<a href="mailto:${emailFull}" style="color: #d1d5db;">${encodedEmail}</a>`;
-            });
-        }
-        function animateOnScroll() {
-            const elements = document.querySelectorAll('.animate');
-            elements.forEach(el => {
-                const rect = el.getBoundingClientRect();
-                if (rect.top < window.innerHeight - 100) {
-                    el.style.opacity = '1';
-                    el.style.transform = 'translateY(0)';
-                }
-            });
-        }
-        document.addEventListener('DOMContentLoaded', () => {
-            protectEmail();
-            animateOnScroll();
-            window.addEventListener('scroll', animateOnScroll);
-        });
-    </script>
+<div class="backdrop" id="backdrop"></div>
+<div class="slide-navigation" id="slideNav">
+    <div class="nav-icon" id="slideClose"><span></span><span></span><span></span></div>
+    <div class="slide-nav-logo">Straya <span>Co</span></div>
+    <div class="slide-nav-grid">
+        <div class="slide-nav-col"><div class="slide-nav-title">Services</div><ul class="slide-nav-links"><li><a href="services.html">Email Security & DMARC</a></li><li><a href="services.html">Office Automation</a></li><li><a href="services.html">IT Setup & Migration</a></li></ul></div>
+        <div class="slide-nav-col"><div class="slide-nav-title">Company</div><ul class="slide-nav-links"><li><a href="about.html">About Us</a></li><li><a href="resources.html">Resources</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+    </div>
+</div>
+<script>(function(){var n=document.getElementById('navIcon'),s=document.getElementById('slideNav'),c=document.getElementById('slideClose'),b=document.getElementById('backdrop');function o(){n.classList.add('open');c.classList.add('open');s.classList.add('open');b.classList.add('open');document.body.style.overflow='hidden';}function x(){n.classList.remove('open');c.classList.remove('open');s.classList.remove('open');b.classList.remove('open');document.body.style.overflow='';}n.addEventListener('click',o);c.addEventListener('click',x);b.addEventListener('click',x);})();</script>
 </body>
 </html>
