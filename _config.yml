@@ -1,9 +1,0 @@
-# Disable Jekyll processing - serve HTML files directly
-exclude:
-  - Gemfile
-  - Gemfile.lock
-  - template.html
-  - update.sh
-  - README.md
-  - CHANGES.md
-  - omlx/
