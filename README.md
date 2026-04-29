@@ -5,7 +5,8 @@ Modern business website for Straya Co - IT solutions for Australian businesses.
 ## Current Status
 - ✅ Modern redesign completed (March 2026)
 - ✅ GitHub Pages publishing workflow established
-- ✅ Live at: https://vinnie77.github.io/Pang/
+- ✅ Live at: https://strayaco.com.au/
+- ✅ GitHub Pages URL: https://xnddzwkf5s-del.github.io/strayaco/
 
 ## Files
 - `index.html` - Modern business website (main page)
