@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configuring Multiple API Providers in OpenClaw: DeepSeek, Anthropic &amp; Local Models - Straya Co Blog</title>
+    <meta name="description" content="Complete guide to adding DeepSeek, Anthropic, Ollama, and OpenAI-compatible API providers to OpenClaw. Includes provider comparison, cost analysis, routing, and security hardening.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+    <style>
+        :root { --dark:#1a1a2e; --gold:#c9a96e; --gold-dark:#b8945a; --cream:#f8f6f1; --white:#fff; --gray:#6b7280; --gray-light:#e8e4dd; --radius:4px; --radius-lg:12px; --shadow:0 4px 20px rgba(0,0,0,0.08); --shadow-lg:0 20px 60px rgba(0,0,0,0.15); --transition:all 0.35s cubic-bezier(0.4,0,0.2,1); }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Inter',sans-serif;color:var(--dark);background:var(--white);line-height:1.7;overflow-x:hidden;}
+        h1,h2,h3,h4{font-family:'Playfair Display',serif;font-weight:600;line-height:1.2;}
+        .container{max-width:800px;margin:0 auto;padding:0 32px;}
+        a{text-decoration:none;color:inherit;}
+        img{max-width:100%;height:auto;}
+        code{font-family:monospace;background:var(--cream);padding:2px 6px;border-radius:3px;font-size:0.9em;}
+        pre{background:var(--dark);color:#e2e8f0;padding:1.25rem;border-radius:var(--radius-lg);overflow-x:auto;margin:1.5rem 0;font-size:0.85rem;line-height:1.6;}
+        pre code{background:transparent;padding:0;color:inherit;font-size:0.85rem;}
+        table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:0.9rem;}
+        th,td{padding:0.75rem 1rem;text-align:left;border-bottom:1px solid var(--gray-light);}
+        th{background:var(--dark);color:var(--white);font-weight:600;}
+        tr:last-child td{border-bottom:none;}
+        p{margin-bottom:1rem;}
+        ul,ol{margin:1rem 0 1rem 1.5rem;}
+        li{margin-bottom:0.4rem;}
+        hr{margin:2rem 0;border:none;border-top:1px solid var(--gray-light);}
+
+        #site-header{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(26,26,46,0.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,169,110,0.2);}
+        .header-inner{max-width:1200px;margin:0 auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:80px;}
+        .logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--white);letter-spacing:0.02em;}
+        .logo span{color:var(--gold);}
+        nav ul{display:flex;list-style:none;gap:2rem;}
+        nav a{color:rgba(255,255,255,0.85);font-size:0.85rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;transition:var(--transition);}
+        nav a:hover,nav a.active{color:var(--gold);}
+        .btn-cta{background:var(--gold);color:var(--dark);padding:0.6rem 1.5rem;border-radius:var(--radius);font-size:0.82rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;transition:var(--transition);}
+        .btn-cta:hover{background:var(--gold-dark);}
+        .nav-icon{display:flex;flex-direction:column;justify-content:space-between;width:26px;height:20px;cursor:pointer;z-index:1100;flex-shrink:0;}
+        .nav-icon span{display:block;height:2px;width:100%;background:#fff;border-radius:9px;transition:all 0.25s ease-in-out;transform-origin:left center;}
+
+        .page-hero{padding:140px 0 40px;background:var(--dark);color:var(--white);}
+        .page-hero h1{font-size:2.4rem;margin-bottom:0.5rem;}
+        .page-hero .meta{color:var(--gold);font-size:0.85rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;}
+        .post-content{padding:60px 0 80px;}
+        .post-content h2{margin:2.5rem 0 1rem;font-size:1.6rem;}
+        .post-content h3{margin:2rem 0 0.75rem;font-size:1.2rem;color:var(--gray);}
+        .post-content ul{margin:1rem 0;}
+        .post-content li{margin-bottom:0.4rem;}
+        .post-content table{margin:1.5rem 0;}
+        .post-content .tag{display:inline-block;background:var(--cream);color:var(--gray);padding:0.3rem 0.8rem;border-radius:20px;font-size:0.8rem;margin-right:0.5rem;margin-bottom:0.5rem;border:1px solid var(--gray-light);}
+        .post-content .lesson{background:var(--cream);border-left:4px solid var(--gold);padding:1.5rem;border-radius:0 var(--radius-lg) var(--radius-lg) 0;margin:2rem 0;}
+
+        footer{background:var(--dark);color:rgba(255,255,255,0.7);padding:60px 0 30px;margin-top:60px;}
+        .footer-inner{max-width:1200px;margin:0 auto;padding:0 32px;}
+        .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;padding-bottom:2rem;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:2rem;}
+        .footer-brand{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--white);margin-bottom:0.75rem;}
+        .footer-brand span{color:var(--gold);}
+        .footer-col h4{color:var(--white);margin-bottom:1rem;font-size:1rem;}
+        .footer-col ul{list-style:none;}
+        .footer-col li{margin-bottom:0.5rem;}
+        .footer-col a:hover{color:var(--gold);}
+        .footer-bottom{text-align:center;font-size:0.85rem;}
+
+        .backdrop{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:900;opacity:0;visibility:hidden;transition:var(--transition);}
+        .backdrop.open{opacity:1;visibility:visible;}
+        .slide-navigation{position:fixed;top:0;right:0;bottom:0;width:320px;background:var(--dark);z-index:950;padding:2rem;transform:translateX(100%);transition:var(--transition);}
+        .slide-navigation.open{transform:translateX(0);}
+        .slide-nav-logo{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--white);margin:2rem 0;}
+        .slide-nav-logo span{color:var(--gold);}
+        .slide-nav-grid{display:grid;grid-template-columns:1fr;gap:2rem;}
+        .slide-nav-title{color:var(--gold);font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:1rem;}
+        .slide-nav-links{list-style:none;}
+        .slide-nav-links li{margin-bottom:0.75rem;}
+        .slide-nav-links a{color:rgba(255,255,255,0.75);font-size:0.95rem;transition:var(--transition);}
+        .slide-nav-links a:hover{color:var(--gold);}
+
+        @media(max-width:991px){nav ul{display:none;}}
+        @media(max-width:768px){.container{padding:0 20px;}.header-inner{padding:0 20px;}.footer-inner{padding:0 20px;}.footer-grid{grid-template-columns:1fr;}.page-hero h1{font-size:1.8rem;}.slide-navigation{width:100%;}}
+    </style>
+</head>
+<body>
+
+<header id="site-header">
+    <div class="header-inner">
+        <a href="../index.html" class="logo">Straya <span>Co</span></a>
+        <nav>
+            <ul>
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../services.html">Services</a></li>
+                <li><a href="../about.html">About</a></li>
+                <li><a href="../resources.html">Resources</a></li>
+                <li><a href="index.html" class="active">Blog</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </nav>
+        <a href="../contact.html" class="btn-cta">Get Started</a>
+        <div class="nav-icon" id="navIcon"><span></span><span></span><span></span></div>
+    </div>
+</header>
+
+<section class="page-hero">
+    <div class="container">
+        <p class="meta">April 29, 2026 &mdash; Configuration &amp; Set Up</p>
+        <h1>Configuring Multiple API Providers in OpenClaw</h1>
+        <div>
+            <span class="tag">OpenClaw</span>
+            <span class="tag">DeepSeek</span>
+            <span class="tag">Anthropic</span>
+            <span class="tag">Ollama</span>
+            <span class="tag">Configuration</span>
+            <span class="tag">Security</span>
+            <span class="tag">Cost Optimisation</span>
+        </div>
+    </div>
+</section>
+
+<section class="post-content">
+    <div class="container">
+
+<p>A complete guide to adding DeepSeek, Anthropic, Ollama, and OpenAI-compatible API providers to OpenClaw &mdash; with provider comparison, cost analysis, model routing, and security hardening.</p>
+
+<hr>
+
+<h2>Overview</h2>
+
+<p>OpenClaw doesn't ship with hardcoded provider options during installation. Instead, it asks you to select an API format &mdash; and DeepSeek is not listed as a named provider. The correct choice during setup is <strong>"OpenAI Compatible"</strong>, which opens up any service using the OpenAI chat completions format, including DeepSeek, Together AI, Groq, Perplexity, OpenRouter, and local Ollama instances.</p>
+
+<p>This guide covers configuring multiple providers in the same <code>openclaw.json</code>, routing tasks to the right model, and hardening your config against leaks.</p>
+
+<hr>
+
+<h2>Why Multiple Providers?</h2>
+
+<p>Running one API provider is simple. Running multiple gives you:</p>
+
+<ul>
+<li><strong>Fallback resilience</strong> &mdash; if DeepSeek is down, the agent falls back to Anthropic, Ollama, or another provider</li>
+<li><strong>Cost optimisation</strong> &mdash; DeepSeek Chat costs ~$0.50/day for typical agent use; Claude Sonnet can burn $50/day on the same workload. Route simple tasks to cheap models, programming to premium models.</li>
+<li><strong>Privacy segmentation</strong> &mdash; sensitive tasks (email processing, document analysis) route through local Ollama models; public tasks (web search, blog writing) use cloud APIs</li>
+<li><strong>Model specialisation</strong> &mdash; different models excel at different things; DeepSeek for code, Claude for writing, local Qwen for fast structured tasks</li>
+</ul>
+
+<p>The configuration shown here uses four providers simultaneously: DeepSeek (primary), Anthropic (premium fallback), Ollama (local privacy), and an OpenAI placeholder for future use.</p>
+
+<hr>
+
+<h2>The "OpenAI Compatible" Setup</h2>
+
+<p>During OpenClaw's initial setup wizard, you'll see a list of provider options:</p>
+
+<pre><code>Which LLM provider do you want to use?
+&gt; OpenAI
+&gt; Anthropic
+&gt; Ollama
+&gt; OpenAI Compatible</code></pre>
+
+<p>Select <strong>"OpenAI Compatible"</strong>. This does not mean you're using OpenAI &mdash; it means the provider speaks the OpenAI chat completions protocol, which is the de facto standard for API-based LLMs. DeepSeek, Together AI, Groq, Perplexity, OpenRouter, and dozens of others all use this format.</p>
+
+<p>After selecting this option, the wizard asks for:</p>
+
+<ol>
+<li><strong>Base URL</strong> &mdash; the API endpoint (e.g. <code>https://api.deepseek.com/v1</code>)</li>
+<li><strong>API Key</strong> &mdash; your authentication key</li>
+<li><strong>Model ID</strong> &mdash; the model name (e.g. <code>deepseek-chat</code>)</li>
+</ol>
+
+<p>This creates a provider entry in <code>openclaw.json</code>. You can then edit the config file directly to add additional providers.</p>
+
+<hr>
+
+<h2>Provider Configuration Walkthrough</h2>
+
+<h3>Provider 1: DeepSeek (Primary)</h3>
+
+<p>DeepSeek's API uses OpenAI-compatible format. There are two relevant models:</p>
+
+<p><strong>deepseek-chat</strong> &mdash; the flagship model. Fast, excellent at code and structured tasks, cost-effective.<br>
+<strong>deepseek-reasoner</strong> &mdash; the reasoning model with extended chain-of-thought. Slower but better at complex logic.</p>
+
+<pre><code>{
+  "custom-api-deepseek-com": {
+    "baseUrl": "https://api.deepseek.com/v1",
+    "apiKey": "sk-your-deepseek-api-key",
+    "api": "openai-completions",
+    "models": [
+      {
+        "id": "deepseek-chat",
+        "name": "deepseek-chat (Custom Provider)",
+        "reasoning": false,
+        "input": ["text"],
+        "contextWindow": 128000,
+        "maxTokens": 8192
+      },
+      {
+        "id": "deepseek-reasoner",
+        "name": "deepseek-reasoner (Custom Provider)",
+        "reasoning": false,
+        "input": ["text"],
+        "contextWindow": 128000,
+        "maxTokens": 64000
+      }
+    ]
+  }
+}</code></pre>
+
+<p><strong>Key details:</strong></p>
+<ul>
+<li><code>baseUrl</code> includes <code>/v1</code> &mdash; the API version path. Without this, requests fail silently</li>
+<li><code>api: "openai-completions"</code> &mdash; tells OpenClaw which protocol to speak</li>
+<li>DeepSeek supports up to 128K context and generous rate limits</li>
+<li>The provider key (<code>custom-api-deepseek-com</code>) is an arbitrary identifier but should be descriptive</li>
+</ul>
+
+<h3>Provider 2: Anthropic (Premium Fallback)</h3>
+
+<p>Anthropic uses its own message format, not OpenAI-compatible. This requires a separate provider type:</p>
+
+<pre><code>{
+  "anthropic": {
+    "baseUrl": "https://api.anthropic.com/v1",
+    "apiKey": "sk-ant-your-anthropic-api-key",
+    "api": "anthropic-messages",
+    "models": [
+      {
+        "id": "claude-sonnet-4-6",
+        "name": "Claude Sonnet 4.6",
+        "api": "anthropic-messages",
+        "contextWindow": 200000,
+        "maxTokens": 8192
+      },
+      {
+        "id": "claude-3-5-haiku-20241022",
+        "name": "Claude 3.5 Haiku",
+        "contextWindow": 200000,
+        "maxTokens": 8192
+      }
+    ]
+  }
+}</code></pre>
+
+<p><strong>Key differences from OpenAI-compatible:</strong></p>
+<ul>
+<li><code>api: "anthropic-messages"</code> &mdash; completely different request/response format</li>
+<li>Each model must explicitly declare <code>"api": "anthropic-messages"</code> (some models inherit from the provider, but explicit is safer)</li>
+<li>Anthropic's API key starts with <code>sk-ant-</code></li>
+<li>Claude models have very large context windows (200K tokens)</li>
+</ul>
+
+<h3>Provider 3: Ollama (Local)</h3>
+
+<p>Ollama runs locally on your machine and serves an OpenAI-compatible endpoint:</p>
+
+<pre><code>{
+  "ollama": {
+    "baseUrl": "http://localhost:11434/v1",
+    "apiKey": "ollama-local",
+    "api": "openai-completions",
+    "models": [
+      {
+        "id": "qwen3.5:latest",
+        "name": "Qwen 3.5 (latest)",
+        "contextWindow": 128000,
+        "maxTokens": 4096
+      },
+      {
+        "id": "deepseek-r1:7b",
+        "name": "DeepSeek R1 7B",
+        "contextWindow": 128000,
+        "maxTokens": 8192
+      }
+    ]
+  }
+}</code></pre>
+
+<p><strong>Key details:</strong></p>
+<ul>
+<li>The <code>apiKey</code> is arbitrary &mdash; Ollama's local server doesn't validate it, but OpenClaw requires a non-empty value</li>
+<li><code>baseUrl</code> points to <code>localhost:11434</code> (Ollama's default port)</li>
+<li>Local models have smaller practical context windows despite what they advertise</li>
+<li>Models need to be pulled first via <code>ollama pull modelname</code></li>
+</ul>
+
+<h3>Provider 4: Placeholder / Unused Provider</h3>
+
+<p>You can keep an empty provider for future use:</p>
+
+<pre><code>{
+  "openai": {
+    "baseUrl": "http://localhost:8000/v1",
+    "apiKey": "placeholder",
+    "api": "openai-completions",
+    "models": []
+  }
+}</code></pre>
+
+<p>This has no impact on performance. An empty model list means OpenClaw ignores it when resolving model references.</p>
+
+<hr>
+
+<h2>The Default Model Configuration</h2>
+
+<p>After adding providers, you need to tell OpenClaw which model(s) to use by default and how to fall back:</p>
+
+<pre><code>{
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "custom-api-deepseek-com/deepseek-chat",
+        "fallbacks": [
+          "custom-api-deepseek-com/deepseek-reasoner",
+          "anthropic/claude-sonnet-4-6",
+          "ollama/deepseek-r1:7b"
+        ]
+      },
+      "models": {
+        "custom-api-deepseek-com/deepseek-chat": {
+          "alias": "deepseek-chat",
+          "params": {
+            "max_tokens": 8192,
+            "timeout": 60000,
+            "max_retries": 3
+          }
+        },
+        "anthropic/claude-sonnet-4-6": {
+          "alias": "claude-sonnet-4-6"
+        },
+        "ollama/qwen3.5:latest": {},
+        "ollama/deepseek-r1:7b": {}
+      }
+    }
+  }
+}</code></pre>
+
+<p><strong>Provider and model references use the format: <code>provider-id/model-id</code></strong></p>
+
+<p>The <code>alias</code> field lets you override a model's display name in the UI and when selecting models per-session.</p>
+
+<p><strong>Fallback order is critical.</strong> OpenClaw tries the primary model first. If it fails (timeout, rate limit, 503), it tries the first fallback, then the second, and so on. This means:</p>
+
+<ol>
+<li>DeepSeek chat (fast, cheap)</li>
+<li>DeepSeek reasoner (slower, more thorough)</li>
+<li>Claude Sonnet (premium, very capable)</li>
+<li>Local DeepSeek R1 (slow, private, last resort)</li>
+</ol>
+
+<hr>
+
+<h2>How OpenClaw Routes Models</h2>
+
+<p>The model routing system uses dot-notation paths: <code>provider/model</code>.</p>
+
+<pre><code># Use the default model (as configured in agents.defaults.model.primary)
+/deepseek-chat
+
+# Switch to a specific provider and model
+/anthropic/claude-sonnet-4-6
+
+# Use a local model
+/ollama/qwen3.5:latest</code></pre>
+
+<p>When you reference a model in a session, OpenClaw looks it up in the default <code>model.primary</code> first, then checks <code>fallbacks</code> if the primary fails. Each session can override the model selection independently.</p>
+
+<p><strong>The <code>models</code> section under <code>agents.defaults</code></strong> is separate from the <code>providers</code> section. Providers define what's available. The models section defines how each one is configured for your agent &mdash; timeouts, retries, token limits, aliases.</p>
+
+<hr>
+
+<h2>The Real Cost Difference: Why Model Selection Matters</h2>
+
+<p>This is not theoretical. Running Claude Sonnet as your only model will cost you real money. Running DeepSeek Chat for the same workload will cost you almost nothing.</p>
+
+<p><strong>The numbers from real usage:</strong></p>
+
+<table>
+<tr><th>Scenario</th><th>Daily Cost</th><th>Monthly Cost</th><th>Annual Cost</th></tr>
+<tr><td>Anthropic Claude Sonnet (default)</td><td>~$50/day</td><td>~$1,500</td><td>~$18,000</td></tr>
+<tr><td>DeepSeek Chat + Reasoner (default)</td><td>~$0.50/day</td><td>~$15</td><td>~$180</td></tr>
+<tr><td>Hybrid: DeepSeek default, Claude for programming</td><td>~$5-10/day</td><td>~$150-300</td><td>~$1,800-3,600</td></tr>
+</table>
+
+<p>That's not a typo. Claude Sonnet can burn through $50 per day of heavy agent usage. DeepSeek Chat handles the same volume for pocket change.</p>
+
+<p><strong>Why is the difference this extreme?</strong></p>
+
+<ul>
+<li><strong>Pricing per million tokens:</strong> DeepSeek Chat is ~$0.14 input / $0.28 output. Claude Sonnet is ~$3.00 input / $15.00 output. Sonnet is roughly 20-50x more expensive depending on the input/output ratio.</li>
+<li><strong>Agent workloads are token-heavy.</strong> An agent doesn't just send a prompt and get a reply. It sends the full conversation history, tool call results, system prompts, and context &mdash; every time. A single agent session can consume 50,000-200,000 input tokens per turn.</li>
+<li><strong>Cron jobs multiply the cost.</strong> Six cron jobs running daily means 6x the token consumption. A single Sonnet-powered cron job handling email processing can cost $3-5 per run.</li>
+</ul>
+
+<p><strong>The hybrid strategy:</strong></p>
+
+<p>DeepSeek Chat handles 90% of agent operations &mdash; email triage, weather checks, backup verification, blog formatting, file management, web searches. These are structured, predictable tasks where DeepSeek performs perfectly well.</p>
+
+<p>Claude Sonnet is reserved for the 10% where it genuinely matters &mdash; complex programming tasks, nuanced writing, multi-step reasoning where you can't afford errors.</p>
+
+<pre><code># Default session: DeepSeek Chat (cheap, fast, good enough)
+/deepseek-chat
+
+# Programming session: Claude Sonnet (premium, best for code)
+/anthropic/claude-sonnet-4-6</code></pre>
+
+<p>This brings daily cost down from $50 to $5-10. The programming work still gets the best model. Everything else runs on the efficient workhorse.</p>
+
+<p><strong>What about the fallback chain?</strong></p>
+
+<p>Even with fallback configured, Claude should <em>never</em> be reached in normal operation because DeepSeek has excellent uptime. The fallback is insurance for the rare case DeepSeek's API is down &mdash; it means the agent keeps working at premium cost rather than failing entirely.</p>
+
+<p><strong>Local models for true zero cost:</strong></p>
+
+<p>For fully private, offline-capable tasks, Ollama local models cost nothing. A weekly email processing run that would cost $0.05 on DeepSeek or $3.00 on Sonnet costs $0.00 on a local 7B model. Speed and quality trade-offs apply.</p>
+
+<hr>
+
+<h2>Comparing Providers at a Glance</h2>
+
+<table>
+<tr><th>Provider</th><th>API Format</th><th>Cost</th><th>Speed</th><th>Privacy</th><th>Best For</th></tr>
+<tr><td><strong>DeepSeek Chat</strong></td><td>OpenAI-compat</td><td>$0.14/M tokens</td><td>Fast</td><td>Cloud</td><td>Code, structured tasks, daily agent work</td></tr>
+<tr><td><strong>DeepSeek Reasoner</strong></td><td>OpenAI-compat</td><td>$0.28/M tokens</td><td>Slow</td><td>Cloud</td><td>Complex reasoning, analysis</td></tr>
+<tr><td><strong>Claude Sonnet</strong></td><td>Anthropic</td><td>~$3/M tokens</td><td>Fast</td><td>Cloud</td><td>Writing, nuanced tasks, creative work</td></tr>
+<tr><td><strong>Claude Haiku</strong></td><td>Anthropic</td><td>~$0.25/M tokens</td><td>Fast</td><td>Cloud</td><td>Quick classification, cheap Anthropic option</td></tr>
+<tr><td><strong>Ollama (local)</strong></td><td>OpenAI-compat</td><td>Free</td><td>Slow</td><td>Local</td><td>Private data, repetitive tasks, offline</td></tr>
+<tr><td><strong>OpenAI GPT-4o</strong></td><td>OpenAI-compat</td><td>~$2.50/M tokens</td><td>Fast</td><td>Cloud</td><td>General purpose</td></tr>
+</table>
+
+<p>Costs vary and change quarterly. Always check current pricing before committing to a strategy. DeepSeek is currently the most cost-effective for high-volume agent usage by a wide margin.</p>
+
+<hr>
+
+<h2>Security Hardening</h2>
+
+<p>Your <code>openclaw.json</code> contains API keys for multiple services. A leak means someone can drain all of them.</p>
+
+<h3>1. Use Environment Variables (Recommended)</h3>
+
+<p>Replace hardcoded API keys with environment variable references:</p>
+
+<pre><code>{
+  "custom-api-deepseek-com": {
+    "apiKey": "${DEEPSEEK_API_KEY}"
+  },
+  "anthropic": {
+    "apiKey": "${ANTHROPIC_API_KEY}"
+  },
+  "skills": {
+    "entries": {
+      "agentmail": {
+        "apiKey": "${AGENTMAIL_API_KEY}"
+      }
+    }
+  }
+}</code></pre>
+
+<p>Then set these in your shell profile (<code>~/.zshrc</code>) or a <code>.env</code> file:</p>
+
+<pre><code>export DEEPSEEK_API_KEY="sk-your-key"
+export ANTHROPIC_API_KEY="sk-ant-your-key"
+export AGENTMAIL_API_KEY="am_us_your-key"</code></pre>
+
+<p>OpenClaw resolves <code>${VAR}</code> placeholders at startup. If a variable is unset, the config will fail to load &mdash; which is safer than falling back to a default.</p>
+
+<h3>2. Lock Down File Permissions</h3>
+
+<pre><code>chmod 600 ~/.openclaw/openclaw.json
+chmod 700 ~/.openclaw</code></pre>
+
+<p>This prevents other users on the system (or any process running as a different user) from reading your config.</p>
+
+<h3>3. Exclude Config from Backups</h3>
+
+<p>If you back up your workspace publicly (e.g., website backups pushed to GitHub), make sure OpenClaw config is excluded:</p>
+
+<pre><code># .gitignore or backup exclusion script
+openclaw.json</code></pre>
+
+<p>The config lives at <code>~/.openclaw/</code>, which should be outside any public backup scope anyway. But verify.</p>
+
+<h3>4. Set Rate Limits on the Gateway</h3>
+
+<p>Protect against brute force of the control panel:</p>
+
+<pre><code>{
+  "gateway": {
+    "auth": {
+      "rateLimit": {
+        "maxAttempts": 10,
+        "windowMs": 60000,
+        "lockoutMs": 300000
+      }
+    }
+  }
+}</code></pre>
+
+<p>This locks out the IP for 5 minutes after 10 failed auth attempts within 60 seconds.</p>
+
+<h3>5. Keep Unused Providers Empty</h3>
+
+<p>If you're not using OpenAI directly, keep its model list empty (<code>[]</code>). An unused provider with models configured could theoretically be selected accidentally or by a confused agent.</p>
+
+<h3>6. Trusted Proxies for Network Security</h3>
+
+<p>If your agent is accessible over a local network, specify which IPs are trusted:</p>
+
+<pre><code>{
+  "gateway": {
+    "trustedProxies": [
+      "127.0.0.1",
+      "::1",
+      "192.168.1.0/24"
+    ]
+  }
+}</code></pre>
+
+<p>This prevents external hosts from spoofing trusted IP headers.</p>
+
+<hr>
+
+<h2>Troubleshooting</h2>
+
+<h3>"Failed to resolve model" error</h3>
+<p><strong>Cause:</strong> The provider key or model ID doesn't match. References use the format <code>provider-name/model-id</code>.</p>
+<p><strong>Fix:</strong> Verify the provider key in the <code>providers</code> section matches what you use in <code>agents.defaults.model.fallbacks</code>.</p>
+<pre><code>Provider key: "custom-api-deepseek-com"
+Reference:     "deepseek/deepseek-chat"  → Wrong
+Reference:     "custom-api-deepseek-com/deepseek-chat"  → Correct</code></pre>
+
+<h3>"Connection refused" for Ollama</h3>
+<p><strong>Cause:</strong> Ollama isn't running or isn't listening on the expected port.</p>
+<pre><code># Check if Ollama is running
+ollama list
+# Start Ollama
+ollama serve</code></pre>
+
+<h3>"401 Unauthorized" for DeepSeek</h3>
+<p><strong>Cause:</strong> Invalid API key or the key hasn't been activated yet. Verify at api.deepseek.com.</p>
+
+<h3>Model responses are truncated</h3>
+<p><strong>Cause:</strong> <code>maxTokens</code> is set too low in the model configuration.</p>
+<pre><code>{
+  "params": {
+    "max_tokens": 16384
+  }
+}</code></pre>
+
+<hr>
+
+<h2>Quick Reference</h2>
+
+<table>
+<tr><th>Task</th><th>Config</th></tr>
+<tr><td>DeepSeek setup</td><td><code>api: "openai-completions"</code>, baseUrl: <code>https://api.deepseek.com/v1</code></td></tr>
+<tr><td>Anthropic setup</td><td><code>api: "anthropic-messages"</code>, baseUrl: <code>https://api.anthropic.com/v1</code></td></tr>
+<tr><td>Ollama setup</td><td><code>api: "openai-completions"</code>, baseUrl: <code>http://localhost:11434/v1</code></td></tr>
+<tr><td>Model reference format</td><td><code>provider-id/model-id</code></td></tr>
+<tr><td>Fallback chain</td><td><code>model.fallbacks</code> array, tried in order</td></tr>
+<tr><td>Model alias</td><td><code>models["provider/model"].alias</code></td></tr>
+<tr><td>Timeout</td><td><code>params.timeout</code> in milliseconds</td></tr>
+<tr><td>Retries</td><td><code>params.max_retries</code></td></tr>
+<tr><td>Env variable</td><td><code>${VARIABLE_NAME}</code> in any string value</td></tr>
+<tr><td>Config permissions</td><td><code>chmod 600 openclaw.json</code>, <code>chmod 700 ~/.openclaw</code></td></tr>
+</table>
+
+<p style="margin-top:2rem;"><a href="index.html" style="
