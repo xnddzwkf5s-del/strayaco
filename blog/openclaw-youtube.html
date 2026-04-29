@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Watching YouTube Videos Through Your AI Agent - Straya Co Blog</title>
+    <meta name="description" content="How to give your OpenClaw AI agent the ability to fetch and analyse YouTube video transcripts — for summarisation, Q&A, and content extraction.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+    <style>
+        :root { --dark:#1a1a2e; --gold:#c9a96e; --gold-dark:#b8945a; --cream:#f8f6f1; --white:#fff; --gray:#6b7280; --gray-light:#e8e4dd; --radius:4px; --radius-lg:12px; --shadow:0 4px 20px rgba(0,0,0,0.08); --shadow-lg:0 20px 60px rgba(0,0,0,0.15); --transition:all 0.35s cubic-bezier(0.4,0,0.2,1); }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Inter',sans-serif;color:var(--dark);background:var(--white);line-height:1.7;overflow-x:hidden;}
+        h1,h2,h3,h4{font-family:'Playfair Display',serif;font-weight:600;line-height:1.2;}
+        .container{max-width:800px;margin:0 auto;padding:0 32px;}
+        a{text-decoration:none;color:inherit;}
+        img{max-width:100%;height:auto;}
+        code{font-family:monospace;background:var(--cream);padding:2px 6px;border-radius:3px;font-size:0.9em;}
+        pre{background:var(--dark);color:#e2e8f0;padding:1.25rem;border-radius:var(--radius-lg);overflow-x:auto;margin:1.5rem 0;font-size:0.85rem;line-height:1.6;}
+        pre code{background:transparent;padding:0;color:inherit;font-size:0.85rem;}
+        table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:0.9rem;}
+        th,td{padding:0.75rem 1rem;text-align:left;border-bottom:1px solid var(--gray-light);}
+        th{background:var(--dark);color:var(--white);font-weight:600;}
+        tr:last-child td{border-bottom:none;}
+        p{margin-bottom:1rem;}
+        ul,ol{margin:1rem 0 1rem 1.5rem;}
+        li{margin-bottom:0.4rem;}
+        hr{margin:2rem 0;border:none;border-top:1px solid var(--gray-light);}
+
+        #site-header{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(26,26,46,0.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,169,110,0.2);}
+        .header-inner{max-width:1200px;margin:0 auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:80px;}
+        .logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--white);letter-spacing:0.02em;}
+        .logo span{color:var(--gold);}
+        nav ul{display:flex;list-style:none;gap:2rem;}
+        nav a{color:rgba(255,255,255,0.85);font-size:0.85rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;transition:var(--transition);}
+        nav a:hover,nav a.active{color:var(--gold);}
+        .btn-cta{background:var(--gold);color:var(--dark);padding:0.6rem 1.5rem;border-radius:var(--radius);font-size:0.82rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;transition:var(--transition);}
+        .btn-cta:hover{background:var(--gold-dark);}
+        .nav-icon{display:flex;flex-direction:column;justify-content:space-between;width:26px;height:20px;cursor:pointer;z-index:1100;flex-shrink:0;}
+        .nav-icon span{display:block;height:2px;width:100%;background:#fff;border-radius:9px;transition:all 0.25s ease-in-out;transform-origin:left center;}
+
+        .page-hero{padding:140px 0 40px;background:var(--dark);color:var(--white);}
+        .page-hero h1{font-size:2.4rem;margin-bottom:0.5rem;}
+        .page-hero .meta{color:var(--gold);font-size:0.85rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;}
+        .post-content{padding:60px 0 80px;}
+        .post-content h2{margin:2.5rem 0 1rem;font-size:1.6rem;}
+        .post-content h3{margin:2rem 0 0.75rem;font-size:1.2rem;color:var(--gray);}
+        .post-content ul{margin:1rem 0;}
+        .post-content li{margin-bottom:0.4rem;}
+        .post-content table{margin:1.5rem 0;}
+        .post-content .tag{display:inline-block;background:var(--cream);color:var(--gray);padding:0.3rem 0.8rem;border-radius:20px;font-size:0.8rem;margin-right:0.5rem;margin-bottom:0.5rem;border:1px solid var(--gray-light);}
+        .post-content .pros-table td:first-child{background:#f0fdf4;color:#166534;font-weight:500;}
+        .post-content .cons-table td:first-child{background:#fef2f2;color:#991b1b;font-weight:500;}
+        .recommendation{background:var(--cream);border-left:4px solid var(--gold);padding:1.5rem;border-radius:0 var(--radius-lg) var(--radius-lg) 0;margin:2rem 0;}
+
+        footer{background:var(--dark);color:rgba(255,255,255,0.7);padding:60px 0 30px;margin-top:60px;}
+        .footer-inner{max-width:1200px;margin:0 auto;padding:0 32px;}
+        .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;padding-bottom:2rem;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:2rem;}
+        .footer-brand{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--white);margin-bottom:0.75rem;}
+        .footer-brand span{color:var(--gold);}
+        .footer-col h4{color:var(--white);margin-bottom:1rem;font-size:1rem;}
+        .footer-col ul{list-style:none;}
+        .footer-col li{margin-bottom:0.5rem;}
+        .footer-col a:hover{color:var(--gold);}
+        .footer-bottom{text-align:center;font-size:0.85rem;}
+
+        .backdrop{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:900;opacity:0;visibility:hidden;transition:var(--transition);}
+        .backdrop.open{opacity:1;visibility:visible;}
+        .slide-navigation{position:fixed;top:0;right:0;bottom:0;width:320px;background:var(--dark);z-index:950;padding:2rem;transform:translateX(100%);transition:var(--transition);}
+        .slide-navigation.open{transform:translateX(0);}
+        .slide-nav-logo{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--white);margin:2rem 0;}
+        .slide-nav-logo span{color:var(--gold);}
+        .slide-nav-grid{display:grid;grid-template-columns:1fr;gap:2rem;}
+        .slide-nav-title{color:var(--gold);font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:1rem;}
+        .slide-nav-links{list-style:none;}
+        .slide-nav-links li{margin-bottom:0.75rem;}
+        .slide-nav-links a{color:rgba(255,255,255,0.75);font-size:0.95rem;transition:var(--transition);}
+        .slide-nav-links a:hover{color:var(--gold);}
+
+        @media(max-width:991px){nav ul{display:none;}}
+        @media(max-width:768px){.container{padding:0 20px;}.header-inner{padding:0 20px;}.footer-inner{padding:0 20px;}.footer-grid{grid-template-columns:1fr;}.page-hero h1{font-size:1.8rem;}.slide-navigation{width:100%;}}
+    </style>
+</head>
+<body>
+
+<header id="site-header">
+    <div class="header-inner">
+        <a href="../index.html" class="logo">Straya <span>Co</span></a>
+        <nav>
+            <ul>
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../services.html">Services</a></li>
+                <li><a href="../about.html">About</a></li>
+                <li><a href="../resources.html">Resources</a></li>
+                <li><a href="index.html" class="active">Blog</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </nav>
+        <a href="../contact.html" class="btn-cta">Get Started</a>
+        <div class="nav-icon" id="navIcon"><span></span><span></span><span></span></div>
+    </div>
+</header>
+
+<section class="page-hero">
+    <div class="container">
+        <p class="meta">April 29, 2026 &mdash; AI Agent Setup</p>
+        <h1>Watching YouTube Videos Through Your AI Agent</h1>
+        <div>
+            <span class="tag">OpenClaw</span>
+            <span class="tag">YouTube</span>
+            <span class="tag">Transcript</span>
+            <span class="tag">AI Agent</span>
+            <span class="tag">yt-dlp</span>
+        </div>
+    </div>
+</section>
+
+<section class="post-content">
+    <div class="container">
+
+<p>How to give your OpenClaw AI agent the ability to fetch and analyse YouTube video transcripts &mdash; for summarisation, Q&amp;A, and content extraction.</p>
+
+<hr>
+
+<h2>Overview</h2>
+
+<p>One of the most useful capabilities you can add to an AI agent is the ability to watch YouTube videos. Not literally watch &mdash; but fetch the transcript (closed captions or auto-generated subtitles) and work with the text content.</p>
+
+<p>This means you can:</p>
+
+<ul>
+<li>Ask your agent to summarise a 30-minute video in a few paragraphs</li>
+<li>Extract specific information without scrubbing through the timeline</li>
+<li>Search across multiple videos for a topic</li>
+<li>Get the key takeaways from a conference talk or tutorial</li>
+</ul>
+
+<p>All with a single command.</p>
+
+<hr>
+
+<h2>How It Works</h2>
+
+<p>The setup has three layers:</p>
+
+<ol>
+<li><strong>yt-dlp</strong> &mdash; a powerful command-line tool that downloads transcripts from YouTube</li>
+<li><strong>A Python script</strong> &mdash; wraps yt-dlp, cleans the WebVTT format into readable text</li>
+<li><strong>OpenClaw skill</strong> &mdash; makes it available as a tool the agent can call</li>
+</ol>
+
+<p>When you ask the agent about a YouTube video, it:</p>
+
+<ol>
+<li>Calls <code>get_transcript.py</code> with the video URL</li>
+<li>yt-dlp extracts the closed captions or auto-generated subtitles</li>
+<li>The Python script strips timestamps, headers, and formatting noise</li>
+<li>Returns clean, readable text to the agent</li>
+<li>The agent summarises or answers your question</li>
+</ol>
+
+<hr>
+
+<h2>Installation</h2>
+
+<h3>1. Install yt-dlp</h3>
+
+<pre><code>brew install yt-dlp</code></pre>
+
+<p>Or via pip:</p>
+
+<pre><code>pip install yt-dlp</code></pre>
+
+<h3>2. Install the Skill from ClawHub</h3>
+
+<pre><code>openclaw skill install youtube-watcher</code></pre>
+
+<p>Or install directly:</p>
+
+<pre><code>openclaw skill install https://clawhub.ai/Michaelgathara/youtube-watcher</code></pre>
+
+<h3>3. Verify It Works</h3>
+
+<pre><code>python3 /path/to/skills/youtube-watcher/scripts/get_transcript.py "https://www.youtube.com/watch?v=VIDEO_ID"</code></pre>
+
+<p>If the video has captions, you'll see clean text output.</p>
+
+<hr>
+
+<h2>Usage Examples</h2>
+
+<h3>Summarise a Video</h3>
+
+<pre><code>You: Summarise this video: https://www.youtube.com/watch?v=dQw4w9WgXcQ
+Agent: [fetches transcript, reads, responds with summary]</code></pre>
+
+<h3>Find Specific Information</h3>
+
+<pre><code>You: What did the speaker say about error handling in https://youtube.com/watch?v=xyz
+Agent: [fetches transcript, searches for "error handling", responds with relevant sections]</code></pre>
+
+<h3>Compare Multiple Videos</h3>
+
+<pre><code>You: Compare the key arguments in video A and video B
+Agent: [fetches both transcripts, compares, responds with analysis]</code></pre>
+
+<hr>
+
+<h2>Why Transcripts Instead of Audio/Video?</h2>
+
+<p>Processing raw video or audio would require:</p>
+
+<ul>
+<li>Downloading potentially hundreds of megabytes</li>
+<li>Running a speech-to-text model (computationally expensive)</li>
+<li>Dealing with different audio formats and quality</li>
+</ul>
+
+<p>Transcripts are:</p>
+
+<ul>
+<li><strong>Lightweight</strong> &mdash; a 30-minute video yields about 5-10KB of text</li>
+<li><strong>Fast</strong> &mdash; yt-dlp extracts captions in seconds</li>
+<li><strong>Accurate</strong> &mdash; official captions or YouTube's auto-generated subtitles are reliable</li>
+<li><strong>Searchable</strong> &mdash; text is easy to search, compare, and process</li>
+</ul>
+
+<hr>
+
+<h2>YouTube Skills Landscape</h2>
+
+<p>There's essentially one dedicated YouTube skill for OpenClaw: <strong>youtube-watcher</strong> from ClawHub. It uses yt-dlp to extract transcripts. But there are alternative approaches, each with different tradeoffs.</p>
+
+<h3>Option 1: youtube-watcher Skill (Recommended) ✅</h3>
+
+<p><strong>Approach:</strong> Install the ClawHub skill + yt-dlp. The agent calls a Python script that wraps yt-dlp to fetch and clean transcript text.</p>
+
+<table>
+<tr><th>Pros</th><th>Cons</th></tr>
+<tr><td>No API key required</td><td>Only works if video has captions</td></tr>
+<tr><td>Fast &mdash; returns in seconds</td><td>No timing context in output</td></tr>
+<tr><td>Ready to use, no custom code</td><td>Not suited for videos without CC</td></tr>
+<tr><td>Works with any YouTube URL format</td><td>English-optimised</td></tr>
+<tr><td>Lightweight (text only, no download)</td><td>No thumbnail/channel metadata</td></tr>
+</table>
+
+<h3>Option 2: Agent-Browser (Custom) ⚠️</h3>
+
+<p><strong>Approach:</strong> Use the agent-browser skill to navigate to YouTube, read the video page, and copy info from the description and comments. Doesn't get the transcript.</p>
+
+<table>
+<tr><th>Pros</th><th>Cons</th></tr>
+<tr><td>Gets page metadata (title, description, comments)</td><td>Cannot access transcript or captions</td></tr>
+<tr><td>No additional tools needed</td><td>Slower and fragile (page layout changes)</td></tr>
+<tr><td>Can scrape playlists or channels</td><td>High token usage per video</td></tr>
+</table>
+
+<p>Not useful for summarising the video itself &mdash; only for metadata.</p>
+
+<h3>Option 3: YouTube Data API (Custom) 🛠️</h3>
+
+<p><strong>Approach:</strong> Register for a Google API key, enable the YouTube Data API v3, and write a custom skill.</p>
+
+<table>
+<tr><th>Pros</th><th>Cons</th></tr>
+<tr><td>Official, reliable data</td><td>Requires API key + Google Cloud project</td></tr>
+<tr><td>Captions, metadata, search in one place</td><td>Free tier quota (10,000 units/day)</td></tr>
+<tr><td>Returns structured JSON</td><td>More complex setup</td></tr>
+<tr><td>Includes timing info with captions</td><td>Quota management overhead</td></tr>
+</table>
+
+<p>Overkill for transcript summarisation. Better for building a video search engine or analytics dashboard.</p>
+
+<h3>Option 4: Direct yt-dlp (No Skill) 🔧</h3>
+
+<p><strong>Approach:</strong> Skip the skill and invoke yt-dlp directly via command tool. Same underlying technology, different interface.</p>
+
+<table>
+<tr><th>Pros</th><th>Cons</th></tr>
+<tr><td>No skill installation needed</td><td>No guardrails or error handling</td></tr>
+<tr><td>Full yt-dlp power (audio download, format selection)</td><td>Must construct commands manually</td></tr>
+<tr><td>Multiple subtitle formats (vtt, srt, ttml)</td><td>Agent may hit options it doesn't understand</td></tr>
+</table>
+
+<div class="recommendation">
+<h3>Recommendation</h3>
+<p><strong>Use youtube-watcher as your primary method.</strong> It's the simplest, fastest, and most reliable option for the common use case: summarise a video or ask what it said about a topic.</p>
+<p>If you need timestamped transcripts for quoting or precise references, extend the skill &mdash; modify <code>get_transcript.py</code> to output timestamps alongside text. The underlying yt-dlp already has this data; the current script strips it for cleaner summarisation.</p>
+<p>If you need to process videos without captions (e.g. music videos, raw recordings), the only real option is downloading audio and running it through a transcription model like Whisper. That's a different use case entirely &mdash; significantly more resource-intensive.</p>
+</div>
+
+<hr>
+
+<h2>Limitations</h2>
+
+<ul>
+<li><strong>No captions = no transcript.</strong> Some videos have subtitles disabled. The script fails gracefully.</li>
+<li><strong>Language dependent.</strong> Auto-generated captions are in the video's audio language.</li>
+<li><strong>Live streams.</strong> May not have captions available after the stream ends (varies).</li>
+<li><strong>Members-only videos.</strong> YouTube restricts caption access for some content.</li>
+<li><strong>Timestamp alignment.</strong> The raw transcript is flat text &mdash; you lose timing context unless you preserve it.</li>
+</ul>
+
+<p>The last point is worth noting. If you need to know <em>when</em> something was said (e.g. for quoting), you may want a modified script that keeps timestamps. For summarisation, the flat text is fine.</p>
+
+<hr>
+
+<h2>Practical Tips</h2>
+
+<p><strong>Tip 1: Check for captions first</strong></p>
+<p>Before asking your agent to process a long video, check if captions exist:</p>
+<pre><code>yt-dlp --list-subs "https://youtube.com/watch?v=VIDEO_ID"</code></pre>
+
+<p><strong>Tip 2: Adjust for very long videos</strong></p>
+<p>Hour-long conference talks generate substantial transcripts. The agent's context window may limit how much it can process at once. For very long videos, ask for a specific section rather than summarising the whole thing.</p>
+
+<p><strong>Tip 3: Use with Obsidian</strong></p>
+<p>Save processed summaries to your notes for future reference. This builds a searchable knowledge base of video content you've consumed.</p>
+
+<p><strong>Tip 4: English-only is the default</strong></p>
+<p>The skill works best with English-language videos. Non-English auto-captions vary in quality.</p>
+
+<hr>
+
+<h2>Key Lessons Learned</h2>
+
+<ul>
+<li>yt-dlp is remarkably robust. It handles shortened URLs (<code>youtu.be/</code>), playlist entries, and timestamped links without issue.</li>
+<li>There's no bulk processing built in, but you can write a simple loop to process multiple videos.</li>
+<li>The skill runs synchronously &mdash; the agent waits for the transcript before responding. For long transcripts this takes a few seconds.</li>
+<li>No API key needed. yt-dlp works directly with YouTube's public endpoints.</li>
+<li>The skill respects YouTube's rate limiting. Don't hammer it with hundreds of requests in quick succession.</li>
+</ul>
+
+<hr>
+
+<h2>Quick Reference</h2>
+
+<table>
+<tr><th>Action</th><th>Command</th></tr>
+<tr><td>Install yt-dlp</td><td><code>brew install yt-dlp</code></td></tr>
+<tr><td>Install skill</td><td><code>openclaw skill install youtube-watcher</code></td></tr>
+<tr><td>Get transcript</td><td><code>python3 get_transcript.py "YOUTUBE_URL"</code></td></tr>
+<tr><td>List available subs</td><td><code>yt-dlp --list-subs "YOUTUBE_URL"</code></td></tr>
+<tr><td>Check yt-dlp version</td><td><code>yt-dlp --version</code></td></tr>
+</table>
+
+<p style="margin-top:2rem;"><a href="index.html" style="color:var(--gold);font-weight:600;">&larr; Back to Blog</a></p>
+
+    </div>
+</section>
+
+<footer>
+    <div class="footer-inner">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <div class="footer-brand">Straya <span>Co</span></div>
+                <p>Sydney-based IT consulting helping Australian businesses secure, automate, and grow.</p>
+                <p style="margin-top:0.75rem;">ABN: 89 642 689 076</p>
+            </div>
+            <div class="footer-col">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="../services.html">Email Security & DMARC</a></li>
+                    <li><a href="../services.html">Office Automation</a></li>
+                    <li><a href="../services.html">IT Setup & Migration</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <ul>
+                    <li><a href="../about.html">About Us</a></li>
+                    <li><a href="../resources.html">Resources</a></li>
+                    <li><a href="../contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Contact</h4>
+                <ul>
+                    <li>Sydney, Australia</li>
+                    <li><a href="mailto:vincent@strayaco.com.au">vincent@strayaco.com.au</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Straya Co Pty Ltd &mdash; Sydney, Australia. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<div class="backdrop" id="backdrop"></div>
+<div class="slide-navigation" id="slideNav">
+    <div class="nav-icon" id="slideClose"><span></span><span></span><span></span></div>
+    <div class="slide-nav-logo">Straya <span>Co</span></div>
+    <div class="slide-nav-grid">
+        <div class="slide-nav-col">
+            <div class="slide-nav-title">Services</div>
+            <ul class="slide-nav-links">
+                <li><a href="../services.html">Email Security & DMARC</a></li>
+                <li><a href="../services.html">Office Automation</a></li>
+                <li><a href="../services.html">IT Setup & Migration</a></li>
+            </ul>
+        </div>
+        <div class="slide-nav-col">
+            <div class="slide-nav-title">Company</div>
+            <ul class="slide-nav-links">
+                <li><a href="../about.html">About Us</a></li>
+                <li><a href="../resources.html">Resources</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+(function(){
+    var n=document.getElementById('navIcon'),s=document.getElementById('slideNav'),c=document.getElementById('slideClose'),b=document.getElementById('backdrop');
+    function o(){n.classList.add('open');c.classList.add('open');s.classList.add('open');b.classList.add('open');document.body.style.overflow='hidden';}
+    function x(){n.classList.remove('open');c.classList.remove('open');s.classList.remove('open');b.classList.remove('open');document.body.style.overflow='';}
+    n.addEventListener('click',o);c.addEventListener('click',x);b.addEventListener('click',x);
+})();
+</script>
+</body>
+</html>
