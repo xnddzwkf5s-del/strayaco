@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Powered Cron Jobs: Automating Your Life with OpenClaw - Straya Co Blog</title>
+    <meta name="description" content="How to use OpenClaw's scheduling system to automate everything from weather alerts to config backups to email processing with real cron configurations and lessons learned.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+    <style>
+        :root { --dark:#1a1a2e; --gold:#c9a96e; --gold-dark:#b8945a; --cream:#f8f6f1; --white:#fff; --gray:#6b7280; --gray-light:#e8e4dd; --radius:4px; --radius-lg:12px; --shadow:0 4px 20px rgba(0,0,0,0.08); --shadow-lg:0 20px 60px rgba(0,0,0,0.15); --transition:all 0.35s cubic-bezier(0.4,0,0.2,1); }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Inter',sans-serif;color:var(--dark);background:var(--white);line-height:1.7;overflow-x:hidden;}
+        h1,h2,h3,h4{font-family:'Playfair Display',serif;font-weight:600;line-height:1.2;}
+        .container{max-width:800px;margin:0 auto;padding:0 32px;}
+        a{text-decoration:none;color:inherit;}
+        img{max-width:100%;height:auto;}
+        code{font-family:monospace;background:var(--cream);padding:2px 6px;border-radius:3px;font-size:0.9em;}
+        pre{background:var(--dark);color:#e2e8f0;padding:1.25rem;border-radius:var(--radius-lg);overflow-x:auto;margin:1.5rem 0;font-size:0.85rem;line-height:1.6;}
+        pre code{background:transparent;padding:0;color:inherit;font-size:0.85rem;}
+        table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:0.9rem;}
+        th,td{padding:0.75rem 1rem;text-align:left;border-bottom:1px solid var(--gray-light);}
+        th{background:var(--dark);color:var(--white);font-weight:600;}
+        tr:last-child td{border-bottom:none;}
+        p{margin-bottom:1rem;}
+        ul,ol{margin:1rem 0 1rem 1.5rem;}
+        li{margin-bottom:0.4rem;}
+        hr{margin:2rem 0;border:none;border-top:1px solid var(--gray-light);}
+
+        #site-header{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(26,26,46,0.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,169,110,0.2);}
+        .header-inner{max-width:1200px;margin:0 auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:80px;}
+        .logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--white);letter-spacing:0.02em;}
+        .logo span{color:var(--gold);}
+        nav ul{display:flex;list-style:none;gap:2rem;}
+        nav a{color:rgba(255,255,255,0.85);font-size:0.85rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;transition:var(--transition);}
+        nav a:hover,nav a.active{color:var(--gold);}
+        .btn-cta{background:var(--gold);color:var(--dark);padding:0.6rem 1.5rem;border-radius:var(--radius);font-size:0.82rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;transition:var(--transition);}
+        .btn-cta:hover{background:var(--gold-dark);}
+        .nav-icon{display:flex;flex-direction:column;justify-content:space-between;width:26px;height:20px;cursor:pointer;z-index:1100;flex-shrink:0;}
+        .nav-icon span{display:block;height:2px;width:100%;background:#fff;border-radius:9px;transition:all 0.25s ease-in-out;transform-origin:left center;}
+
+        .page-hero{padding:140px 0 40px;background:var(--dark);color:var(--white);}
+        .page-hero h1{font-size:2.4rem;margin-bottom:0.5rem;}
+        .page-hero .meta{color:var(--gold);font-size:0.85rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;}
+        .post-content{padding:60px 0 80px;}
+        .post-content h2{margin:2.5rem 0 1rem;font-size:1.6rem;}
+        .post-content h3{margin:2rem 0 0.75rem;font-size:1.2rem;color:var(--gray);}
+        .post-content ul{margin:1rem 0;}
+        .post-content li{margin-bottom:0.4rem;}
+        .post-content table{margin:1.5rem 0;}
+        .post-content .tag{display:inline-block;background:var(--cream);color:var(--gray);padding:0.3rem 0.8rem;border-radius:20px;font-size:0.8rem;margin-right:0.5rem;margin-bottom:0.5rem;border:1px solid var(--gray-light);}
+        .post-content .lesson{background:var(--cream);border-left:4px solid var(--gold);padding:1.5rem;border-radius:0 var(--radius-lg) var(--radius-lg) 0;margin:2rem 0;}
+
+        footer{background:var(--dark);color:rgba(255,255,255,0.7);padding:60px 0 30px;margin-top:60px;}
+        .footer-inner{max-width:1200px;margin:0 auto;padding:0 32px;}
+        .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;padding-bottom:2rem;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:2rem;}
+        .footer-brand{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--white);margin-bottom:0.75rem;}
+        .footer-brand span{color:var(--gold);}
+        .footer-col h4{color:var(--white);margin-bottom:1rem;font-size:1rem;}
+        .footer-col ul{list-style:none;}
+        .footer-col li{margin-bottom:0.5rem;}
+        .footer-col a:hover{color:var(--gold);}
+        .footer-bottom{text-align:center;font-size:0.85rem;}
+
+        .backdrop{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:900;opacity:0;visibility:hidden;transition:var(--transition);}
+        .backdrop.open{opacity:1;visibility:visible;}
+        .slide-navigation{position:fixed;top:0;right:0;bottom:0;width:320px;background:var(--dark);z-index:950;padding:2rem;transform:translateX(100%);transition:var(--transition);}
+        .slide-navigation.open{transform:translateX(0);}
+        .slide-nav-logo{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--white);margin:2rem 0;}
+        .slide-nav-logo span{color:var(--gold);}
+        .slide-nav-grid{display:grid;grid-template-columns:1fr;gap:2rem;}
+        .slide-nav-title{color:var(--gold);font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:1rem;}
+        .slide-nav-links{list-style:none;}
+        .slide-nav-links li{margin-bottom:0.75rem;}
+        .slide-nav-links a{color:rgba(255,255,255,0.75);font-size:0.95rem;transition:var(--transition);}
+        .slide-nav-links a:hover{color:var(--gold);}
+
+        @media(max-width:991px){nav ul{display:none;}}
+        @media(max-width:768px){.container{padding:0 20px;}.header-inner{padding:0 20px;}.footer-inner{padding:0 20px;}.footer-grid{grid-template-columns:1fr;}.page-hero h1{font-size:1.8rem;}.slide-navigation{width:100%;}}
+    </style>
+</head>
+<body>
+
+<header id="site-header">
+    <div class="header-inner">
+        <a href="../index.html" class="logo">Straya <span>Co</span></a>
+        <nav>
+            <ul>
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../services.html">Services</a></li>
+                <li><a href="../about.html">About</a></li>
+                <li><a href="../resources.html">Resources</a></li>
+                <li><a href="index.html" class="active">Blog</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </nav>
+        <a href="../contact.html" class="btn-cta">Get Started</a>
+        <div class="nav-icon" id="navIcon"><span></span><span></span><span></span></div>
+    </div>
+</header>
+
+<section class="page-hero">
+    <div class="container">
+        <p class="meta">April 29, 2026 &mdash; Automation &amp; Workflow</p>
+        <h1>AI-Powered Cron Jobs: Automating Your Life with OpenClaw</h1>
+        <div>
+            <span class="tag">OpenClaw</span>
+            <span class="tag">Cron</span>
+            <span class="tag">Automation</span>
+            <span class="tag">Scheduling</span>
+            <span class="tag">AI Agent</span>
+            <span class="tag">Workflow</span>
+        </div>
+    </div>
+</section>
+
+<section class="post-content">
+    <div class="container">
+
+<p>How to use OpenClaw's scheduling system to automate everything from weather alerts to config backups to email processing &mdash; with real cron configurations and lessons learned.</p>
+
+<hr>
+
+<h2>Overview</h2>
+
+<p>Cron jobs have been around since 1975. They're simple: "run this command at this time." But with an AI agent, cron jobs become something more powerful: "run this task with intelligence."</p>
+
+<p>Instead of a shell script that sends a static message, an agent-powered cron job can:</p>
+
+<ul>
+<li>Check conditions and decide whether to act</li>
+<li>Summarise and contextualise information</li>
+<li>Route messages to the right channel</li>
+<li>Handle errors gracefully</li>
+<li>Execute multi-step workflows</li>
+</ul>
+
+<p>This post covers the real-world cron setup powering an OpenClaw AI agent &mdash; handling weather alerts, email processing, and configuration backups.</p>
+
+<hr>
+
+<h2>The Jobs at a Glance</h2>
+
+<table>
+<tr><th>Job</th><th>Schedule</th><th>What It Does</th></tr>
+<tr><td>Friday Weather Check</td><td>Every Friday 6 PM</td><td>Checks weekend forecast, emails only if rain is predicted</td></tr>
+<tr><td>AgentMail Weekly Processing</td><td>Every Monday 8 AM</td><td>Checks inbox, summarises, triages, cleans up</td></tr>
+<tr><td>Daily Config Backup</td><td>Every day 5 PM</td><td>Backs up OpenClaw configuration</td></tr>
+</table>
+
+<hr>
+
+<h2>Job 1: The Intelligent Weather Alert</h2>
+
+<p><strong>Schedule:</strong> Every Friday at 6 PM</p>
+
+<pre><code>{
+  "name": "Friday Weather Check",
+  "schedule": {
+    "kind": "cron",
+    "expr": "0 18 * * 5",
+    "tz": "Australia/Melbourne"
+  },
+  "target": "isolated",
+  "payload": {
+    "kind": "agentTurn",
+    "message": "Check weather for our location for tomorrow (Saturday). Use Open-Meteo API to get forecast data. If rain is predicted (>1mm), send a brief alert. Otherwise, do nothing."
+  },
+  "delivery": {
+    "mode": "none"
+  }
+}</code></pre>
+
+<p>This is a perfect example of the "intelligent" cron pattern. Instead of sending a weather report every Friday whether you need it or not, the agent:</p>
+
+<ol>
+<li>Checks the forecast using the Open-Meteo API (no API key needed)</li>
+<li>Evaluates whether rain is likely (>1mm precipitation)</li>
+<li>Only sends a notification if you actually need to know</li>
+<li>Otherwise silently does nothing</li>
+</ol>
+
+<p><strong>Delivery mode <code>"none"</code></strong> means the job runs in an isolated session &mdash; no messages are sent to your chat unless the agent explicitly decides to send one.</p>
+
+<hr>
+
+<h2>Job 2: Weekly Email Processing</h2>
+
+<p><strong>Schedule:</strong> Every Monday at 8 AM</p>
+
+<pre><code>{
+  "name": "AgentMail Weekly Processing",
+  "schedule": {
+    "kind": "cron",
+    "expr": "0 8 * * 1",
+    "tz": "Australia/Melbourne"
+  },
+  "target": "isolated",
+  "payload": {
+    "kind": "agentTurn",
+    "message": "Check and process new emails from AgentMail inbox."
+  },
+  "delivery": {
+    "mode": "none"
+  }
+}</code></pre>
+
+<p>This job triggers the email processing script. The key design decisions:</p>
+
+<ul>
+<li><strong>Monday morning</strong> &mdash; before the work week starts, so you have a clean inbox</li>
+<li><strong>Isolated target</strong> &mdash; the agent processes emails in a sandbox</li>
+<li><strong>No delivery</strong> &mdash; the script sends its own summary email</li>
+</ul>
+
+<hr>
+
+<h2>Job 3: Daily Configuration Backup</h2>
+
+<p><strong>Schedule:</strong> Every day at 5 PM</p>
+
+<pre><code>{
+  "name": "Daily OpenClaw Config Backup",
+  "schedule": {
+    "kind": "cron",
+    "expr": "0 17 * * *",
+    "tz": "Australia/Melbourne"
+  },
+  "target": "isolated",
+  "payload": {
+    "kind": "agentTurn",
+    "message": "Run the OpenClaw configuration backup script."
+  },
+  "delivery": {
+    "mode": "announce"
+  }
+}</code></pre>
+
+<p>This job runs a shell script that backs up the OpenClaw config files. It uses <code>delivery.mode: "announce"</code>, meaning the agent announces the result. If the backup fails, you know immediately.</p>
+
+<p><strong>Why not add this to the website backup?</strong> The OpenClaw config contains API keys and tokens &mdash; it's backed up separately and stored with tighter permissions (600/700). The website backup covers the public-facing content.</p>
+
+<hr>
+
+<h2>The Patterns</h2>
+
+<p>Looking across these jobs, several scheduling patterns emerge:</p>
+
+<h3>Pattern 1: Recurring Cron</h3>
+
+<pre><code>{ "kind": "cron", "expr": "0 18 * * 5" }</code></pre>
+
+<p>Standard cron expression. Use this for anything that repeats on a regular schedule.</p>
+
+<h3>Pattern 2: Conditional ("Only if needed")</h3>
+
+<p>This isn't a cron pattern but a job logic pattern. The cron fires every Friday, but the agent decides whether to actually notify you. To the scheduler, the job always runs and reports success. To you, the job only surfaces when it matters.</p>
+
+<hr>
+
+<h2>Delivery Modes</h2>
+
+<table>
+<tr><th>Mode</th><th>Behaviour</th><th>Use Case</th></tr>
+<tr><td><code>"announce"</code></td><td>Sends agent's response to default channel</td><td>Backup failures, important notifications</td></tr>
+<tr><td><code>"none"</code></td><td>Runs silently, no notification</td><td>Weather check (conditional), email processing</td></tr>
+</table>
+
+<p>Mode <code>"none"</code> is the most interesting for AI agents. It lets the agent decide independently whether to communicate &mdash; the cron job is just the trigger.</p>
+
+<hr>
+
+<h2>Lessons Learned</h2>
+
+<div class="lesson">
+<h3>Lesson 1: Timezone Matters</h3>
+<p>All cron expressions in OpenClaw use the server's timezone unless explicitly overridden with <code>"tz"</code>. For a personal agent, specifying <code>"Australia/Melbourne"</code> prevents confusion with UTC-based scheduling.</p>
+</div>
+
+<div class="lesson">
+<h3>Lesson 2: Isolated Sessions Prevent Side Effects</h3>
+<p>Every cron job targets an isolated session. Jobs can't accidentally access or modify other conversations, state is isolated between runs, and errors in one job don't affect others. Even the "daily backup" job, which seems safe, runs isolated. It's a small overhead that prevents big problems.</p>
+</div>
+
+<div class="lesson">
+<h3>Lesson 3: Test With Announce First</h3>
+<p>When setting up a new cron job, start with <code>delivery.mode: "announce"</code> so you can see the agent's output. Once you're confident the logic works, switch to <code>"none"</code> for silent conditional jobs. The weather check was initially set to announce every Friday &mdash; after two weeks of "no rain expected" messages, the conditional logic was added.</p>
+</div>
+
+<div class="lesson">
+<h3>Lesson 4: Cron Format Is Standard But Fragile</h3>
+<p>OpenClaw uses standard cron syntax (<code>minute hour day month weekday</code>). The most common mistake is getting the order wrong (it's minute-first, not hour-first). Always verify with a cron tester before relying on a job.</p>
+</div>
+
+<div class="lesson">
+<h3>Lesson 5: Separate Sensitive Backups</h3>
+<p>Config backups containing API keys, tokens, and credentials should be stored separately from public website backups with tighter file permissions (600/700 instead of 644). This limits exposure if the website backup is ever leaked.</p>
+</div>
+
+<hr>
+
+<h2>What Could Be Better</h2>
+
+<h3>Dynamic Scheduling</h3>
+<p>Currently, schedules are static. The agent can't say "remind me about this in 3 days" and have it create a new cron entry. Adding a tool that lets the agent schedule and manage jobs would unlock full autonomous scheduling.</p>
+
+<h3>Failure Notifications</h3>
+<p>Jobs with <code>mode: "none"</code> that fail silently are hard to debug. Adding a health-check that periodically verifies recent cron jobs executed successfully would improve reliability.</p>
+
+<h3>Job Dependencies</h3>
+<p>Some workflows require job sequencing ("after email processing, send a summary"). Currently, each job is independent. A chaining mechanism would enable multi-stage automation.</p>
+
+<hr>
+
+<h2>Quick Reference</h2>
+
+<table>
+<tr><th>Concept</th><th>Config</th></tr>
+<tr><td>Weekly cron</td><td><code>{ "kind": "cron", "expr": "0 8 * * 1" }</code></td></tr>
+<tr><td>Daily cron</td><td><code>{ "kind": "cron", "expr": "0 17 * * *" }</code></td></tr>
+<tr><td>Timezone</td><td><code>"tz": "Australia/Melbourne"</code></td></tr>
+<tr><td>Silent run</td><td><code>"delivery": { "mode": "none" }</code></td></tr>
+<tr><td>Isolated target</td><td><code>"target": "isolated"</code></td></tr>
+<tr><td>Announce result</td><td><code>"mode": "announce"</code></td></tr>
+<tr><td>Run shell script</td><td>Payload: <code>"Run script.sh"</code></td></tr>
+</table>
+
+<hr>
+
+<h2>Final Thoughts</h2>
+
+<p>Cron jobs are the unsung heroes of personal automation. Adding an AI agent to the mix turns them from rigid timers into intelligent assistants that check, decide, and act on your behalf.</p>
+
+<p>The key insight is that most cron jobs shouldn't actually <em>do</em> the work &mdash; they should <em>trigger</em> the work. The agent brings the intelligence. The cron brings the timing. Together, they automate the predictable parts of your life so you don't have to think about them.</p>
+
+<p>Start with one job. Get it right. Then add another.</p>
+
+<p style="margin-top:2rem;"><a href="index.html" style="color:var(--gold);font-weight:600;">&larr; Back to Blog</a></p>
+
+    </div>
+</section>
+
+<footer>
+    <div class="footer-inner">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <div class="footer-brand">Straya <span>Co</span></div>
+                <p>Sydney-based IT consulting helping Australian businesses secure, automate, and grow.</p>
+                <p style="margin-top:0.75rem;">ABN: 89 642 689 076</p>
+            </div>
+            <div class="footer-col">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="../services.html">Email Security & DMARC</a></li>
+                    <li><a href="../services.html">Office Automation</a></li>
+                    <li><a href="../services.html">IT Setup & Migration</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <ul>
+                    <li><a href="../about.html">About Us</a></li>
+                    <li><a href="../resources.html">Resources</a></li>
+                    <li><a href="../contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Contact</h4>
+                <ul>
+                    <li>Sydney, Australia</li>
+                    <li><a href="mailto:vincent@strayaco.com.au">vincent@strayaco.com.au</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Straya Co Pty Ltd &mdash; Sydney, Australia. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<div class="backdrop" id="backdrop"></div>
+<div class="slide-navigation" id="slideNav">
+    <div class="nav-icon" id="slideClose"><span></span><span></span><span></span></div>
+    <div class="slide-nav-logo">Straya <span>Co</span></div>
+    <div class="slide-nav-grid">
+        <div class="slide-nav-col">
+            <div class="slide-nav-title">Services</div>
+            <ul class="slide-nav-links">
+                <li><a href="../services.html">Email Security & DMARC</a></li>
+                <li><a href="../services.html">Office Automation</a></li>
+                <li><a href="../services.html">IT Setup & Migration</a></li>
+            </ul>
+        </div>
+        <div class="slide-nav-col">
+            <div class="slide-nav-title">Company</div>
+            <ul class="slide-nav-links">
+                <li><a href="../about.html">About Us</a></li>
+                <li><a href="../resources.html">Resources</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+(function(){
+    var n=document.getElementById('navIcon'),s=document.getElementById('slideNav'),c=document.getElementById('slideClose'),b=document.getElementById('backdrop');
+    function o(){n.classList.add('open');c.classList.add('open');s.classList.add('open');b.classList.add('open');document.body.style.overflow='hidden';}
+    function x(){n.classList.remove('open');c.classList.remove('open');s.classList.remove('open');b.classList.remove('open');document.body.style.overflow='';}
+    n.addEventListener('click',o);c.addEventListener('click',x);b.addEventListener('click',x);
+})();
+</script>
+</body>
+</html>
