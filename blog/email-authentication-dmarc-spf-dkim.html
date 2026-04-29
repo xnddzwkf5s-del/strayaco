@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DMARC, SPF &amp; DKIM: Email Security for Australian Small Business - Straya Co Blog</title>
+    <meta name="description" content="A practical guide to email authentication protocols — what they are, why they matter, how to set them up, and what happens when you don't.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+    <style>
+        :root { --dark:#1a1a2e; --gold:#c9a96e; --gold-dark:#b8945a; --cream:#f8f6f1; --white:#fff; --gray:#6b7280; --gray-light:#e8e4dd; --radius:4px; --radius-lg:12px; --shadow:0 4px 20px rgba(0,0,0,0.08); --shadow-lg:0 20px 60px rgba(0,0,0,0.15); --transition:all 0.35s cubic-bezier(0.4,0,0.2,1); }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Inter',sans-serif;color:var(--dark);background:var(--white);line-height:1.7;overflow-x:hidden;}
+        h1,h2,h3,h4{font-family:'Playfair Display',serif;font-weight:600;line-height:1.2;}
+        .container{max-width:800px;margin:0 auto;padding:0 32px;}
+        a{text-decoration:none;color:inherit;}
+        img{max-width:100%;height:auto;}
+        code{font-family:monospace;background:var(--cream);padding:2px 6px;border-radius:3px;font-size:0.9em;}
+        pre{background:var(--dark);color:#e2e8f0;padding:1.25rem;border-radius:var(--radius-lg);overflow-x:auto;margin:1.5rem 0;font-size:0.85rem;line-height:1.6;}
+        pre code{background:transparent;padding:0;color:inherit;font-size:0.85rem;}
+        table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:0.9rem;}
+        th,td{padding:0.75rem 1rem;text-align:left;border-bottom:1px solid var(--gray-light);}
+        th{background:var(--dark);color:var(--white);font-weight:600;}
+        tr:last-child td{border-bottom:none;}
+        p{margin-bottom:1rem;}
+        ul,ol{margin:1rem 0 1rem 1.5rem;}
+        li{margin-bottom:0.4rem;}
+        hr{margin:2rem 0;border:none;border-top:1px solid var(--gray-light);}
+
+        #site-header{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(26,26,46,0.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,169,110,0.2);}
+        .header-inner{max-width:1200px;margin:0 auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:80px;}
+        .logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--white);letter-spacing:0.02em;}
+        .logo span{color:var(--gold);}
+        nav ul{display:flex;list-style:none;gap:2rem;}
+        nav a{color:rgba(255,255,255,0.85);font-size:0.85rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;transition:var(--transition);}
+        nav a:hover,nav a.active{color:var(--gold);}
+        .btn-cta{background:var(--gold);color:var(--dark);padding:0.6rem 1.5rem;border-radius:var(--radius);font-size:0.82rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;transition:var(--transition);}
+        .btn-cta:hover{background:var(--gold-dark);}
+        .nav-icon{display:flex;flex-direction:column;justify-content:space-between;width:26px;height:20px;cursor:pointer;z-index:1100;flex-shrink:0;}
+        .nav-icon span{display:block;height:2px;width:100%;background:#fff;border-radius:9px;transition:all 0.25s ease-in-out;transform-origin:left center;}
+
+        .page-hero{padding:140px 0 40px;background:var(--dark);color:var(--white);}
+        .page-hero h1{font-size:2.4rem;margin-bottom:0.5rem;}
+        .page-hero .meta{color:var(--gold);font-size:0.85rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;}
+        .page-hero .subhead{color:rgba(255,255,255,0.7);font-size:1.05rem;margin-top:0.75rem;font-style:italic;}
+        .post-content{padding:60px 0 80px;}
+        .post-content h2{margin:2.5rem 0 1rem;font-size:1.6rem;}
+        .post-content h3{margin:2rem 0 0.75rem;font-size:1.2rem;color:var(--gray);}
+        .post-content ul{margin:1rem 0;}
+        .post-content li{margin-bottom:0.4rem;}
+        .post-content table{margin:1.5rem 0;}
+        .post-content .tag{display:inline-block;background:var(--cream);color:var(--gray);padding:0.3rem 0.8rem;border-radius:20px;font-size:0.8rem;margin-right:0.5rem;margin-bottom:0.5rem;border:1px solid var(--gray-light);}
+        .post-content .lesson{background:var(--cream);border-left:4px solid var(--gold);padding:1.5rem;border-radius:0 var(--radius-lg) var(--radius-lg) 0;margin:2rem 0;}
+        .post-content blockquote{border-left:3px solid var(--gold);padding:1rem 1.5rem;margin:1.5rem 0;background:var(--cream);border-radius:0 var(--radius-lg) var(--radius-lg) 0;font-style:italic;color:var(--gray);}
+        .post-content .straya-cta{background:var(--dark);color:var(--white);padding:2rem;border-radius:var(--radius-lg);margin:2.5rem 0;text-align:center;}
+        .post-content .straya-cta p{color:rgba(255,255,255,0.85);font-size:1.05rem;}
+        .post-content .straya-cta .btn-cta{display:inline-block;margin-top:1rem;}
+        .post-content strong{color:var(--dark);}
+
+        footer{background:var(--dark);color:rgba(255,255,255,0.7);padding:60px 0 30px;margin-top:60px;}
+        .footer-inner{max-width:1200px;margin:0 auto;padding:0 32px;}
+        .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;padding-bottom:2rem;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:2rem;}
+        .footer-brand{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--white);margin-bottom:0.75rem;}
+        .footer-brand span{color:var(--gold);}
+        .footer-col h4{color:var(--white);margin-bottom:1rem;font-size:1rem;}
+        .footer-col ul{list-style:none;}
+        .footer-col li{margin-bottom:0.5rem;}
+        .footer-col a:hover{color:var(--gold);}
+        .footer-bottom{text-align:center;font-size:0.85rem;}
+
+        .backdrop{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:900;opacity:0;visibility:hidden;transition:var(--transition);}
+        .backdrop.open{opacity:1;visibility:visible;}
+        .slide-navigation{position:fixed;top:0;right:0;bottom:0;width:320px;background:var(--dark);z-index:950;padding:2rem;transform:translateX(100%);transition:var(--transition);}
+        .slide-navigation.open{transform:translateX(0);}
+        .slide-nav-logo{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--white);margin:2rem 0;}
+        .slide-nav-logo span{color:var(--gold);}
+        .slide-nav-grid{display:grid;grid-template-columns:1fr;gap:2rem;}
+        .slide-nav-title{color:var(--gold);font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:1rem;}
+        .slide-nav-links{list-style:none;}
+        .slide-nav-links li{margin-bottom:0.75rem;}
+        .slide-nav-links a{color:rgba(255,255,255,0.75);font-size:0.95rem;transition:var(--transition);}
+        .slide-nav-links a:hover{color:var(--gold);}
+
+        @media(max-width:991px){nav ul{display:none;}}
+        @media(max-width:768px){.container{padding:0 20px;}.header-inner{padding:0 20px;}.footer-inner{padding:0 20px;}.footer-grid{grid-template-columns:1fr;}.page-hero h1{font-size:1.8rem;}.slide-navigation{width:100%;}}
+    </style>
+</head>
+<body>
+
+<header id="site-header">
+    <div class="header-inner">
+        <a href="../index.html" class="logo">Straya <span>Co</span></a>
+        <nav>
+            <ul>
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../services.html">Services</a></li>
+                <li><a href="../about.html">About</a></li>
+                <li><a href="../resources.html">Resources</a></li>
+                <li><a href="index.html" class="active">Blog</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </nav>
+        <a href="../contact.html" class="btn-cta">Get Started</a>
+        <div class="nav-icon" id="navIcon"><span></span><span></span><span></span></div>
+    </div>
+</header>
+
+<section class="page-hero">
+    <div class="container">
+        <p class="meta">April 30, 2026 &mdash; Security &amp; Compliance</p>
+        <h1>DMARC, SPF &amp; DKIM: Email Security for Australian Small Business</h1>
+        <p class="subhead">Stop worrying about whether your emails are landing in spam &mdash; or worse, whether someone else is sending them.</p>
+        <div style="margin-top:1rem;">
+            <span class="tag">DMARC</span>
+            <span class="tag">SPF</span>
+            <span class="tag">DKIM</span>
+            <span class="tag">Email Security</span>
+            <span class="tag">Phishing</span>
+            <span class="tag">Small Business</span>
+            <span class="tag">Cybersecurity</span>
+        </div>
+    </div>
+</section>
+
+<section class="post-content">
+    <div class="container">
+
+<h2>The Problem</h2>
+
+<p>Every day, millions of emails are sent pretending to be from domains they don't belong to. Your domain. Your customers' trust. Your brand's reputation &mdash; all at risk, and you might not even know it.</p>
+
+<p>Email was built in an era of trust. That era is over. Today, anyone with basic technical knowledge can forge a "From" address and send email that looks like it came from you. Without the right protections in place, your customers, suppliers, and partners have no way of telling the difference between a legitimate email from your business and a carefully crafted fake.</p>
+
+<p>The consequences? Phishing attacks bearing your name. Fake invoices sent to your clients. Your domain blacklisted, your legitimate emails quarantined, and your brand's integrity eroded &mdash; one spoofed message at a time.</p>
+
+<p>Three protocols exist to stop this: <strong>DMARC, SPF, and DKIM</strong>. Together, they give receiving mail servers cryptographic proof that an email is genuinely from you. And for Australian small businesses, implementing them isn't just good security practice &mdash; it's increasingly a requirement.</p>
+
+<hr>
+
+<h2>Why This Matters Now</h2>
+
+<p>Major email providers &mdash; Gmail, Outlook, Yahoo &mdash; have been tightening their requirements for years. Domains without DMARC enforcement are increasingly flagged, quarantined, or rejected outright.</p>
+
+<p>For Australian businesses, the stakes are higher still:</p>
+
+<ul>
+<li>The ACSC (Australian Cyber Security Centre) recommends DMARC enforcement as a baseline security control</li>
+<li>A successful phishing attack exploiting your domain can trigger obligations under the Privacy Act</li>
+<li>ASIC and ATO communications must remain deliverable &mdash; no room for error</li>
+</ul>
+
+<p>The question isn't whether you can afford to set this up. It's whether you can afford not to.</p>
+
+<hr>
+
+<h2>The Three Protocols That Protect Your Domain</h2>
+
+<h3>SPF &mdash; Who's Allowed to Send</h3>
+
+<p>SPF is your domain's guest list. It publishes a simple record in your DNS that tells the world: "These IP addresses are authorised to send email on our behalf. Everyone else is an imposter."</p>
+
+<pre><code>yourdomain.com  TXT  "v=spf1 include:_spf.google.com ip4:203.0.113.0/24 ~all"</code></pre>
+
+<ul>
+<li><code>include:_spf.google.com</code> &mdash; authorises Google Workspace</li>
+<li><code>ip4:203.0.113.0/24</code> &mdash; authorises your office IP range</li>
+<li><code>~all</code> &mdash; flags unauthorised senders (or use <code>-all</code> for hard rejection)</li>
+</ul>
+
+<p>It sounds simple, but misconfigurations are common. Every third-party service you use &mdash; Mailchimp, Campaign Monitor, SendGrid, Salesforce &mdash; needs to be included. Miss one, and their emails fail authentication.</p>
+
+<h3>DKIM &mdash; Tamper-Proof Signatures</h3>
+
+<p>While SPF checks <em>who sent it</em>, DKIM checks <em>is it real</em>. Each email is signed with a private key held by your email provider. Receiving servers verify that signature against a public key published in your DNS.</p>
+
+<pre><code>google._domainkey.yourdomain.com  TXT  "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3..."</code></pre>
+
+<p>Even if an attacker spoofs the From address, they cannot forge the DKIM signature &mdash; they don't hold the private key. The maths simply doesn't work in their favour.</p>
+
+<h3>DMARC &mdash; The Policy Enforcer</h3>
+
+<p>DMARC ties SPF and DKIM together and tells receiving servers: "If these checks fail, here's exactly what to do &mdash; and here's where to send the evidence."</p>
+
+<pre><code>_dmarc.yourdomain.com  TXT  "v=DMARC1; p=quarantine; rua=mailto:dmarc@yourdomain.com; pct=100"</code></pre>
+
+<ul>
+<li><code>p=quarantine</code> &mdash; deliver suspicious emails to spam</li>
+<li><code>p=reject</code> &mdash; block them outright</li>
+<li><code>rua=</code> &mdash; receive daily XML reports showing who's sending email as you</li>
+<li><code>ruf=</code> &mdash; receive detailed forensic reports on individual failures</li>
+</ul>
+
+<p>DMARC also gives you something uniquely valuable: <strong>visibility</strong>. Those aggregate reports show every service and server attempting to send email as your domain &mdash; including ones you've forgotten about, or ones you never authorised at all.</p>
+
+<hr>
+
+<h2>A Strategy, Not a Toggle</h2>
+
+<p>DMARC enforcement isn't something you flip on overnight. The recommended progression is deliberate and data-driven:</p>
+
+<ol>
+<li><strong>Monitor (p=none).</strong> Deploy DMARC in reporting-only mode for 2&ndash;4 weeks. Collect data on everything sending email as your domain &mdash; the authorised, the unauthorised, and the surprising.</li>
+<li><strong>Quarantine (p=quarantine).</strong> Once you understand your landscape, begin routing authentication failures to spam. Watch for false positives.</li>
+<li><strong>Reject (p=reject).</strong> Only move to hard rejection when you're confident every legitimate sender is authenticated. This is the gold standard &mdash; and increasingly, the expectation.</li>
+</ol>
+
+<p>Each stage is safer than the last, and each is informed by the data gathered before it.</p>
+
+<hr>
+
+<h2>The Catch: SPF's 10-Lookup Limit</h2>
+
+<p>There's one limitation that catches growing businesses off guard. SPF records are limited to <strong>10 DNS lookups</strong>. Every <code>include:</code> statement counts as one, and it adds up fast:</p>
+
+<ul>
+<li>Google Workspace: 1 lookup</li>
+<li>Mailchimp: 1 lookup</li>
+<li>SendGrid: 1 lookup</li>
+<li>Salesforce: 1 lookup</li>
+<li>HubSpot: 1 lookup</li>
+</ul>
+
+<p>Five services, and you've already consumed half your allowance. Many mid-sized businesses hit the ceiling without realising it &mdash; at which point SPF silently fails, and DMARC enforcement starts breaking legitimate email.</p>
+
+<p><strong>How enterprises solve this:</strong> SPF macro and flattening services &mdash; offered by providers like Valimail, DMARCLY, PowerDMARC, and EasyDMARC &mdash; automatically resolve all <code>include:</code> statements to a flat list of IP addresses. The flattened record contains only <code>ip4:</code> and <code>ip6:</code> entries, which don't count toward the lookup limit. Some use SPF macros (the <code>%</code> macro language defined in RFC 7208) to dynamically construct lookups based on who's sending. Others maintain a continuously updated, compressed SPF record that stays well under the limit.</p>
+
+<p>For most Australian small businesses, this isn't a concern yet. But if you're growing, it's worth knowing about before the limit becomes a crisis.</p>
+
+<hr>
+
+<h2>Setup Checklist</h2>
+
+<p>For a typical small business on Google Workspace:</p>
+
+<ol>
+<li><strong>SPF</strong> &mdash; Publish a TXT record listing Google's SPF include + any other legitimate senders</li>
+<li><strong>DKIM</strong> &mdash; Enable DKIM signing in Google Workspace admin, publish the public key</li>
+<li><strong>DMARC</strong> &mdash; Start with <code>p=none</code>, add a report address, monitor for 2 weeks</li>
+<li><strong>Review</strong> &mdash; Check the reports for unauthorised senders or gaps</li>
+<li><strong>Progress</strong> &mdash; Move to <code>p=quarantine</code>, then <code>p=reject</code></li>
+<li><strong>Maintain</strong> &mdash; Review reports monthly for new or forgotten senders</li>
+</ol>
+
+<p>A note for Australian businesses: DNS providers like VentraIP, Netregistry, and Crazy Domains don't always make SPF and DKIM configuration straightforward. You may need to add DNS records manually &mdash; which is precisely where small mistakes can cause big problems.</p>
+
+<hr>
+
+<h2>The Bottom Line</h2>
+
+<p>Email authentication isn't complex, but it is precise. A missing record, a forgotten service, or an exceeded lookup limit can undo everything. The difference between security theatre and real protection is in the detail.</p>
+
+<p>Straya Co helps Australian businesses get this right &mdash; from initial configuration through to full DMARC enforcement. We handle the DNS records, the monitoring, the reporting, and the maintenance. You get confidence that your emails land where they should, and that no one else is sending them in your name.</p>
+
+<p>Because in 2026, if your domain isn't authenticated, it's only a matter of time before someone exploits that gap. The only question is whether you'll have closed it by then.</p>
+
+<div class="straya-cta">
+    <p style="font-size:1.1rem;font-weight:600;color:var(--gold);margin-bottom:0.75rem;">Need help securing your domain?</p>
+    <p>We'll audit your current setup, fix what's broken, and walk you through the DMARC progression. No jargon, no upsells &mdash; just straight-up solutions.</p>
+    <a href="../contact.html" class="btn-cta">Get in touch &rarr;</a>
+</div>
+
+<hr>
+
+<h2>Quick Reference</h2>
+
+<table>
+<tr><th>What</th><th>Record Type</th><th>Purpose</th></tr>
+<tr><td>SPF</td><td><code>v=spf1 include:_spf.google.com ~all</code></td><td>Authorises sending IPs</td></tr>
+<tr><td>DKIM</td><td><code>google._domainkey.example.com</code></td><td>Holds public verification key</td></tr>
+<tr><td>DMARC</td><td><code>_dmarc.example.com</code></td><td>Sets policy + reporting</td></tr>
+<tr><td>Aggregate reports</td><td>XML via <code>rua</code></td><td>Daily summary of authentication results</td></tr>
+<tr><td>Forensic reports</td><td>XML via <code>ruf</code></td><td>Individual failure records</td></tr>
+</table>
+
+<p style="margin-top:2rem;"><a href="index.html" style="color:var(--gold);font-weight:600;">&larr; Back to Blog</a></p>
+
+    </div>
+</section>
+
+<footer>
+    <div class="footer-inner">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <div class="footer-brand">Straya <span>Co</span></div>
+                <p>Sydney-based IT consulting helping Australian businesses secure, automate, and grow.</p>
+                <p style="margin-top:0.75rem;">ABN: 89 642 689 076</p>
+            </div>
+            <div class="footer-col">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="../services.html">Email Security & DMARC</a></li>
+                    <li><a href="../services.html">Office Automation</a></li>
+                    <li><a href="../services.html">IT Setup & Migration</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <ul>
+                    <li><a href="../about.html">About Us</a></li>
+                    <li><a href="../resources.html">Resources</a></li>
+                    <li><a href="../contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Contact</h4>
+                <ul>
+                    <li>Sydney, Australia</li>
+                    <li><a href="mailto:vincent@strayaco.com.au">vincent@strayaco.com.au</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Straya Co Pty Ltd &mdash; Sydney, Australia. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<div class="backdrop" id="backdrop"></div>
+<div class="slide-navigation" id="slideNav">
+    <div class="nav-icon" id="slideClose"><span></span><span></span><span></span></div>
+    <div class="slide-nav-logo">Straya <span>Co</span></div>
+    <div class="slide-nav-grid">
+        <div class="slide-nav-col">
+            <div class="slide-nav-title">Services</div>
+            <ul class="slide-nav-links">
+                <li><a href="../services.html">Email Security & DMARC</a></li>
+                <li><a href="../services.html">Office Automation</a></li>
+                <li><a href="../services.html">IT Setup & Migration</a></li>
+            </ul>
+        </div>
+        <div class="slide-nav-col">
+            <div class="slide-nav-title">Company</div>
+            <ul class="slide-nav-links">
+                <li><a href="../about.html">About Us</a></li>
+                <li><a href="../resources.html">Resources</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+(function(){
+    var n=document.getElementById('navIcon'),s=document.getElementById('slideNav'),c=document.getElementById('slideClose'),b=document.getElementById('backdrop');
+    function o(){n.classList.add('open');c.classList.add('open');s.classList.add('open');b.classList.add('open');document.body.style.overflow='hidden';}
+    function x(){n.classList.remove('open');c.classList.remove('open');s.classList.remove('open');b.classList.remove('open');document.body.style.overflow='';}
+    n.addEventListener('click',o);c.addEventListener('click',x);b.addEventListener('click',x);
+})();
+</script>
+</body>
+</html>
