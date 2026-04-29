@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>External OpenClaw Access Guide - Straya Co Blog</title>
+    <meta name="description" content="A practical guide to exposing a local OpenClaw AI dashboard to the internet with HTTPS. Covers Cloudflare Tunnel, Ngrok, Tailscale, and lessons learned.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+    <style>
+        :root { --dark:#1a1a2e; --gold:#c9a96e; --gold-dark:#b8945a; --cream:#f8f6f1; --white:#fff; --gray:#6b7280; --gray-light:#e8e4dd; --radius:4px; --radius-lg:12px; --shadow:0 4px 20px rgba(0,0,0,0.08); --shadow-lg:0 20px 60px rgba(0,0,0,0.15); --transition:all 0.35s cubic-bezier(0.4,0,0.2,1); }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Inter',sans-serif;color:var(--dark);background:var(--white);line-height:1.7;overflow-x:hidden;}
+        h1,h2,h3,h4{font-family:'Playfair Display',serif;font-weight:600;line-height:1.2;}
+        .container{max-width:800px;margin:0 auto;padding:0 32px;}
+        a{text-decoration:none;color:inherit;}
+        img{max-width:100%;height:auto;}
+        code{font-family:monospace;background:var(--cream);padding:2px 6px;border-radius:3px;font-size:0.9em;}
+        pre{background:var(--dark);color:#e2e8f0;padding:1.25rem;border-radius:var(--radius-lg);overflow-x:auto;margin:1.5rem 0;font-size:0.85rem;line-height:1.6;}
+        pre code{background:transparent;padding:0;color:inherit;font-size:0.85rem;}
+        table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:0.9rem;}
+        th,td{padding:0.75rem 1rem;text-align:left;border-bottom:1px solid var(--gray-light);}
+        th{background:var(--dark);color:var(--white);font-weight:600;}
+        tr:last-child td{border-bottom:none;}
+        p{margin-bottom:1rem;}
+        ul,ol{margin:1rem 0 1rem 1.5rem;}
+        li{margin-bottom:0.4rem;}
+        hr{margin:2rem 0;border:none;border-top:1px solid var(--gray-light);}
+
+        #site-header{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(26,26,46,0.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,169,110,0.2);}
+        .header-inner{max-width:1200px;margin:0 auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:80px;}
+        .logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--white);letter-spacing:0.02em;}
+        .logo span{color:var(--gold);}
+        nav ul{display:flex;list-style:none;gap:2rem;}
+        nav a{color:rgba(255,255,255,0.85);font-size:0.85rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;transition:var(--transition);}
+        nav a:hover,nav a.active{color:var(--gold);}
+        .btn-cta{background:var(--gold);color:var(--dark);padding:0.6rem 1.5rem;border-radius:var(--radius);font-size:0.82rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;transition:var(--transition);}
+        .btn-cta:hover{background:var(--gold-dark);}
+        .nav-icon{display:flex;flex-direction:column;justify-content:space-between;width:26px;height:20px;cursor:pointer;z-index:1100;flex-shrink:0;}
+        .nav-icon span{display:block;height:2px;width:100%;background:#fff;border-radius:9px;transition:all 0.25s ease-in-out;transform-origin:left center;}
+
+        .page-hero{padding:140px 0 40px;background:var(--dark);color:var(--white);}
+        .page-hero h1{font-size:2.4rem;margin-bottom:0.5rem;}
+        .page-hero .meta{color:var(--gold);font-size:0.85rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;}
+        .post-content{padding:60px 0 80px;}
+        .post-content h2{margin:2.5rem 0 1rem;font-size:1.6rem;}
+        .post-content h3{margin:2rem 0 0.75rem;font-size:1.2rem;color:var(--gray);}
+        .post-content ul{margin:1rem 0;}
+        .post-content li{margin-bottom:0.4rem;}
+        .post-content table{margin:1.5rem 0;}
+        .post-content .tag{display:inline-block;background:var(--cream);color:var(--gray);padding:0.3rem 0.8rem;border-radius:20px;font-size:0.8rem;margin-right:0.5rem;margin-bottom:0.5rem;border:1px solid var(--gray-light);}
+
+        footer{background:var(--dark);color:rgba(255,255,255,0.7);padding:60px 0 30px;margin-top:60px;}
+        .footer-inner{max-width:1200px;margin:0 auto;padding:0 32px;}
+        .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;padding-bottom:2rem;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:2rem;}
+        .footer-brand{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--white);margin-bottom:0.75rem;}
+        .footer-brand span{color:var(--gold);}
+        .footer-col h4{color:var(--white);margin-bottom:1rem;font-size:1rem;}
+        .footer-col ul{list-style:none;}
+        .footer-col li{margin-bottom:0.5rem;}
+        .footer-col a:hover{color:var(--gold);}
+        .footer-bottom{text-align:center;font-size:0.85rem;}
+
+        .backdrop{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:900;opacity:0;visibility:hidden;transition:var(--transition);}
+        .backdrop.open{opacity:1;visibility:visible;}
+        .slide-navigation{position:fixed;top:0;right:0;bottom:0;width:320px;background:var(--dark);z-index:950;padding:2rem;transform:translateX(100%);transition:var(--transition);}
+        .slide-navigation.open{transform:translateX(0);}
+        .slide-nav-logo{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--white);margin:2rem 0;}
+        .slide-nav-logo span{color:var(--gold);}
+        .slide-nav-grid{display:grid;grid-template-columns:1fr;gap:2rem;}
+        .slide-nav-title{color:var(--gold);font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:1rem;}
+        .slide-nav-links{list-style:none;}
+        .slide-nav-links li{margin-bottom:0.75rem;}
+        .slide-nav-links a{color:rgba(255,255,255,0.75);font-size:0.95rem;transition:var(--transition);}
+        .slide-nav-links a:hover{color:var(--gold);}
+
+        @media(max-width:991px){nav ul{display:none;}}
+        @media(max-width:768px){.container{padding:0 20px;}.header-inner{padding:0 20px;}.footer-inner{padding:0 20px;}.footer-grid{grid-template-columns:1fr;}.page-hero h1{font-size:1.8rem;}.slide-navigation{width:100%;}}
+    </style>
+</head>
+<body>
+
+<header id="site-header">
+    <div class="header-inner">
+        <a href="../index.html" class="logo">Straya <span>Co</span></a>
+        <nav>
+            <ul>
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../services.html">Services</a></li>
+                <li><a href="../about.html">About</a></li>
+                <li><a href="../resources.html">Resources</a></li>
+                <li><a href="index.html" class="active">Blog</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </nav>
+        <a href="../contact.html" class="btn-cta">Get Started</a>
+        <div class="nav-icon" id="navIcon"><span></span><span></span><span></span></div>
+    </div>
+</header>
+
+<section class="page-hero">
+    <div class="container">
+        <p class="meta">April 29, 2026 &mdash; Infrastructure</p>
+        <h1>External OpenClaw Access Guide</h1>
+        <div>
+            <span class="tag">OpenClaw</span>
+            <span class="tag">Cloudflare</span>
+            <span class="tag">Tunnel</span>
+            <span class="tag">Ngrok</span>
+            <span class="tag">Tailscale</span>
+            <span class="tag">AI</span>
+        </div>
+    </div>
+</section>
+
+<section class="post-content">
+    <div class="container">
+
+<p>A practical guide to exposing your local OpenClaw dashboard to the internet with HTTPS, based on real-world experience.</p>
+
+<hr>
+
+<h2>Overview</h2>
+<p>OpenClaw runs on <code>http://localhost:18789</code> by default. To access it from outside your home network (phone, work, travel), you need a tunnel or reverse proxy with HTTPS. This document covers the approaches we tried, what worked, and lessons learned.</p>
+<p><strong>Final working solution:</strong> Cloudflare Tunnel + Cloudflare Access (email gate) at <code>https://&lt;your-hostname&gt;.&lt;your-domain&gt;</code></p>
+
+<hr>
+
+<h2>Approaches Tried</h2>
+
+<h3>1. Cloudflare Tunnel (Named Tunnel) — ✅ WINNER</h3>
+<p><strong>Method:</strong> Install <code>cloudflared</code>, create a named tunnel, run as a LaunchDaemon, point a DNS CNAME at the tunnel endpoint.</p>
+
+<table>
+<tr><th>Aspect</th><th>Detail</th></tr>
+<tr><td>Cost</td><td>Free</td></tr>
+<tr><td>HTTPS</td><td>Yes (Cloudflare edge)</td></tr>
+<tr><td>Permanent URL</td><td>Yes</td></tr>
+<tr><td>Survives reboot</td><td>Yes (LaunchDaemon)</td></tr>
+<tr><td>DNS required</td><td>Yes (your own domain)</td></tr>
+<tr><td>Auth gate</td><td>Free via Cloudflare Access (email login)</td></tr>
+</table>
+
+<p><strong>Setup:</strong></p>
+<pre><code># Install cloudflared
+brew install cloudflared
+
+# Authenticate with Cloudflare
+cloudflared tunnel login
+
+# Create a named tunnel
+cloudflared tunnel create openclaw
+
+# Configure ingress in ~/.cloudflared/config.yml
+# tunnel: openclaw
+# credentials-file: /Users/you/.cloudflared/openclaw-credentials.json
+# ingress:
+#   - hostname: &lt;your-hostname&gt;.&lt;your-domain&gt;
+#     service: http://localhost:18789
+#   - service: http_status:404
+
+# Create DNS record at Cloudflare:
+# CNAME &lt;your-hostname&gt; → &lt;tunnel-id&gt;.cfargotunnel.com (proxied)
+
+# Install as system service (auto-starts on boot)
+sudo launchctl bootstrap system /Library/LaunchDaemons/com.cloudflare.cloudflared.plist</code></pre>
+
+<p><strong>Pros:</strong> Free, permanent URL, full HTTPS, auto-starts on boot, free email auth gate, no open ports on router, works from any browser without client software, works on locked-down company laptops.</p>
+<p><strong>Cons:</strong> Requires your own domain, requires Cloudflare as DNS provider, several moving parts in setup.</p>
+
+<p><strong>Key lesson:</strong> You must use Cloudflare as your DNS provider. The <code>cfargotunnel.com</code> domain is internal to Cloudflare — it cannot resolve publicly without Cloudflare NS. Don't bother trying to use a CNAME at GoDaddy or another registrar.</p>
+
+<h3>2. Quick Tunnel (trycloudflare.com) — ❌ FAILED</h3>
+<p><strong>Method:</strong> <code>cloudflared tunnel --url http://localhost:18789</code> generates a random <code>*.trycloudflare.com</code> URL.</p>
+
+<table>
+<tr><th>Aspect</th><th>Detail</th></tr>
+<tr><td>Cost</td><td>Free</td></tr>
+<tr><td>HTTPS</td><td>Yes</td></tr>
+<tr><td>Setup time</td><td>1 minute</td></tr>
+<tr><td>Reliability</td><td>Poor</td></tr>
+</table>
+
+<p><strong>Result:</strong> Tunnel connected successfully from our side (cloudflared reported 0 errors, 11 requests proxied), but the <code>trycloudflare.com</code> URL always returned HTTP 404 from Cloudflare's edge. This persisted across multiple tunnel instances with different random subdomains.</p>
+
+<p><strong>Root cause (suspected):</strong> trycloudflare.com quick tunnels have a routing issue at Cloudflare's edge. The edge returns 404 before the request reaches the cloudflared client.</p>
+
+<h3>3. Ngrok (Free Tier) — ❌ NOT RECOMMENDED</h3>
+<p><strong>Method:</strong> <code>brew install ngrok && ngrok http 18789</code> generates a random <code>*.ngrok-free.dev</code> URL.</p>
+
+<table>
+<tr><th>Aspect</th><th>Detail</th></tr>
+<tr><td>Cost</td><td>Free tier; $10+/mo for fixed subdomain</td></tr>
+<tr><td>HTTPS</td><td>Yes</td></tr>
+<tr><td>Setup time</td><td>2 minutes</td></tr>
+<tr><td>Reliability</td><td>Good</td></tr>
+</table>
+
+<p><strong>Result:</strong> Worked immediately. The OpenClaw dashboard loaded correctly once the <code>allowedOrigins</code> config was updated with the exact ngrok URL.</p>
+
+<p><strong>Pros:</strong> Fastest setup, no DNS needed, works reliably, good for testing.</p>
+<p><strong>Cons:</strong> Random URL changes on every restart (free tier), permanent URL costs ~$10/month, need to update config each time the URL changes.</p>
+
+<h3>4. Tailscale Funnel — ❌ NOT PRACTICAL</h3>
+
+<table>
+<tr><th>Aspect</th><th>Detail</th></tr>
+<tr><td>Cost</td><td>Free (up to 3 users)</td></tr>
+<tr><td>HTTPS</td><td>Yes</td></tr>
+<tr><td>Setup time</td><td>5 minutes</td></tr>
+<tr><td>Client requirement</td><td>Tailscale client on every accessing device</td></tr>
+</table>
+
+<p><strong>Result:</strong> Requires the Tailscale client on both the host machine AND every accessing device. Impractical for company-managed laptops, shared computers, or guest devices where you can't install software.</p>
+
+<p><strong>Key lesson:</strong> For a dashboard you need from anywhere, a browser-based solution like Cloudflare Tunnel is essential. Tailscale Funnel is fine for personal devices you control, but not for accessing from locked-down environments.</p>
+
+<hr>
+
+<h2>OpenClaw Configuration</h2>
+
+<p>For any external access method, update your OpenClaw config to allow the external origin:</p>
+
+<p><strong>File:</strong> <code>~/.openclaw/openclaw.json</code></p>
+
+<pre><code>{
+  "gateway": {
+    "controlUi": {
+      "allowedOrigins": [
+        "http://localhost:18789",
+        "http://127.0.0.1:18789",
+        "https://&lt;your-hostname&gt;.&lt;your-domain&gt;"
+      ],
+      "allowInsecureAuth": true,
+      "dangerouslyDisableDeviceAuth": true
+    },
+    "auth": {
+      "mode": "token",
+      "token": "your-gateway-token"
+    }
+  }
+}</code></pre>
+
+<p><strong>Important notes:</strong></p>
+<ul>
+<li>Wildcards (e.g. <code>*.ngrok-free.dev</code>) do NOT work — use the exact origin URL</li>
+<li>If you forget to add the URL, the browser will show: <em>"origin not allowed"</em> — the HTML loads but WebSocket auth fails</li>
+<li>After editing config, run <code>openclaw gateway restart</code> or the old config remains in memory</li>
+<li>With Ngrok free tier, the URL changes every restart — you must update <code>allowedOrigins</code> and restart each time</li>
+<li>Use <code>https://</code> not <code>wss://</code> in the origins list — OpenClaw handles WebSocket matching internally</li>
+</ul>
+
+<h2>Cloudflare Access (Email Gate)</h2>
+<p>Add an email authentication gate via Cloudflare Access:</p>
+<ol>
+<li>Go to Cloudflare Dashboard → Zero Trust</li>
+<li>Choose a team name</li>
+<li>Go to Access → Applications → Add an application → Self-hosted</li>
+<li>Set domain to your tunnel subdomain (e.g. <code>&lt;your-hostname&gt;.&lt;your-domain&gt;</code>)</li>
+<li>Add policy: Allow if email ends with <code>you@example.com</code></li>
+<li>Save</li>
+</ol>
+<p>This is free on Cloudflare's Zero Trust free plan (up to 50 users).</p>
+
+<h2>DNS Migration (GoDaddy → Cloudflare)</h2>
+<ol>
+<li>Add your domain to Cloudflare (it scans existing DNS records)</li>
+<li>Verify all records imported (A, CNAME, MX, TXT for email)</li>
+<li>At your registrar, change nameservers to Cloudflare's</li>
+<li>Wait 5-30 minutes for propagation</li>
+<li>Existing websites and email continue working — Cloudflare auto-proxies traffic</li>
+</ol>
+<p><strong>Do NOT</strong> add CNAME records at your registrar pointing to <code>cfargotunnel.com</code> — they won't resolve without Cloudflare NS.</p>
+
+<h2>Quick Reference</h2>
+<table>
+<tr><th>Action</th><th>Command</th></tr>
+<tr><td>Start tunnel</td><td><code>sudo launchctl bootstrap system /Library/LaunchDaemons/com.cloudflare.cloudflared.plist</code></td></tr>
+<tr><td>Stop tunnel</td><td><code>sudo launchctl bootout system/com.cloudflare.cloudflared</code></td></tr>
+<tr><td>Check tunnel status</td><td><code>launchctl print system/com.cloudflare.cloudflared</code></td></tr>
+<tr><td>Restart OpenClaw</td><td><code>openclaw gateway restart</code></td></tr>
+<tr><td>Quick test (ngrok)</td><td><code>ngrok http 18789</code></td></tr>
+<tr><td>Quick test (cloudflared)</td><td><code>cloudflared tunnel --url http://localhost:18789</code></td></tr>
+</table>
+
+<hr>
+
+<h2>Recommendation</h2>
+<p><strong>Use Cloudflare Tunnel + Cloudflare Access</strong> for a permanent, free, secure setup:</p>
+<ol>
+<li>Move your domain DNS to Cloudflare (free)</li>
+<li>Install and configure cloudflared as a LaunchDaemon</li>
+<li>Set up Cloudflare Access for email authentication</li>
+<li>Update OpenClaw config with the allowed origin</li>
+<li>Done — permanent HTTPS URL that survives reboots</li>
+</ol>
+<p>This is the only approach tested that delivers all of: free cost, permanent URL, HTTPS, boot persistence, access control, and works from any browser without client software. Perfect for accessing a headless home server from locked-down work laptops or any device with a web browser.</p>
+
+<p style="margin-top:2rem;"><a href="index.html" style="color:var(--gold);font-weight:600;">&larr; Back to Blog</a></p>
+
+    </div>
+</section>
+
+<footer>
+    <div class="footer-inner">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <div class="footer-brand">Straya <span>Co</span></div>
+                <p>Sydney-based IT consulting helping Australian businesses secure, automate, and grow.</p>
+                <p style="margin-top:0.75rem;">ABN: 89 642 689 076</p>
+            </div>
+            <div class="footer-col">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="../services.html">Email Security & DMARC</a></li>
+                    <li><a href="../services.html">Office Automation</a></li>
+                    <li><a href="../services.html">IT Setup & Migration</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <ul>
+                    <li><a href="../about.html">About Us</a></li>
+                    <li><a href="../resources.html">Resources</a></li>
+                    <li><a href="../contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Contact</h4>
+                <ul>
+                    <li>Sydney, Australia</li>
+                    <li><a href="mailto:vincent@strayaco.com.au">vincent@strayaco.com.au</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Straya Co Pty Ltd — Sydney, Australia. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<div class="backdrop" id="backdrop"></div>
+<div class="slide-navigation" id="slideNav">
+    <div class="nav-icon" id="slideClose"><span></span><span></span><span></span></div>
+    <div class="slide-nav-logo">Straya <span>Co</span></div>
+    <div class="slide-nav-grid">
+        <div class="slide-nav-col">
+            <div class="slide-nav-title">Services</div>
+            <ul class="slide-nav-links">
+                <li><a href="../services.html">Email Security & DMARC</a></li>
+                <li><a href="../services.html">Office Automation</a></li>
+                <li><a href="../services.html">IT Setup & Migration</a></li>
+            </ul>
+        </div>
+        <div class="slide-nav-col">
+            <div class="slide-nav-title">Company</div>
+            <ul class="slide-nav-links">
+                <li><a href="../about.html">About Us</a></li>
+                <li><a href="../resources.html">Resources</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+(function(){
+    var n=document.getElementById('navIcon'),s=document.getElementById('slideNav'),c=document.getElementById('slideClose'),b=document.getElementById('backdrop');
+    function o(){n.classList.add('open');c.classList.add('open');s.classList.add('open');b.classList.add('open');document.body.style.overflow='hidden';}
+    function x(){n.classList.remove('open');c.classList.remove('open');s.classList.remove('open');b.classList.remove('open');document.body.style.overflow='';}
+    n.addEventListener('click',o);c.addEventListener('click',x);b.addEventListener('click',x);
+})();
+</script>
+</body>
+</html>
