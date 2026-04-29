@@ -170,15 +170,15 @@ zip -r "backup_$(date +%Y%m%d_%H%M%S).zip" repo/ --exclude "repo/.git/*"</code><
 <h3>Step 3: Commit and Tag</h3>
 
 <pre><code>git add -A
-git commit -m "v4.5 - Add blog: Watching YouTube Videos Through Your AI Agent"
-git tag v4.5</code></pre>
+git commit -m "v4.9 - Add blog: Configuring Multiple API Providers"
+git tag v4.9</code></pre>
 
 <p>Version tags are sequential (v4.0, v4.1, v4.2...). Each blog post or feature add gets a version bump. The commit message includes the version number and a one-line description.</p>
 
 <h3>Step 4: Push Both Branch and Tag</h3>
 
 <pre><code>git push origin main
-git push origin v4.5</code></pre>
+git push origin v4.9</code></pre>
 
 <p>Two pushes are needed &mdash; one for the branch (which triggers GitHub Pages rebuild) and one for the tag (for version tracking).</p>
 
@@ -201,7 +201,10 @@ git push origin v4.5</code></pre>
 
 <p>The version history tells a story. Looking at <code>git tag</code> output:</p>
 
-<pre><code>v4.6
+<pre><code>v4.9 - Add blog: Configuring Multiple API Providers
+v4.8 - Add blog: AI-Powered Cron Jobs
+v4.7 - Add blog: Email Processing with an AI Agent
+v4.6 - Add blog: AI-Powered Website Publishing Workflow
 v4.5 - Add blog: Watching YouTube Videos
 v4.4 - Add blog: Connecting Telegram and Email
 v4.3 - Add blog landing page + first post

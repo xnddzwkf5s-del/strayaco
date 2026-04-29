@@ -162,7 +162,7 @@
     "expr": "0 18 * * 5",
     "tz": "Australia/Melbourne"
   },
-  "target": "isolated",
+  "sessionTarget": "isolated",
   "payload": {
     "kind": "agentTurn",
     "message": "Check weather for our location for tomorrow (Saturday). Use Open-Meteo API to get forecast data. If rain is predicted (>1mm), send a brief alert. Otherwise, do nothing."
@@ -196,7 +196,7 @@
     "expr": "0 8 * * 1",
     "tz": "Australia/Melbourne"
   },
-  "target": "isolated",
+  "sessionTarget": "isolated",
   "payload": {
     "kind": "agentTurn",
     "message": "Check and process new emails from AgentMail inbox."
@@ -227,7 +227,7 @@
     "expr": "0 17 * * *",
     "tz": "Australia/Melbourne"
   },
-  "target": "isolated",
+  "sessionTarget": "isolated",
   "payload": {
     "kind": "agentTurn",
     "message": "Run the OpenClaw configuration backup script."
@@ -321,7 +321,7 @@
 <tr><td>Daily cron</td><td><code>{ "kind": "cron", "expr": "0 17 * * *" }</code></td></tr>
 <tr><td>Timezone</td><td><code>"tz": "Australia/Melbourne"</code></td></tr>
 <tr><td>Silent run</td><td><code>"delivery": { "mode": "none" }</code></td></tr>
-<tr><td>Isolated target</td><td><code>"target": "isolated"</code></td></tr>
+<tr><td>Isolated target</td><td><code>"sessionTarget": "isolated"</code></td></tr>
 <tr><td>Announce result</td><td><code>"mode": "announce"</code></td></tr>
 <tr><td>Run shell script</td><td>Payload: <code>"Run script.sh"</code></td></tr>
 </table>
