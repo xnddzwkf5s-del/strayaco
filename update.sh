@@ -20,6 +20,4 @@ git commit -m "$1"
 git push origin main
 
 echo "✅ Website update published!"
-echo "Live at: https://vinnie77.github.io/Pang/"
-echo ""
-echo "Changes will be live in 1-2 minutes via GitHub Pages."
+echo "Live at: https://www.strayaco.com.au/"
