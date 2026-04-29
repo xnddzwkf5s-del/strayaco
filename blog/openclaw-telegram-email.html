@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connecting Telegram and Email to OpenClaw - Straya Co Blog</title>
+    <meta name="description" content="A practical guide to giving your OpenClaw AI agent two communication channels - Telegram for instant messaging and AgentMail for email.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+    <style>
+        :root { --dark:#1a1a2e; --gold:#c9a96e; --gold-dark:#b8945a; --cream:#f8f6f1; --white:#fff; --gray:#6b7280; --gray-light:#e8e4dd; --radius:4px; --radius-lg:12px; --shadow:0 4px 20px rgba(0,0,0,0.08); --shadow-lg:0 20px 60px rgba(0,0,0,0.15); --transition:all 0.35s cubic-bezier(0.4,0,0.2,1); }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Inter',sans-serif;color:var(--dark);background:var(--white);line-height:1.7;overflow-x:hidden;}
+        h1,h2,h3,h4{font-family:'Playfair Display',serif;font-weight:600;line-height:1.2;}
+        .container{max-width:800px;margin:0 auto;padding:0 32px;}
+        a{text-decoration:none;color:inherit;}
+        img{max-width:100%;height:auto;}
+        code{font-family:monospace;background:var(--cream);padding:2px 6px;border-radius:3px;font-size:0.9em;}
+        pre{background:var(--dark);color:#e2e8f0;padding:1.25rem;border-radius:var(--radius-lg);overflow-x:auto;margin:1.5rem 0;font-size:0.85rem;line-height:1.6;}
+        pre code{background:transparent;padding:0;color:inherit;font-size:0.85rem;}
+        table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:0.9rem;}
+        th,td{padding:0.75rem 1rem;text-align:left;border-bottom:1px solid var(--gray-light);}
+        th{background:var(--dark);color:var(--white);font-weight:600;}
+        tr:last-child td{border-bottom:none;}
+        p{margin-bottom:1rem;}
+        ul,ol{margin:1rem 0 1rem 1.5rem;}
+        li{margin-bottom:0.4rem;}
+        hr{margin:2rem 0;border:none;border-top:1px solid var(--gray-light);}
+
+        #site-header{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(26,26,46,0.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,169,110,0.2);}
+        .header-inner{max-width:1200px;margin:0 auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:80px;}
+        .logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--white);letter-spacing:0.02em;}
+        .logo span{color:var(--gold);}
+        nav ul{display:flex;list-style:none;gap:2rem;}
+        nav a{color:rgba(255,255,255,0.85);font-size:0.85rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;transition:var(--transition);}
+        nav a:hover,nav a.active{color:var(--gold);}
+        .btn-cta{background:var(--gold);color:var(--dark);padding:0.6rem 1.5rem;border-radius:var(--radius);font-size:0.82rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;transition:var(--transition);}
+        .btn-cta:hover{background:var(--gold-dark);}
+        .nav-icon{display:flex;flex-direction:column;justify-content:space-between;width:26px;height:20px;cursor:pointer;z-index:1100;flex-shrink:0;}
+        .nav-icon span{display:block;height:2px;width:100%;background:#fff;border-radius:9px;transition:all 0.25s ease-in-out;transform-origin:left center;}
+
+        .page-hero{padding:140px 0 40px;background:var(--dark);color:var(--white);}
+        .page-hero h1{font-size:2.4rem;margin-bottom:0.5rem;}
+        .page-hero .meta{color:var(--gold);font-size:0.85rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;}
+        .post-content{padding:60px 0 80px;}
+        .post-content h2{margin:2.5rem 0 1rem;font-size:1.6rem;}
+        .post-content h3{margin:2rem 0 0.75rem;font-size:1.2rem;color:var(--gray);}
+        .post-content ul{margin:1rem 0;}
+        .post-content li{margin-bottom:0.4rem;}
+        .post-content table{margin:1.5rem 0;}
+        .post-content .tag{display:inline-block;background:var(--cream);color:var(--gray);padding:0.3rem 0.8rem;border-radius:20px;font-size:0.8rem;margin-right:0.5rem;margin-bottom:0.5rem;border:1px solid var(--gray-light);}
+
+        footer{background:var(--dark);color:rgba(255,255,255,0.7);padding:60px 0 30px;margin-top:60px;}
+        .footer-inner{max-width:1200px;margin:0 auto;padding:0 32px;}
+        .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;padding-bottom:2rem;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:2rem;}
+        .footer-brand{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--white);margin-bottom:0.75rem;}
+        .footer-brand span{color:var(--gold);}
+        .footer-col h4{color:var(--white);margin-bottom:1rem;font-size:1rem;}
+        .footer-col ul{list-style:none;}
+        .footer-col li{margin-bottom:0.5rem;}
+        .footer-col a:hover{color:var(--gold);}
+        .footer-bottom{text-align:center;font-size:0.85rem;}
+
+        .backdrop{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:900;opacity:0;visibility:hidden;transition:var(--transition);}
+        .backdrop.open{opacity:1;visibility:visible;}
+        .slide-navigation{position:fixed;top:0;right:0;bottom:0;width:320px;background:var(--dark);z-index:950;padding:2rem;transform:translateX(100%);transition:var(--transition);}
+        .slide-navigation.open{transform:translateX(0);}
+        .slide-nav-logo{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--white);margin:2rem 0;}
+        .slide-nav-logo span{color:var(--gold);}
+        .slide-nav-grid{display:grid;grid-template-columns:1fr;gap:2rem;}
+        .slide-nav-title{color:var(--gold);font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:1rem;}
+        .slide-nav-links{list-style:none;}
+        .slide-nav-links li{margin-bottom:0.75rem;}
+        .slide-nav-links a{color:rgba(255,255,255,0.75);font-size:0.95rem;transition:var(--transition);}
+        .slide-nav-links a:hover{color:var(--gold);}
+
+        @media(max-width:991px){nav ul{display:none;}}
+        @media(max-width:768px){.container{padding:0 20px;}.header-inner{padding:0 20px;}.footer-inner{padding:0 20px;}.footer-grid{grid-template-columns:1fr;}.page-hero h1{font-size:1.8rem;}.slide-navigation{width:100%;}}
+    </style>
+</head>
+<body>
+
+<header id="site-header">
+    <div class="header-inner">
+        <a href="../index.html" class="logo">Straya <span>Co</span></a>
+        <nav>
+            <ul>
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../services.html">Services</a></li>
+                <li><a href="../about.html">About</a></li>
+                <li><a href="../resources.html">Resources</a></li>
+                <li><a href="index.html" class="active">Blog</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </nav>
+        <a href="../contact.html" class="btn-cta">Get Started</a>
+        <div class="nav-icon" id="navIcon"><span></span><span></span><span></span></div>
+    </div>
+</header>
+
+<section class="page-hero">
+    <div class="container">
+        <p class="meta">April 29, 2026 &mdash; AI Agent Setup</p>
+        <h1>Connecting Telegram and Email to OpenClaw</h1>
+        <div>
+            <span class="tag">OpenClaw</span>
+            <span class="tag">Telegram</span>
+            <span class="tag">AgentMail</span>
+            <span class="tag">Email</span>
+            <span class="tag">Automation</span>
+        </div>
+    </div>
+</section>
+
+<section class="post-content">
+    <div class="container">
+
+<p>A practical guide to giving your OpenClaw AI agent two communication channels &mdash; Telegram for instant messaging and AgentMail for email &mdash; based on real-world setup.</p>
+
+<hr>
+
+<h2>Overview</h2>
+
+<p>Out of the box, OpenClaw listens on a web dashboard at <code>http://localhost:18789</code>. That&rsquo;s fine for a local terminal, but if you want your agent to message you proactively (reminders, alerts, daily summaries) or receive input while you&rsquo;re away from your desk, you need channels.</p>
+
+<p>We set up two:</p>
+
+<ul>
+<li><strong>Telegram</strong> &mdash; fast, push-based, great for conversational back-and-forth</li>
+<li><strong>AgentMail</strong> &mdash; email inbox for the agent, with scheduled processing and daily summaries</li>
+</ul>
+
+<p>Each has a different personality. Telegram is synchronous &mdash; you DM the bot, it replies. Email is asynchronous &mdash; the agent checks its inbox on a schedule and processes messages in batches.</p>
+
+<hr>
+
+<h2>Telegram Setup</h2>
+
+<p>Telegram is the most popular OpenClaw channel for good reason: it&rsquo;s free, push-based, works on any device, and the bot API is mature.</p>
+
+<h3>1. Create a Bot with BotFather</h3>
+
+<p>Open Telegram and message <strong>@BotFather</strong>:</p>
+
+<pre><code>/newbot</code></pre>
+
+<p>Follow the prompts. You&rsquo;ll get a token like <code>123456789:ABCdefGHIjklMNOpqrsTUVwxyz</code>.</p>
+
+<h3>2. Configure OpenClaw</h3>
+
+<p>Add to <code>~/.openclaw/openclaw.json</code>:</p>
+
+<pre><code>{
+  "channels": {
+    "telegram": {
+      "enabled": true,
+      "botToken": "123456789:ABCdefGHIjklMNOpqrsTUVwxyz",
+      "dmPolicy": "pairing",
+      "groups": {
+        "*": {
+          "requireMention": true
+        }
+      }
+    }
+  }
+}</code></pre>
+
+<p>If you prefer not to put the token in plaintext config, use the env var <code>TELEGRAM_BOT_TOKEN</code>.</p>
+
+<h3>3. Pair Your Account</h3>
+
+<p>Start the gateway, then DM your bot and run:</p>
+
+<pre><code>openclaw pairing list telegram
+openclaw pairing approve telegram &lt;CODE&gt;</code></pre>
+
+<p>Pairing codes expire after 1 hour. Once paired, you can DM the bot from anywhere.</p>
+
+<h3>4. Find Your Telegram User ID</h3>
+
+<p>For configuring allowlists, get your numeric user ID:</p>
+
+<pre><code>curl "https://api.telegram.org/bot&lt;token&gt;/getUpdates"</code></pre>
+
+<p>Look for <code>from.id</code> in the JSON. Or DM your bot and check <code>openclaw logs --follow</code>.</p>
+
+<h3>5. (Optional) Add to a Group</h3>
+
+<p>Add the bot to a group. By default it only responds when mentioned (<code>@botname</code>). To let it see all messages:</p>
+
+<ul>
+<li>Make the bot a group admin, or</li>
+<li>Tell BotFather: <code>/setprivacy</code> &rarr; Disabled</li>
+</ul>
+
+<hr>
+
+<h2>AgentMail Setup</h2>
+
+<p>AgentMail is an API-first email platform designed for AI agents. Unlike Gmail or Outlook, there&rsquo;s no OAuth flow, no IMAP, no polling overhead &mdash; just a REST API and webhooks.</p>
+
+<h3>1. Create an Account</h3>
+
+<p>Go to <a href="https://console.agentmail.to">console.agentmail.to</a> and sign up. Generate an API key from the dashboard.</p>
+
+<h3>2. Install the SDK</h3>
+
+<pre><code>pip install agentmail python-dotenv</code></pre>
+
+<h3>3. Create an Inbox</h3>
+
+<pre><code>from agentmail import AgentMail
+
+client = AgentMail(api_key="am_us_YOUR_API_KEY_HERE")
+inbox = client.inboxes.create(
+    username="my-assistant",  # Creates my-assistant@agentmail.to
+    client_id="unique-id"
+)</code></pre>
+
+<p>You can also create inboxes via the OpenClaw skills config:</p>
+
+<pre><code>{
+  "skills": {
+    "entries": {
+      "agentmail": {
+        "apiKey": "am_us_YOUR_API_KEY_HERE"
+      }
+    }
+  }
+}</code></pre>
+
+<h3>4. Configure the Inbox ID</h3>
+
+<pre><code>INBOX_ID = "your-assistant@agentmail.to"</code></pre>
+
+<p>This is where all incoming email will land.</p>
+
+<h3>5. Sending Email</h3>
+
+<pre><code>client.inboxes.messages.send(
+    inbox_id="your-assistant@agentmail.to",
+    to="you@example.com",
+    subject="Daily Summary",
+    text="Here's what happened today..."
+)</code></pre>
+
+<p>AgentMail supports attachments (base64-encoded), HTML content, and multiple recipients.</p>
+
+<h3>6. Checking Email</h3>
+
+<p>The OpenClaw agentmail skill ships with scripts:</p>
+
+<pre><code># Check the last 10 messages
+python3 check_inbox.py --inbox "your-assistant@agentmail.to"
+
+# Monitor for new messages (poll every 30s)
+python3 check_inbox.py --inbox "your-assistant@agentmail.to" --monitor 30</code></pre>
+
+<hr>
+
+<h2>Practical Patterns</h2>
+
+<h3>Pattern 1: Scheduled Email Check (Cron)</h3>
+
+<p>The most practical pattern for email is a weekly cron job. The agent:</p>
+
+<ol>
+<li>Checks the inbox for new messages</li>
+<li>Marks processed emails as read</li>
+<li>Trashes old read emails (older than 14 days)</li>
+<li>Summarises anything that needs attention</li>
+</ol>
+
+<pre><code>{
+  "schedule": {
+    "kind": "cron",
+    "expr": "0 8 * * 1",
+    "tz": "Australia/Melbourne"
+  },
+  "payload": {
+    "kind": "systemEvent",
+    "text": "Time for the weekly AgentMail check. Process the inbox."
+  }
+}</code></pre>
+
+<h3>Pattern 2: Deduplication</h3>
+
+<p>Since the agent may check email multiple times before processing, track processed email IDs:</p>
+
+<pre><code>PROCESSED_FILE = "processed_emails.json"
+
+def load_processed():
+    try:
+        with open(PROCESSED_FILE) as f:
+            return json.load(f)
+    except:
+        return []
+
+def save_processed(ids):
+    with open(PROCESSED_FILE, 'w') as f:
+        json.dump(ids[-1000:], f)  # Keep last 1000</code></pre>
+
+<h3>Pattern 3: Proactive Notifications</h3>
+
+<p>Combine Telegram + email notifications. For example:</p>
+
+<ul>
+<li><strong>Telegram:</strong> Quick alerts ("GitHub push failed", "Server rebooting")</li>
+<li><strong>Email:</strong> Longer summaries ("Weekly email processing report", "Backup status")</li>
+</ul>
+
+<p>The agent can send to either channel depending on message type:</p>
+
+<pre><code>Telegram: short, urgent, needs attention now
+Email: detailed, archival, can wait</code></pre>
+
+<h3>Pattern 4: Webhook Processing (Advanced)</h3>
+
+<p>For real-time email processing, set up a webhook endpoint. When email arrives, the webhook triggers the agent immediately instead of waiting for the next cron run.</p>
+
+<pre><code>webhook = client.webhooks.create(
+    url="https://your-server.your-domain.com/webhook/agentmail",
+    client_id="email-processor"
+)</code></pre>
+
+<p><strong>Warning:</strong> Email webhooks are a prompt injection vector. Anyone can email your agent. Use allowlist filtering or isolated sessions to sandbox untrusted senders.</p>
+
+<hr>
+
+<h2>Key Lessons Learned</h2>
+
+<p><strong>Telegram:</strong></p>
+<ul>
+<li>The bot token is sensitive &mdash; if exposed, anyone can control your bot. Use env vars or a secrets manager.</li>
+<li>Pairing codes expire after 1 hour &mdash; complete the flow promptly.</li>
+<li>Group bots need <code>requireMention: false</code> or admin status to see all messages.</li>
+<li>Telegram has no delete/edit of sent messages via the API that users won&rsquo;t see.</li>
+</ul>
+
+<p><strong>AgentMail:</strong></p>
+<ul>
+<li>There is no <code>delete</code> method in the SDK (v0.4.15). Use the <code>trash</code> label instead for cleanup.</li>
+<li>The API key controls everything &mdash; guard it like a password.</li>
+<li>AgentMail inboxes are public &mdash; anyone can email your agent address. Use allowlists or webhook transforms to filter.</li>
+<li>Processing emails via cron is simpler than webhooks for personal use, and avoids prompt injection risks.</li>
+</ul>
+
+<p><strong>General:</strong></p>
+<ul>
+<li>Always restart the gateway after config changes: <code>openclaw gateway restart</code></li>
+<li>Test each channel independently before relying on it</li>
+<li>Start with one channel, get it solid, then add the second</li>
+</ul>
+
+<hr>
+
+<h2>Quick Reference</h2>
+
+<table>
+<tr><th>Action</th><th>Command</th></tr>
+<tr><td>Restart OpenClaw</td><td><code>openclaw gateway restart</code></td></tr>
+<tr><td>Send Telegram message</td><td>DM your bot in Telegram</td></tr>
+<tr><td>Pair Telegram account</td><td><code>openclaw pairing approve telegram &lt;CODE&gt;</code></td></tr>
+<tr><td>Check email (CLI)</td><td><code>python3 check_inbox.py --inbox "your-assistant@agentmail.to"</code></td></tr>
+<tr><td>Send email (CLI)</td><td><code>python3 send_email.py "Subject" "Body"</code></td></tr>
+<tr><td>Find Telegram user ID</td><td><code>curl "https://api.telegram.org/bot&lt;token&gt;/getUpdates"</code></td></tr>
+<tr><td>View OpenClaw logs</td><td><code>openclaw logs --follow</code></td></tr>
+</table>
+
+<p style="margin-top:2rem;"><a href="index.html" style="color:var(--gold);font-weight:600;">&larr; Back to Blog</a></p>
+
+    </div>
+</section>
+
+<footer>
+    <div class="footer-inner">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <div class="footer-brand">Straya <span>Co</span></div>
+                <p>Sydney-based IT consulting helping Australian businesses secure, automate, and grow.</p>
+                <p style="margin-top:0.75rem;">ABN: 89 642 689 076</p>
+            </div>
+            <div class="footer-col">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="../services.html">Email Security & DMARC</a></li>
+                    <li><a href="../services.html">Office Automation</a></li>
+                    <li><a href="../services.html">IT Setup & Migration</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <ul>
+                    <li><a href="../about.html">About Us</a></li>
+                    <li><a href="../resources.html">Resources</a></li>
+                    <li><a href="../contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Contact</h4>
+                <ul>
+                    <li>Sydney, Australia</li>
+                    <li><a href="mailto:vincent@strayaco.com.au">vincent@strayaco.com.au</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Straya Co Pty Ltd &mdash; Sydney, Australia. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<div class="backdrop" id="backdrop"></div>
+<div class="slide-navigation" id="slideNav">
+    <div class="nav-icon" id="slideClose"><span></span><span></span><span></span></div>
+    <div class="slide-nav-logo">Straya <span>Co</span></div>
+    <div class="slide-nav-grid">
+        <div class="slide-nav-col">
+            <div class="slide-nav-title">Services</div>
+            <ul class="slide-nav-links">
+                <li><a href="../services.html">Email Security & DMARC</a></li>
+                <li><a href="../services.html">Office Automation</a></li>
+                <li><a href="../services.html">IT Setup & Migration</a></li>
+            </ul>
+        </div>
+        <div class="slide-nav-col">
+            <div class="slide-nav-title">Company</div>
+            <ul class="slide-nav-links">
+                <li><a href="../about.html">About Us</a></li>
+                <li><a href="../resources.html">Resources</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+(function(){
+    var n=document.getElementById('navIcon'),s=document.getElementById('slideNav'),c=document.getElementById('slideClose'),b=document.getElementById('backdrop');
+    function o(){n.classList.add('open');c.classList.add('open');s.classList.add('open');b.classList.add('open');document.body.style.overflow='hidden';}
+    function x(){n.classList.remove('open');c.classList.remove('open');s.classList.remove('open');b.classList.remove('open');document.body.style.overflow='';}
+    n.addEventListener('click',o);c.addEventListener('click',x);b.addEventListener('click',x);
+})();
+</script>
+</body>
+</html>
