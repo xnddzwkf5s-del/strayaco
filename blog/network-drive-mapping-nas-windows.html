@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Network Drive Mapping That Actually Works - Straya Co Blog</title>
+    <meta name="description" content="A simple PowerShell script that makes NAS drives behave reliably — no more red X errors every time someone reboots.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+    <style>
+        :root { --dark:#1a1a2e; --gold:#c9a96e; --gold-dark:#b8945a; --cream:#f8f6f1; --white:#fff; --gray:#6b7280; --gray-light:#e8e4dd; --radius:4px; --radius-lg:12px; --shadow:0 4px 20px rgba(0,0,0,0.08); --shadow-lg:0 20px 60px rgba(0,0,0,0.15); --transition:all 0.35s cubic-bezier(0.4,0,0.2,1); }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Inter',sans-serif;color:var(--dark);background:var(--white);line-height:1.7;overflow-x:hidden;}
+        h1,h2,h3,h4{font-family:'Playfair Display',serif;font-weight:600;line-height:1.2;}
+        .container{max-width:800px;margin:0 auto;padding:0 32px;}
+        a{text-decoration:none;color:inherit;}
+        img{max-width:100%;height:auto;}
+        code{font-family:monospace;background:var(--cream);padding:2px 6px;border-radius:3px;font-size:0.9em;}
+        pre{background:var(--dark);color:#e2e8f0;padding:1.25rem;border-radius:var(--radius-lg);overflow-x:auto;margin:1.5rem 0;font-size:0.85rem;line-height:1.6;}
+        pre code{background:transparent;padding:0;color:inherit;font-size:0.85rem;}
+        table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:0.9rem;}
+        th,td{padding:0.75rem 1rem;text-align:left;border-bottom:1px solid var(--gray-light);}
+        th{background:var(--dark);color:var(--white);font-weight:600;}
+        tr:last-child td{border-bottom:none;}
+        p{margin-bottom:1rem;}
+        ul,ol{margin:1rem 0 1rem 1.5rem;}
+        li{margin-bottom:0.4rem;}
+        hr{margin:2rem 0;border:none;border-top:1px solid var(--gray-light);}
+
+        #site-header{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(26,26,46,0.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,169,110,0.2);}
+        .header-inner{max-width:1200px;margin:0 auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:80px;}
+        .logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--white);letter-spacing:0.02em;}
+        .logo span{color:var(--gold);}
+        nav ul{display:flex;list-style:none;gap:2rem;}
+        nav a{color:rgba(255,255,255,0.85);font-size:0.85rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;transition:var(--transition);}
+        nav a:hover,nav a.active{color:var(--gold);}
+        .btn-cta{background:var(--gold);color:var(--dark);padding:0.6rem 1.5rem;border-radius:var(--radius);font-size:0.82rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;transition:var(--transition);}
+        .btn-cta:hover{background:var(--gold-dark);}
+        .nav-icon{display:flex;flex-direction:column;justify-content:space-between;width:26px;height:20px;cursor:pointer;z-index:1100;flex-shrink:0;}
+        .nav-icon span{display:block;height:2px;width:100%;background:#fff;border-radius:9px;transition:all 0.25s ease-in-out;transform-origin:left center;}
+
+        .page-hero{padding:140px 0 40px;background:var(--dark);color:var(--white);}
+        .page-hero h1{font-size:2.4rem;margin-bottom:0.5rem;}
+        .page-hero .meta{color:var(--gold);font-size:0.85rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;}
+        .page-hero .subhead{color:rgba(255,255,255,0.7);font-size:1.05rem;margin-top:0.75rem;font-style:italic;}
+        .post-content{padding:60px 0 80px;}
+        .post-content h2{margin:2.5rem 0 1rem;font-size:1.6rem;}
+        .post-content h3{margin:2rem 0 0.75rem;font-size:1.2rem;color:var(--gray);}
+        .post-content ul{margin:1rem 0;}
+        .post-content li{margin-bottom:0.4rem;}
+        .post-content table{margin:1.5rem 0;}
+        .post-content .tag{display:inline-block;background:var(--cream);color:var(--gray);padding:0.3rem 0.8rem;border-radius:20px;font-size:0.8rem;margin-right:0.5rem;margin-bottom:0.5rem;border:1px solid var(--gray-light);}
+        .post-content .lesson{background:var(--cream);border-left:4px solid var(--gold);padding:1.5rem;border-radius:0 var(--radius-lg) var(--radius-lg) 0;margin:2rem 0;}
+        .post-content blockquote{background:var(--cream);border-left:4px solid var(--gold);padding:1.25rem 1.5rem;margin:1.5rem 0;border-radius:0 var(--radius-lg) var(--radius-lg) 0;font-style:italic;color:var(--gray);}
+        .post-content .straya-cta{background:var(--dark);color:var(--white);padding:2rem;border-radius:var(--radius-lg);margin:2.5rem 0;text-align:center;}
+        .post-content .straya-cta p{color:rgba(255,255,255,0.85);font-size:1.05rem;}
+        .post-content .straya-cta .btn-cta{display:inline-block;margin-top:1rem;}
+        .post-content strong{color:var(--dark);}
+
+        footer{background:var(--dark);color:rgba(255,255,255,0.7);padding:60px 0 30px;margin-top:60px;}
+        .footer-inner{max-width:1200px;margin:0 auto;padding:0 32px;}
+        .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;padding-bottom:2rem;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:2rem;}
+        .footer-brand{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--white);margin-bottom:0.75rem;}
+        .footer-brand span{color:var(--gold);}
+        .footer-col h4{color:var(--white);margin-bottom:1rem;font-size:1rem;}
+        .footer-col ul{list-style:none;}
+        .footer-col li{margin-bottom:0.5rem;}
+        .footer-col a:hover{color:var(--gold);}
+        .footer-bottom{text-align:center;font-size:0.85rem;}
+
+        .backdrop{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:900;opacity:0;visibility:hidden;transition:var(--transition);}
+        .backdrop.open{opacity:1;visibility:visible;}
+        .slide-navigation{position:fixed;top:0;right:0;bottom:0;width:320px;background:var(--dark);z-index:950;padding:2rem;transform:translateX(100%);transition:var(--transition);}
+        .slide-navigation.open{transform:translateX(0);}
+        .slide-nav-logo{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--white);margin:2rem 0;}
+        .slide-nav-logo span{color:var(--gold);}
+        .slide-nav-grid{display:grid;grid-template-columns:1fr;gap:2rem;}
+        .slide-nav-title{color:var(--gold);font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:1rem;}
+        .slide-nav-links{list-style:none;}
+        .slide-nav-links li{margin-bottom:0.75rem;}
+        .slide-nav-links a{color:rgba(255,255,255,0.75);font-size:0.95rem;transition:var(--transition);}
+        .slide-nav-links a:hover{color:var(--gold);}
+
+        @media(max-width:991px){nav ul{display:none;}}
+        @media(max-width:768px){.container{padding:0 20px;}.header-inner{padding:0 20px;}.footer-inner{padding:0 20px;}.footer-grid{grid-template-columns:1fr;}.page-hero h1{font-size:1.8rem;}.slide-navigation{width:100%;}}
+    </style>
+</head>
+<body>
+
+<header id="site-header">
+    <div class="header-inner">
+        <a href="../index.html" class="logo">Straya <span>Co</span></a>
+        <nav>
+            <ul>
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../services.html">Services</a></li>
+                <li><a href="../about.html">About</a></li>
+                <li><a href="../resources.html">Resources</a></li>
+                <li><a href="index.html" class="active">Blog</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </nav>
+        <a href="../contact.html" class="btn-cta">Get Started</a>
+        <div class="nav-icon" id="navIcon"><span></span><span></span><span></span></div>
+    </div>
+</header>
+
+<section class="page-hero">
+    <div class="container">
+        <p class="meta">April 30, 2026 &mdash; Office IT &amp; Automation</p>
+        <h1>Network Drive Mapping That Actually Works</h1>
+        <p class="subhead">A simple script that makes NAS drives behave reliably &mdash; no more "disconnected network drive" errors every time someone reboots.</p>
+        <div style="margin-top:1rem;">
+            <span class="tag">NAS</span>
+            <span class="tag">Network Drive</span>
+            <span class="tag">PowerShell</span>
+            <span class="tag">Windows</span>
+            <span class="tag">File Sharing</span>
+            <span class="tag">Small Business</span>
+            <span class="tag">IT Automation</span>
+        </div>
+    </div>
+</section>
+
+<section class="post-content">
+    <div class="container">
+
+<h2>The Pain</h2>
+
+<p>If you've got a NAS in your office, you know the story. Everyone connects to it manually &mdash; or a login script that mostly works. Until someone reboots. Or switches from Wi-Fi to Ethernet. Or works from home and the drive stubbornly tries to connect.</p>
+
+<p>Suddenly there's a red X on the drive icon, someone can't save their work, and IT gets a ticket.</p>
+
+<p>The fix is a simple PowerShell script that checks the network first, maps the drives, and &mdash; most importantly &mdash; only runs when it should. No more failed drive letters at login. No more corrupted connections.</p>
+
+<hr>
+
+<h2>The Setup</h2>
+
+<p>The script lives in a dedicated folder structure:</p>
+
+<pre><code>C:\Users\Username\Documents\Scripts\NAS\
+  ├── Config\
+  │   └── NASConfig.json       # Your settings
+  ├── Scripts\
+  │   └── Map-Drives.ps1       # The script
+  └── Logs\                    # Only created if logging is on
+      └── nas_mapping.log</code></pre>
+
+<p>One JSON file controls everything, so you don't need to edit the script itself.</p>
+
+<hr>
+
+<h2>The Config</h2>
+
+<pre><code>{
+  "UserSettings": {
+    "TargetUser": "YourUsername"
+  },
+  "Network": {
+    "ValidationMethod": "Both",
+    "AllowedSSIDs": [
+      "Office-WiFi",
+      "Guest-Network"
+    ],
+    "AllowedSubnets": [
+      "192.168.86."
+    ]
+  },
+  "NAS": {
+    "ServerName": "192.168.1.100",
+    "Username": "nas_username"
+  },
+  "Mappings": {
+    "P": { "ShareName": "Projects", "Description": "Project Files" },
+    "S": { "ShareName": "Shared", "Description": "Team Shared Drive" },
+    "B": { "ShareName": "Backups", "Description": "Daily Backups" }
+  }
+}</code></pre>
+
+<p>Key bits:</p>
+
+<ul>
+<li><strong>Network validation</strong> &mdash; the script checks SSID and/or subnet before attempting to map. Working from home? It skips the mapping gracefully instead of hanging.</li>
+<li><strong>Drive letters</strong> &mdash; assign any letter (P:, S:, B:, etc.) and point it to the correct share on your NAS.</li>
+<li><strong>Credentials</strong> &mdash; stored once in Windows Credential Manager, so the script isn't handling plain text passwords.</li>
+</ul>
+
+<hr>
+
+<h2>How It Works</h2>
+
+<p>When the script runs:</p>
+
+<ol>
+<li><strong>Check network</strong> &mdash; is the machine on the right SSID or subnet? No &rarr; exit cleanly.</li>
+<li><strong>Validate NAS</strong> &mdash; can we reach the NAS? No &rarr; log the error, exit.</li>
+<li><strong>Remove stale connections</strong> &mdash; clean up any broken drive letters from previous sessions.</li>
+<li><strong>Map drives</strong> &mdash; connect P: to \\NAS\Projects, S: to \\NAS\Shared, etc.</li>
+<li><strong>Log results</strong> &mdash; if logging is enabled, write success/failure to the log file.</li>
+</ol>
+
+<hr>
+
+<h2>Automating It</h2>
+
+<p>The script runs via Task Scheduler at user logon. Setup takes two minutes:</p>
+
+<ol>
+<li>Open Task Scheduler</li>
+<li>Create a Basic Task &rarr; trigger "At log on"</li>
+<li>Action: Start a program</li>
+<li>Program: <code>powershell.exe</code></li>
+<li>Arguments: <code>-NoProfile -ExecutionPolicy Bypass -File "C:\Users\Username\Documents\Scripts\NAS\Scripts\Map-Drives.ps1"</code></li>
+</ol>
+
+<p>That's it. Every time someone logs in, the script runs, checks the network, and maps the drives.</p>
+
+<hr>
+
+<h2>Why This Beats a Manual Connection</h2>
+
+<p>A manually mapped drive (via "Map Network Drive" in File Explorer) will:</p>
+
+<ul>
+<li>Stay connected until it breaks &mdash; then show a red X forever</li>
+<li>Try to reconnect on every network change, sometimes causing delays</li>
+<li>Fail silently if the NAS is unreachable at login</li>
+</ul>
+
+<p>The script does the opposite:</p>
+
+<ul>
+<li>Only maps when conditions are right</li>
+<li>Cleans up stale connections first</li>
+<li>Logs errors so you can see what happened</li>
+<li>Exits cleanly if the network isn't appropriate (home, coffee shop, etc.)</li>
+</ul>
+
+<hr>
+
+<h2>When You'd Use This</h2>
+
+<p><strong>Small business with a Synology, QNAP, or TrueNAS box.</strong> Multiple staff, multiple shared folders, all on Windows machines. You want reliable drive letters without enterprise tools like Group Policy.</p>
+
+<p><strong>Mixed environment &mdash; desk and laptop.</strong> People move between wired and wireless, or work from home occasionally. The network validation keeps stale drives from gumming up the works.</p>
+
+<p><strong>Office with no Active Directory.</strong> For a lot of small businesses, AD is overkill. This script gives you some of the same benefits without the infrastructure cost.</p>
+
+<hr>
+
+<h2>What About Security?</h2>
+
+<p>The script doesn't store passwords. Windows credentials are either saved once via Credential Manager or entered interactively on first connection. The config file holds the NAS address and share names &mdash; no secrets.</p>
+
+<p>If you want to take it further, you can:</p>
+
+<ul>
+<li>Restrict which machines can run the script</li>
+<li>Enable auditing via the log file</li>
+<li>Pair with a VPN check for remote access</li>
+</ul>
+
+<hr>
+
+<h2>The Bottom Line</h2>
+
+<p>Network drive mapping seems trivial until it breaks repeatedly. A 50-line PowerShell script with a JSON config eliminates the most common failure points and makes shared storage behave like it should: invisibly and reliably.</p>
+
+<p>Straya Co can set this up for your business &mdash; configure the NAS, write the script, and deploy it to every machine in about an hour. No ongoing licence fees, no vendor lock-in, just a cleaner setup than most enterprise tools deliver.</p>
+
+<div class="straya-cta">
+    <p style="font-size:1.1rem;font-weight:600;color:var(--gold);margin-bottom:0.75rem;">Tired of broken drive connections?</p>
+    <p>We'll set up a proper NAS mapping script for your whole office. One hour, fixed price, done.</p>
+    <a href="../contact.html" class="btn-cta">Get in touch &rarr;</a>
+</div>
+
+<hr>
+
+<p style="margin-top:2rem;"><a href="index.html" style="color:var(--gold);font-weight:600;">&larr; Back to Blog</a></p>
+
+    </div>
+</section>
+
+<footer>
+    <div class="footer-inner">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <div class="footer-brand">Straya <span>Co</span></div>
+                <p>Sydney-based IT consulting helping Australian businesses secure, automate, and grow.</p>
+                <p style="margin-top:0.75rem;">ABN: 89 642 689 076</p>
+            </div>
+            <div class="footer-col">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="../services.html">Email Security & DMARC</a></li>
+                    <li><a href="../services.html">Office Automation</a></li>
+                    <li><a href="../services.html">IT Setup & Migration</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <ul>
+                    <li><a href="../about.html">About Us</a></li>
+                    <li><a href="../resources.html">Resources</a></li>
+                    <li><a href="../contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Contact</h4>
+                <ul>
+                    <li>Sydney, Australia</li>
+                    <li><a href="mailto:vincent@strayaco.com.au">vincent@strayaco.com.au</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Straya Co Pty Ltd &mdash; Sydney, Australia. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<div class="backdrop" id="backdrop"></div>
+<div class="slide-navigation" id="slideNav">
+    <div class="nav-icon" id="slideClose"><span></span><span></span><span></span></div>
+    <div class="slide-nav-logo">Straya <span>Co</span></div>
+    <div class="slide-nav-grid">
+        <div class="slide-nav-col">
+            <div class="slide-nav-title">Services</div>
+            <ul class="slide-nav-links">
+                <li><a href="../services.html">Email Security & DMARC</a></li>
+                <li><a href="../services.html">Office Automation</a></li>
+                <li><a href="../services.html">IT Setup & Migration</a></li>
+            </ul>
+        </div>
+        <div class="slide-nav-col">
+            <div class="slide-nav-title">Company</div>
+            <ul class="slide-nav-links">
+                <li><a href="../about.html">About Us</a></li>
+                <li><a href="../resources.html">Resources</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+(function(){
+    var n=document.getElementById('navIcon'),s=document.getElementById('slideNav'),c=document.getElementById('slideClose'),b=document.getElementById('backdrop');
+    function o(){n.classList.add('open');c.classList.add('open');s.classList.add('open');b.classList.add('open');document.body.style.overflow='hidden';}
+    function x(){n.classList.remove('open');c.classList.remove('open');s.classList.remove('open');b.classList.remove('open');document.body.style.overflow='';}
+    n.addEventListener('click',o);c.addEventListener('click',x);b.addEventListener('click',x);
+})();
+</script>
+</body>
+</html>
