@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenClaw Dashboard Offline After Update? Here's the Fix - Straya Co Blog</title>
+    <meta name="description" content="OpenClaw dashboard goes offline after every update? Here's why, how to fix it in 10 seconds, and a permanent solution with automated backup and restore scripts.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+    <style>
+        :root { --dark:#1a1a2e; --gold:#c9a96e; --gold-dark:#b8945a; --cream:#f8f6f1; --white:#fff; --gray:#6b7280; --gray-light:#e8e4dd; --radius:4px; --radius-lg:12px; --shadow:0 4px 20px rgba(0,0,0,0.08); --shadow-lg:0 20px 60px rgba(0,0,0,0.15); --transition:all 0.35s cubic-bezier(0.4,0,0.2,1); }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Inter',sans-serif;color:var(--dark);background:var(--white);line-height:1.7;overflow-x:hidden;}
+        h1,h2,h3,h4{font-family:'Playfair Display',serif;font-weight:600;line-height:1.2;}
+        .container{max-width:800px;margin:0 auto;padding:0 32px;}
+        a{text-decoration:none;color:inherit;}
+        img{max-width:100%;height:auto;}
+        code{font-family:'SF Mono',Monaco,monospace;background:var(--cream);padding:2px 6px;border-radius:3px;font-size:0.9em;}
+        pre{background:var(--dark);color:#e2e8f0;padding:1.25rem;border-radius:var(--radius-lg);overflow-x:auto;margin:1.5rem 0;font-size:0.85rem;line-height:1.6;}
+        pre code{background:transparent;padding:0;color:inherit;font-size:0.85rem;}
+        table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:0.9rem;}
+        th,td{padding:0.75rem 1rem;text-align:left;border-bottom:1px solid var(--gray-light);}
+        th{background:var(--dark);color:var(--white);font-weight:600;}
+        tr:last-child td{border-bottom:none;}
+        p{margin-bottom:1rem;}
+        ul,ol{margin:1rem 0 1rem 1.5rem;}
+        li{margin-bottom:0.4rem;}
+        hr{margin:2rem 0;border:none;border-top:1px solid var(--gray-light);}
+        .callout{background:var(--cream);border-left:4px solid var(--gold);padding:1.25rem 1.5rem;border-radius:0 var(--radius) var(--radius) 0;margin:1.5rem 0;}
+        .callout strong{color:var(--dark);}
+
+        #site-header{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(26,26,46,0.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,169,110,0.2);}
+        .header-inner{max-width:1200px;margin:0 auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:80px;}
+        .logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--white);letter-spacing:0.02em;}
+        .logo span{color:var(--gold);}
+        nav ul{display:flex;list-style:none;gap:2rem;}
+        nav a{color:rgba(255,255,255,0.85);font-size:0.85rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;transition:var(--transition);}
+        nav a:hover,nav a.active{color:var(--gold);}
+        .btn-cta{background:var(--gold);color:var(--dark);padding:0.6rem 1.5rem;border-radius:var(--radius);font-size:0.82rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;transition:var(--transition);}
+        .btn-cta:hover{background:var(--gold-dark);}
+        .nav-icon{display:flex;flex-direction:column;justify-content:space-between;width:26px;height:20px;cursor:pointer;z-index:1100;flex-shrink:0;}
+        .nav-icon span{display:block;height:2px;width:100%;background:#fff;border-radius:9px;transition:all 0.25s ease-in-out;transform-origin:left center;}
+
+        .page-hero{padding:140px 0 40px;background:var(--dark);color:var(--white);}
+        .page-hero h1{font-size:2.4rem;margin-bottom:0.5rem;}
+        .page-hero .meta{color:var(--gold);font-size:0.85rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;}
+        .post-content{padding:60px 0 80px;}
+        .post-content h2{margin:2.5rem 0 1rem;font-size:1.6rem;}
+        .post-content h3{margin:2rem 0 0.75rem;font-size:1.2rem;color:var(--gray);}
+        .post-content ul{margin:1rem 0;}
+        .post-content li{margin-bottom:0.4rem;}
+        .post-content table{margin:1.5rem 0;}
+        .post-content .tag{display:inline-block;background:var(--cream);color:var(--gray);padding:0.3rem 0.8rem;border-radius:20px;font-size:0.8rem;margin-right:0.5rem;margin-bottom:0.5rem;border:1px solid var(--gray-light);}
+
+        footer{background:var(--dark);color:rgba(255,255,255,0.7);padding:60px 0 30px;margin-top:60px;}
+        .footer-inner{max-width:1200px;margin:0 auto;padding:0 32px;}
+        .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;padding-bottom:2rem;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:2rem;}
+        .footer-brand{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--white);margin-bottom:0.75rem;}
+        .footer-brand span{color:var(--gold);}
+        .footer-col h4{color:var(--white);margin-bottom:1rem;font-size:1rem;}
+        .footer-col ul{list-style:none;}
+        .footer-col li{margin-bottom:0.5rem;}
+        .footer-col a:hover{color:var(--gold);}
+        .footer-bottom{text-align:center;font-size:0.85rem;}
+
+        .backdrop{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:900;opacity:0;visibility:hidden;transition:var(--transition);}
+        .backdrop.open{opacity:1;visibility:visible;}
+        .slide-navigation{position:fixed;top:0;right:0;bottom:0;width:320px;background:var(--dark);z-index:950;padding:2rem;transform:translateX(100%);transition:var(--transition);}
+        .slide-navigation.open{transform:translateX(0);}
+        .slide-nav-logo{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--white);margin:2rem 0;}
+        .slide-nav-logo span{color:var(--gold);}
+        .slide-nav-grid{display:grid;grid-template-columns:1fr;gap:2rem;}
+        .slide-nav-title{color:var(--gold);font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:1rem;}
+        .slide-nav-links{list-style:none;}
+        .slide-nav-links li{margin-bottom:0.75rem;}
+        .slide-nav-links a{color:rgba(255,255,255,0.75);font-size:0.95rem;transition:var(--transition);}
+        .slide-nav-links a:hover{color:var(--gold);}
+
+        @media(max-width:991px){nav ul{display:none;}}
+        @media(max-width:768px){.container{padding:0 20px;}.header-inner{padding:0 20px;}.footer-inner{padding:0 20px;}.footer-grid{grid-template-columns:1fr;}.page-hero h1{font-size:1.8rem;}.slide-navigation{width:100%;}}
+    </style>
+</head>
+<body>
+
+<header id="site-header">
+    <div class="header-inner">
+        <a href="../index.html" class="logo">Straya <span>Co</span></a>
+        <nav>
+            <ul>
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../services.html">Services</a></li>
+                <li><a href="../about.html">About</a></li>
+                <li><a href="../resources.html">Resources</a></li>
+                <li><a href="index.html" class="active">Blog</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </nav>
+        <a href="../contact.html" class="btn-cta">Get Started</a>
+        <div class="nav-icon" id="navIcon"><span></span><span></span><span></span></div>
+    </div>
+</header>
+
+<section class="page-hero">
+    <div class="container">
+        <p class="meta">May 4, 2026 &mdash; Infrastructure</p>
+        <h1>OpenClaw Dashboard Offline After Update? Here's the Fix</h1>
+        <div>
+            <span class="tag">OpenClaw</span>
+            <span class="tag">macOS</span>
+            <span class="tag">LaunchAgent</span>
+            <span class="tag">Automation</span>
+            <span class="tag">DevOps</span>
+        </div>
+    </div>
+</section>
+
+<section class="post-content">
+    <div class="container">
+
+<p>Every time you update OpenClaw, the dashboard goes offline. You SSH in, fiddle with configs, restart the service, and 10 minutes later it's back. Next update — same thing. Here's why it happens and how to fix it permanently.</p>
+
+<div class="callout">
+<strong>TL;DR:</strong> The LaunchAgent plist gets silently replaced during updates, wiping your custom port and environment variables. The fix is a pre-update backup script and a post-update restore script. Total fix time: 10 seconds instead of 10 minutes.
+</div>
+
+<hr>
+
+<h2>Root Cause: The LaunchAgent Plist Problem</h2>
+
+<p>OpenClaw on macOS runs as a <code>LaunchAgent</code> — a background service managed by <code>launchd</code>. Its configuration lives in a single file:</p>
+
+<pre><code>~/Library/LaunchAgents/ai.openclaw.gateway.plist</code></pre>
+
+<p>This plist contains everything the service needs to start: the Node.js path, the gateway command, the port number, environment variables (including API keys), and log paths.</p>
+
+<p>When you run <code>openclaw update</code> (or <code>brew upgrade openclaw</code>), the update process calls <code>openclaw gateway install --force</code> under the hood. That command <strong>writes a fresh plist from a template</strong> — and the template doesn't know about your custom port, your custom PATH, or your API keys.</p>
+
+<p>The result: the service tries to start with a vanilla config, fails silently, and your dashboard is dead.</p>
+
+<h3>What Gets Wiped</h3>
+
+<table>
+<tr><th>Setting</th><th>Before Update</th><th>After Update</th></tr>
+<tr><td>Port</td><td><code>18789</code> (custom)</td><td><code>18789</code> or default (may change)</td></tr>
+<tr><td>PATH</td><td>Full Homebrew + user paths</td><td>Minimal (or missing)</td></tr>
+<tr><td>API keys</td><td>ANTHROPIC, DEEPSEEK, etc.</td><td>Gone</td></tr>
+<tr><td>Auth token</td><td>Your gateway token</td><td>Gone</td></tr>
+<tr><td>Log paths</td><td>Custom locations</td><td>Default locations</td></tr>
+</table>
+
+<p>There are actually <em>two</em> separate failure modes:</p>
+
+<ol>
+<li><strong>Plist overwrite:</strong> The plist is replaced with a vanilla one. Missing port, missing env vars, service fails to start.</li>
+<li><strong>API key desync:</strong> Even if the plist survives, <code>models.json</code> can fall out of sync with your real config. The gateway loads, but model switching fails with "assistant turn failed before producing content" because <code>models.json</code> still has placeholder keys like <code>YOUR_ANTHROPIC_API_KEY</code>.</li>
+</ol>
+
+<hr>
+
+<h2>The Fix: Automated Backup and Restore</h2>
+
+<p>Two scripts. One runs before the update, one runs after. Together they eliminate the problem.</p>
+
+<h3>Pre-Update Backup Script</h3>
+
+<p>Save this as <code>~/.openclaw/scripts/pre-update-backup.sh</code> and make it executable with <code>chmod +x</code>:</p>
+
+<pre><code>#!/bin/bash
+# Run BEFORE updating OpenClaw. Saves everything needed to recover.
+set -e
+
+BACKUP_DIR="$HOME/.openclaw/backups/$(date +%Y%m%d_%H%M%S)"
+mkdir -p "$BACKUP_DIR"
+
+echo "=== OpenClaw Pre-Update Backup ==="
+echo "Backup dir: $BACKUP_DIR"
+
+# 1. Plist (the most fragile piece)
+cp ~/Library/LaunchAgents/ai.openclaw.gateway.plist "$BACKUP_DIR/"
+echo "✓ Plist saved"
+
+# 2. Config
+cp ~/.openclaw/openclaw.json "$BACKUP_DIR/"
+echo "✓ Config saved"
+
+# 3. Models config (gets out of sync sometimes)
+cp ~/.openclaw/agents/main/agent/models.json \
+   "$BACKUP_DIR/models.json" 2>/dev/null \
+   && echo "✓ Models saved" \
+   || echo "- Models file not found (ok)"
+
+# 4. Current version
+openclaw --version > "$BACKUP_DIR/version.txt" 2>/dev/null
+echo "✓ Version: $(cat "$BACKUP_DIR/version.txt")"
+
+echo ""
+echo "=== Backup complete: $BACKUP_DIR ==="
+echo "You can now run: openclaw update"
+echo "If the dashboard goes offline, run:"
+echo "  ~/.openclaw/scripts/post-update-restore.sh $BACKUP_DIR"</code></pre>
+
+<h3>Post-Update Restore Script</h3>
+
+<p>Save this as <code>~/.openclaw/scripts/post-update-restore.sh</code>:</p>
+
+<pre><code>#!/bin/bash
+# Run AFTER updating OpenClaw if the dashboard is offline.
+# Usage: ~/.openclaw/scripts/post-update-restore.sh [backup_dir]
+# If no backup_dir given, uses the most recent backup.
+
+set -e
+
+if [ -n "$1" ]; then
+    BACKUP_DIR="$1"
+else
+    BACKUP_DIR=$(ls -dt "$HOME/.openclaw/backups/"*/ \
+                   2>/dev/null | head -1)
+fi
+
+if [ -z "$BACKUP_DIR" ] || [ ! -d "$BACKUP_DIR" ]; then
+    echo "ERROR: No backup found. Run pre-update-backup.sh first."
+    exit 1
+fi
+
+echo "=== OpenClaw Post-Update Restore ==="
+echo "Using backup: $BACKUP_DIR"
+
+# 1. Restore plist if it's missing or different
+if [ -f "$BACKUP_DIR/ai.openclaw.gateway.plist" ]; then
+    if ! diff "$BACKUP_DIR/ai.openclaw.gateway.plist" \
+         ~/Library/LaunchAgents/ai.openclaw.gateway.plist \
+         > /dev/null 2>&1; then
+        echo "Plist changed/damaged — restoring from backup..."
+        cp "$BACKUP_DIR/ai.openclaw.gateway.plist" \
+           ~/Library/LaunchAgents/ai.openclaw.gateway.plist
+        echo "✓ Plist restored"
+    else
+        echo "✓ Plist unchanged (ok)"
+    fi
+fi
+
+# 2. Sync API keys into models.json
+echo "Syncing API keys..."
+python3 &lt;&lt; 'EOF'
+import json
+
+with open(os.path.expanduser(
+    '~/.openclaw/openclaw.json'), 'r') as f:
+    real = json.load(f)
+with open(os.path.expanduser(
+    '~/.openclaw/agents/main/agent/models.json'), 'r') as f:
+    models = json.load(f)
+
+for provider in ['anthropic', 'deepseek',
+                  'custom-api-deepseek-com']:
+    if (provider in models.get('providers', {}) and
+        provider in real.get('models', {}).get('providers', {})):
+        real_key = real['models']['providers'][provider].get(
+            'apiKey', '')
+        if real_key and not real_key.startswith('YOUR_'):
+            models['providers'][provider]['apiKey'] = real_key
+
+with open(os.path.expanduser(
+    '~/.openclaw/agents/main/agent/models.json'), 'w') as f:
+    json.dump(models, f, indent=2)
+print('✓ API keys synced to models.json')
+EOF
+
+# 3. Reinstall service and reload
+echo "Reinstalling gateway service..."
+openclaw gateway install --force 2>&1 || true
+
+echo "Reloading service..."
+launchctl bootout gui/$(id -u)/ai.openclaw.gateway \
+    2>/dev/null || true
+sleep 1
+launchctl bootstrap gui/$(id -u) \
+    ~/Library/LaunchAgents/ai.openclaw.gateway.plist
+
+sleep 2
+
+# 4. Verify
+echo ""
+echo "=== Checking status ==="
+openclaw gateway status 2>&1
+
+echo ""
+echo "=== Restore complete ==="
+echo "Dashboard: http://&lt;your-ip&gt;:18789/"</code></pre>
+
+<hr>
+
+<h2>The Workflow</h2>
+
+<p>Once the scripts are in place, the update process becomes:</p>
+
+<pre><code># 1. Always run this first
+~/.openclaw/scripts/pre-update-backup.sh
+
+# 2. Do the update
+openclaw update
+# or: brew upgrade openclaw
+
+# 3. If the dashboard is offline after the update:
+~/.openclaw/scripts/post-update-restore.sh</code></pre>
+
+<p>The restore script handles all four failure modes automatically:</p>
+
+<ol>
+<li><strong>Plist overwritten?</strong> → Restores from backup</li>
+<li><strong>API keys desynced?</strong> → Syncs <code>openclaw.json</code> → <code>models.json</code></li>
+<li><strong>Service not running?</strong> → Reinstalls and reloads the LaunchAgent</li>
+<li><strong>Not sure it worked?</strong> → Runs <code>openclaw gateway status</code> to verify</li>
+</ol>
+
+<hr>
+
+<h2>Manual Recovery (No Scripts)</h2>
+
+<p>If you don't have the scripts yet and the dashboard is offline, here's the manual recovery sequence:</p>
+
+<h3>Step 1: Restore the plist</h3>
+<pre><code>cp ~/Library/LaunchAgents/ai.openclaw.gateway.plist.backup \
+   ~/Library/LaunchAgents/ai.openclaw.gateway.plist</code></pre>
+
+<p>This assumes you kept a backup copy of the plist. If you didn't, skip to step 3 and manually edit the fresh plist to add your port and environment variables.</p>
+
+<h3>Step 2: Sync API keys</h3>
+<pre><code>python3 -c "
+import json
+with open('$HOME/.openclaw/openclaw.json') as f:
+    real = json.load(f)
+with open('$HOME/.openclaw/agents/main/agent/models.json') as f:
+    models = json.load(f)
+for p in ['anthropic','deepseek','custom-api-deepseek-com']:
+    if (p in models.get('providers',{}) and
+        p in real.get('models',{}).get('providers',{})):
+        k = real['models']['providers'][p].get('apiKey','')
+        if k and not k.startswith('YOUR_'):
+            models['providers'][p]['apiKey'] = k
+with open('$HOME/.openclaw/agents/main/agent/models.json',
+          'w') as f:
+    json.dump(models, f, indent=2)
+print('Keys synced')
+"</code></pre>
+
+<h3>Step 3: Reinstall and reload</h3>
+<pre><code>openclaw gateway install --force
+launchctl bootout gui/$(id -u)/ai.openclaw.gateway 2>/dev/null
+sleep 1
+launchctl bootstrap gui/$(id -u) \
+    ~/Library/LaunchAgents/ai.openclaw.gateway.plist</code></pre>
+
+<h3>Step 4: Verify</h3>
+<pre><code>openclaw gateway status</code></pre>
+<p>Look for <code>Runtime: running</code> and <code>Connectivity probe: ok</code>.</p>
+
+<hr>
+
+<h2>Hardening the Plist (Prevention)</h2>
+
+<p>While we can't stop <code>openclaw gateway install --force</code> from generating a fresh plist, we can make the plist more robust so it survives <em>most</em> issues. The most common fix: add a proper <code>PATH</code> to the environment variables.</p>
+
+<p>Edit <code>~/Library/LaunchAgents/ai.openclaw.gateway.plist</code> and add this inside the <code>&lt;dict&gt;</code> under <code>EnvironmentVariables</code>:</p>
+
+<pre><code>&lt;key&gt;PATH&lt;/key&gt;
+&lt;string&gt;/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:\
+/usr/bin:/bin:/usr/sbin:/sbin:$HOME/.local/bin:\
+$HOME/.npm-global/bin:$HOME/bin&lt;/string&gt;</code></pre>
+
+<p>This ensures the LaunchAgent can find <code>openclaw</code>, <code>node</code>, and any other tools it needs, even after an update changes the environment.</p>
+
+<div class="callout">
+<strong>Important:</strong> After editing the plist, save a working copy as <code>ai.openclaw.gateway.plist.backup</code> in the same directory. This is your insurance policy — the restore script uses it as the source of truth.
+</div>
+
+<hr>
+
+<h2>How to Test (Without Breaking Anything)</h2>
+
+<p>Want to verify your backup and restore flow works before the next real update?</p>
+
+<pre><code># 1. Run the backup
+~/.openclaw/scripts/pre-update-backup.sh
+
+# 2. Simulate a "bad" plist by renaming it
+mv ~/Library/LaunchAgents/ai.openclaw.gateway.plist \
+   ~/Library/LaunchAgents/ai.openclaw.gateway.plist.test
+
+# 3. Run the restore (it'll see no plist and restore from backup)
+~/.openclaw/scripts/post-update-restore.sh
+
+# 4. Verify the dashboard is back
+openclaw gateway status</code></pre>
+
+<hr>
+
+<h2>Key Files Reference</h2>
+
+<table>
+<tr><th>File</th><th>Purpose</th></tr>
+<tr><td><code>~/Library/LaunchAgents/ai.openclaw.gateway.plist</code></td><td>Active LaunchAgent config (fragile during updates)</td></tr>
+<tr><td><code>~/*.plist.backup</code></td><td>Working backup — your insurance policy</td></tr>
+<tr><td><code>~/.openclaw/openclaw.json</code></td><td>Source of truth for all config and API keys</td></tr>
+<tr><td><code>~/.openclaw/agents/main/agent/models.json</code></td><td>Model config (must stay in sync with openclaw.json)</td></tr>
+<tr><td><code>~/.openclaw/scripts/pre-update-backup.sh</code></td><td>Pre-update backup script</td></tr>
+<tr><td><code>~/.openclaw/scripts/post-update-restore.sh</code></td><td>Post-update restore script</td></tr>
+<tr><td><code>~/.openclaw/logs/gateway.err.log</code></td><td>Error log — check here if the gateway won't start</td></tr>
+</table>
+
+<hr>
+
+<h2>Why This Matters</h2>
+
+<p>OpenClaw is a control plane. When it's offline, scheduled jobs don't run, Telegram messages go unanswered, email processing stops, and you lose access to your AI assistant. For anyone running OpenClaw as infrastructure (not a toy), an update that takes the dashboard offline is a real outage.</p>
+
+<p>The backup-and-restore pattern here isn't unique to OpenClaw — it applies to any macOS LaunchAgent or Linux systemd service that stores custom configuration in a file that gets regenerated during updates. The principle is the same: identify the fragile file, back it up before mutation, and have a scripted restore path.</p>
+
+<p>Ten seconds of prevention beats ten minutes of debugging. Every time.</p>
+
+</div>
+</section>
+
+<footer>
+    <div class="footer-inner">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <div class="footer-brand">Straya <span>Co</span></div>
+                <p>Sydney-based IT consulting helping Australian businesses secure, automate, and grow.</p>
+                <p style="margin-top:0.75rem;">ABN: 89 642 689 076</p>
+            </div>
+            <div class="footer-col">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="../services.html">Email Security & DMARC</a></li>
+                    <li><a href="../services.html">Office Automation</a></li>
+                    <li><a href="../services.html">IT Setup & Migration</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <ul>
+                    <li><a href="../about.html">About Us</a></li>
+                    <li><a href="../resources.html">Resources</a></li>
+                    <li><a href="../contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Contact</h4>
+                <ul>
+                    <li>Sydney, Australia</li>
+                    <li><a href="mailto:vincent@strayaco.com.au">vincent@strayaco.com.au</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Straya Co Pty Ltd — Sydney, Australia. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<div class="backdrop" id="backdrop"></div>
+<div class="slide-navigation" id="slideNav">
+    <div class="nav-icon" id="slideClose"><span></span><span></span><span></span></div>
+    <div class="slide-nav-logo">Straya <span>Co</span></div>
+    <div class="slide-nav-grid">
+        <div class="slide-nav-col">
+            <div class="slide-nav-title">Services</div>
+            <ul class="slide-nav-links">
+                <li><a href="../services.html">Email Security & DMARC</a></li>
+                <li><a href="../services.html">Office Automation</a></li>
+                <li><a href="../services.html">IT Setup & Migration</a></li>
+            </ul>
+        </div>
+        <div class="slide-nav-col">
+            <div class="slide-nav-title">Company</div>
+            <ul class="slide-nav-links">
+                <li><a href="../about.html">About Us</a></li>
+                <li><a href="../resources.html">Resources</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+(function(){
+    var n=document.getElementById('navIcon'),s=document.getElementById('slideNav'),c=document.getElementById('slideClose'),b=document.getElementById('backdrop');
+    function o(){n.classList.add('open');c.classList.add('open');s.classList.add('open');b.classList.add('open');document.body.style.overflow='hidden';}
+    function x(){n.classList.remove('open');c.classList.remove('open');s.classList.remove('open');b.classList.remove('open');document.body.style.overflow='';}
+    n.addEventListener('click',o);c.addEventListener('click',x);b.addEventListener('click',x);
+})();
+</script>
+</body>
+</html>
