@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenClaw API Key Corruption: Anatomy of a Silent 401 - Straya Co Blog</title>
+    <meta name="description" content="When your AI agent goes silent and all model calls return 401, but your config file has the right key — here's how launchd silently poisons your API keys with shell injection artifacts, and how to fix it permanently.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+    <style>
+        :root { --dark:#1a1a2e; --gold:#c9a96e; --gold-dark:#b8945a; --cream:#f8f6f1; --white:#fff; --gray:#6b7280; --gray-light:#e8e4dd; --radius:4px; --radius-lg:12px; --shadow:0 4px 20px rgba(0,0,0,0.08); --shadow-lg:0 20px 60px rgba(0,0,0,0.15); --transition:all 0.35s cubic-bezier(0.4,0,0.2,1); }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Inter',sans-serif;color:var(--dark);background:var(--white);line-height:1.7;overflow-x:hidden;}
+        h1,h2,h3,h4{font-family:'Playfair Display',serif;font-weight:600;line-height:1.2;}
+        .container{max-width:800px;margin:0 auto;padding:0 32px;}
+        a{text-decoration:none;color:inherit;}
+        img{max-width:100%;height:auto;}
+        code{font-family:'SF Mono',Monaco,monospace;background:var(--cream);padding:2px 6px;border-radius:3px;font-size:0.9em;}
+        pre{background:var(--dark);color:#e2e8f0;padding:1.25rem;border-radius:var(--radius-lg);overflow-x:auto;margin:1.5rem 0;font-size:0.85rem;line-height:1.6;}
+        pre code{background:transparent;padding:0;color:inherit;font-size:0.85rem;}
+        table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:0.9rem;}
+        th,td{padding:0.75rem 1rem;text-align:left;border-bottom:1px solid var(--gray-light);}
+        th{background:var(--dark);color:var(--white);font-weight:600;}
+        tr:last-child td{border-bottom:none;}
+        p{margin-bottom:1rem;}
+        ul,ol{margin:1rem 0 1rem 1.5rem;}
+        li{margin-bottom:0.4rem;}
+        hr{margin:2rem 0;border:none;border-top:1px solid var(--gray-light);}
+        .callout{background:var(--cream);border-left:4px solid var(--gold);padding:1.25rem 1.5rem;border-radius:0 var(--radius) var(--radius) 0;margin:1.5rem 0;}
+        .callout strong{color:var(--dark);}
+        .callout.danger{background:#fff5f5;border-left-color:#e53e3e;}
+
+        #site-header{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(26,26,46,0.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,169,110,0.2);}
+        .header-inner{max-width:1200px;margin:0 auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:80px;}
+        .logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--white);letter-spacing:0.02em;}
+        .logo span{color:var(--gold);}
+        nav ul{display:flex;list-style:none;gap:2rem;}
+        nav a{color:rgba(255,255,255,0.85);font-size:0.85rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;transition:var(--transition);}
+        nav a:hover,nav a.active{color:var(--gold);}
+        .btn-cta{background:var(--gold);color:var(--dark);padding:0.6rem 1.5rem;border-radius:var(--radius);font-size:0.82rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;transition:var(--transition);}
+        .btn-cta:hover{background:var(--gold-dark);}
+        .nav-icon{display:flex;flex-direction:column;justify-content:space-between;width:26px;height:20px;cursor:pointer;z-index:1100;flex-shrink:0;}
+        .nav-icon span{display:block;height:2px;width:100%;background:#fff;border-radius:9px;transition:all 0.25s ease-in-out;transform-origin:left center;}
+
+        .page-hero{padding:140px 0 40px;background:var(--dark);color:var(--white);}
+        .page-hero h1{font-size:2.4rem;margin-bottom:0.5rem;}
+        .page-hero .meta{color:var(--gold);font-size:0.85rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;}
+        .post-content{padding:60px 0 80px;}
+        .post-content h2{margin:2.5rem 0 1rem;font-size:1.6rem;}
+        .post-content h3{margin:2rem 0 0.75rem;font-size:1.2rem;color:var(--gray);}
+        .post-content ul{margin:1rem 0;}
+        .post-content li{margin-bottom:0.4rem;}
+        .post-content table{margin:1.5rem 0;}
+        .post-content .tag{display:inline-block;background:var(--cream);color:var(--gray);padding:0.3rem 0.8rem;border-radius:20px;font-size:0.8rem;margin-right:0.5rem;margin-bottom:0.5rem;border:1px solid var(--gray-light);}
+        .post-content .diagram{background:var(--cream);border:1px solid var(--gray-light);border-radius:var(--radius-lg);padding:1.5rem;margin:1.5rem 0;font-family:'SF Mono',Monaco,monospace;font-size:0.85rem;line-height:1.8;overflow-x:auto;}
+
+        footer{background:var(--dark);color:rgba(255,255,255,0.7);padding:60px 0 30px;margin-top:60px;}
+        .footer-inner{max-width:1200px;margin:0 auto;padding:0 32px;}
+        .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;padding-bottom:2rem;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:2rem;}
+        .footer-brand{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--white);margin-bottom:0.75rem;}
+        .footer-brand span{color:var(--gold);}
+        .footer-col h4{color:var(--white);margin-bottom:1rem;font-size:1rem;}
+        .footer-col ul{list-style:none;}
+        .footer-col li{margin-bottom:0.5rem;}
+        .footer-col a:hover{color:var(--gold);}
+        .footer-bottom{text-align:center;font-size:0.85rem;}
+
+        .backdrop{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:900;opacity:0;visibility:hidden;transition:var(--transition);}
+        .backdrop.open{opacity:1;visibility:visible;}
+        .slide-navigation{position:fixed;top:0;right:0;bottom:0;width:320px;background:var(--dark);z-index:950;padding:2rem;transform:translateX(100%);transition:var(--transition);}
+        .slide-navigation.open{transform:translateX(0);}
+        .slide-nav-logo{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--white);margin:2rem 0;}
+        .slide-nav-logo span{color:var(--gold);}
+        .slide-nav-grid{display:grid;grid-template-columns:1fr;gap:2rem;}
+        .slide-nav-title{color:var(--gold);font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:1rem;}
+        .slide-nav-links{list-style:none;}
+        .slide-nav-links li{margin-bottom:0.75rem;}
+        .slide-nav-links a{color:rgba(255,255,255,0.75);font-size:0.95rem;transition:var(--transition);}
+        .slide-nav-links a:hover{color:var(--gold);}
+
+        @media(max-width:991px){nav ul{display:none;}}
+        @media(max-width:768px){.container{padding:0 20px;}.header-inner{padding:0 20px;}.footer-inner{padding:0 20px;}.footer-grid{grid-template-columns:1fr;}.page-hero h1{font-size:1.8rem;}.slide-navigation{width:100%;}}
+    </style>
+</head>
+<body>
+
+<header id="site-header">
+    <div class="header-inner">
+        <a href="../index.html" class="logo">Straya <span>Co</span></a>
+        <nav>
+            <ul>
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../services.html">Services</a></li>
+                <li><a href="../about.html">About</a></li>
+                <li><a href="../resources.html">Resources</a></li>
+                <li><a href="index.html" class="active">Blog</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </nav>
+        <a href="../contact.html" class="btn-cta">Get Started</a>
+        <div class="nav-icon" id="navIcon"><span></span><span></span><span></span></div>
+    </div>
+</header>
+
+<section class="page-hero">
+    <div class="container">
+        <p class="meta">May 4, 2026 &mdash; Infrastructure</p>
+        <h1>OpenClaw API Key Corruption: Anatomy of a Silent 401</h1>
+        <div>
+            <span class="tag">OpenClaw</span>
+            <span class="tag">macOS</span>
+            <span class="tag">launchd</span>
+            <span class="tag">Security</span>
+            <span class="tag">DevOps</span>
+            <span class="tag">Debugging</span>
+        </div>
+    </div>
+</section>
+
+<section class="post-content">
+    <div class="container">
+
+<p>Your AI agent stops responding. Model switches fail silently. Cron jobs that ran reliably for weeks start returning errors. You check your config file — the API key is there, 35 characters, correct. You test it directly with <code>curl</code> — 200 OK. But the gateway keeps logging <code>401 Authentication Fails</code>.</p>
+
+<p>This is the story of a particularly insidious bug: how <strong>macOS launchd silently poisons your API keys with shell injection artifacts</strong>, why nothing in your config shows it, and how to fix it permanently.</p>
+
+<div class="callout danger">
+<strong>TL;DR:</strong> OpenClaw's service installer writes keys using <code>$(security find-generic-password)</code> shell substitution, but launchd doesn't expand <code>$()</code> — it sends the literal string (including <code>&nbsp;-w)</code>) as your API key. The fix: write real key values directly into the service environment file, never rely on shell command substitution in plist <code>EnvironmentVariables</code>.
+</div>
+
+<hr>
+
+<h2>The Symptom: Everything Looks Right, Nothing Works</h2>
+
+<p>Here's what you'll see when this bug hits:</p>
+
+<ul>
+<li>Switching to any affected model: <strong>no response, silent failure</strong> (no visible error in the dashboard — the agent simply produces nothing)</li>
+<li>Scheduled cron jobs using that model: <strong>fail with 401</strong></li>
+<li>Error in gateway logs: <code>401 Authentication Fails, Your api key: **** -w) is invalid</code> — the <strong><code>-w)</code> suffix</strong> is the smoking gun</li>
+<li>Error hash is consistent across failures: <code>sha256:b6c634fc9b1e</code></li>
+<li>Models from other providers (Anthropic, OpenAI) using <em>different</em> keys in the same environment: <strong>continue working normally</strong></li>
+</ul>
+
+<p>The most confusing part: a direct <code>curl</code> test with the key from <code>openclaw.json</code> returns 200. The config file is correct. The keychain is correct. Only the running gateway process has the wrong key.</p>
+
+<hr>
+
+<h2>Root Cause: launchd Does Not Expand Shell</h2>
+
+<p>OpenClaw's service installer (<code>openclaw gateway install</code>) writes API keys into the service environment file at:</p>
+
+<pre><code>~/.openclaw/service-env/ai.openclaw.gateway.env</code></pre>
+
+<p>For keys listed in <code>OPENCLAW_SERVICE_MANAGED_ENV_KEYS</code>, the installer pulls values from the macOS keychain using shell command substitution:</p>
+
+<pre><code>export DEEPSEEK_API_KEY=$(security find-generic-password -s DEEPSEEK_API_KEY -w)</code></pre>
+
+<p>Or worse, the literal <code>$()</code> string is written into the LaunchAgent plist's <code>EnvironmentVariables</code> dictionary:</p>
+
+<pre><code>&lt;key&gt;DEEPSEEK_API_KEY&lt;/key&gt;
+&lt;string&gt;$(security find-generic-password -s DEEPSEEK_API_KEY -w)&lt;/string&gt;</code></pre>
+
+<p><strong>launchd on macOS does not expand <code>$()</code> in plist <code>EnvironmentVariables</code>.</strong> It treats the entire string as a literal value. The DeepSeek API key sent to the provider becomes:</p>
+
+<pre><code>sk-xxxxxxxx...xxxx -w)</code></pre>
+
+<p>Note the trailing space and <code>-w)</code> — that's the shell flag and closing parenthesis from the <code>security</code> command, now permanently fused to your API key.</p>
+
+<h3>Why This Was Hard to Find</h3>
+
+<table>
+<tr><th>Check</th><th>Result</th><th>Misleading?</th></tr>
+<tr><td><code>openclaw.json</code> → <code>models.providers.deepseek.apiKey</code></td><td>35 chars, valid</td><td>✅ Yes — config looks correct</td></tr>
+<tr><td>macOS keychain → <code>security find-generic-password -s DEEPSEEK_API_KEY -w</code></td><td>35 chars, valid</td><td>✅ Yes — keychain is correct</td></tr>
+<tr><td>Direct <code>curl</code> test with key from config</td><td>200 OK</td><td>✅ Yes — key works on its own</td></tr>
+<tr><td>Running gateway process environment</td><td><code>sk-... -w)</code> (corrupted)</td><td>❌ Only visible with <code>ps eww</code></td></tr>
+<tr><td>Gateway error log</td><td><code>401 ... api key: **** -w)</code></td><td>🎯 Smoking gun (if you notice the <code>-w)</code>)</td></tr>
+</table>
+
+<p>Every diagnostic tool you'd naturally reach for shows the correct key. Only the runtime process environment reveals the corruption — and even then, you have to know to look.</p>
+
+<hr>
+
+<h2>How the Gateway Resolves Keys (Priority Chain)</h2>
+
+<p>Understanding the resolution order is critical to fixing this. When the gateway starts, it checks for API keys in this sequence — and the <strong>first one wins</strong>:</p>
+
+<div class="diagram">
+1. <strong>Service env file:</strong> ~/.openclaw/service-env/ai.openclaw.gateway.env  ← <strong>WINS</strong><br>
+2. <strong>LaunchAgent plist:</strong> EnvironmentVariables dictionary<br>
+3. <strong>openclaw.json:</strong> models.providers.{name}.apiKey<br>
+4. <strong>agent/models.json:</strong> auto-patched by launchd WatchPath
+</div>
+
+<p>This means you can have a perfectly valid key in <code>openclaw.json</code> (layer 3), but if the env file or plist (layers 1-2) contain a corrupted value, that's what the gateway actually uses. The config file never gets consulted.</p>
+
+<p>This priority chain is normal for OpenClaw and isn't a bug in itself — it's the standard way environment variables override config files. The bug is specifically that <strong>the installer writes a non-expandable shell command as the environment value</strong>.</p>
+
+<hr>
+
+<h2>The Recovery: Fix It in One Shot</h2>
+
+<h3>Automated recovery (recommended)</h3>
+
+<p>Run the recovery script (create it first if you don't have it):</p>
+
+<pre><code>bash ~/.openclaw/scripts/fix-openclaw-api-keys.sh</code></pre>
+
+<p>This script:</p>
+<ol>
+<li>Extracts real keys from <code>openclaw.json</code></li>
+<li>Strips any <code>$()</code> shell commands from the env file</li>
+<li>Writes literal key values directly into the env file</li>
+<li>Syncs keys to <code>models.json</code></li>
+<li>Restarts the gateway</li>
+<li>Verifies with direct API calls</li>
+</ol>
+
+<h3>Manual recovery (step by step)</h3>
+
+<p><strong>Step 1: Extract the real key from config</strong></p>
+<pre><code>python3 -c "import json; print(json.load(open('$HOME/.openclaw/openclaw.json'))['models']['providers']['deepseek']['apiKey'])"</code></pre>
+
+<p>Copy the output — this is your real key (should be ~35 characters, no spaces, no <code>-w)</code>).</p>
+
+<p><strong>Step 2: Check for shell injection in the env file</strong></p>
+<pre><code>grep '\$(' ~/.openclaw/service-env/ai.openclaw.gateway.env</code></pre>
+
+<p>If you see any <code>$()</code> in the output — those lines need to be replaced with literal values.</p>
+
+<p><strong>Step 3: Write real key directly into the env file</strong></p>
+<pre><code># Replace the shell command with a literal key value
+# Edit ~/.openclaw/service-env/ai.openclaw.gateway.env and change:
+#   export DEEPSEEK_API_KEY=$(security find-generic-password ...)
+# To:
+#   export DEEPSEEK_API_KEY='sk-your-real-35-char-key-here'
+
+# Or use this one-liner (substitute your real key):
+python3 -c "
+import re
+key = 'sk-your-real-key-here'
+with open('$HOME/.openclaw/service-env/ai.openclaw.gateway.env','r') as f:
+    c = f.read()
+c = re.sub(r'export DEEPSEEK_API_KEY=.*', f\"export DEEPSEEK_API_KEY='***'\", c)
+with open('$HOME/.openclaw/service-env/ai.openclaw.gateway.env','w') as f:
+    f.write(c)
+print('Done')
+"</code></pre>
+
+<p><strong>Step 4: Also check the plist</strong></p>
+<pre><code>plutil -p ~/Library/LaunchAgents/ai.openclaw.gateway.plist | grep -A5 EnvironmentVariables | grep '\$('</code></pre>
+
+<p>If this returns anything, the plist itself has shell injection. Fix it by editing the plist and replacing the <code>$()</code> with the real key, or re-run <code>openclaw gateway install</code> after fixing the env file.</p>
+
+<p><strong>Step 5: Restart and verify</strong></p>
+<pre><code>openclaw gateway restart
+sleep 10
+
+# Test the key directly
+curl -s -o /dev/null -w "%{http_code}" \
+  -X POST https://api.deepseek.com/v1/chat/completions \
+  -H "Authorization: Bearer YOUR_REAL_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"deepseek-chat","max_tokens":5,"messages":[{"role":"user","content":"hi"}]}'
+# Should return: 200</code></pre>
+
+<hr>
+
+<h2>Permanent Defenses</h2>
+
+<p>After fixing the immediate issue, deploy these four defenses to prevent recurrence:</p>
+
+<table>
+<tr><th>Defense</th><th>Location</th><th>What It Does</th></tr>
+<tr><td><strong>Direct env keys</strong></td><td><code>~/.openclaw/service-env/ai.openclaw.gateway.env</code></td><td>Real key values — no <code>$()</code> shell commands, no plist indirection</td></tr>
+<tr><td><strong>fix-models-keys.sh</strong></td><td><code>~/.openclaw/scripts/</code></td><td>Patches placeholder keys in <code>models.json</code> after updates</td></tr>
+<tr><td><strong>launchd WatchPath</strong></td><td><code>~/Library/LaunchAgents/local.openclaw.fix-models-keys.plist</code></td><td>Automatically fires <code>fix-models-keys.sh</code> when <code>models.json</code> changes</td></tr>
+<tr><td><strong>Recovery script</strong></td><td><code>~/.openclaw/scripts/fix-openclaw-api-keys.sh</code></td><td>One-shot fix for all key corruption issues</td></tr>
+</table>
+
+<hr>
+
+<h2>Prevention Rules (Tattoo These)</h2>
+
+<ol>
+<li><strong>NEVER</strong> rely solely on <code>openclaw config set models.providers.{name}.apiKey</code> — it only writes <code>openclaw.json</code>, which is layer 3 in the priority chain</li>
+<li><strong>ALWAYS</strong> write API keys directly into <code>~/.openclaw/service-env/ai.openclaw.gateway.env</code> as literal values in <code>export KEY='value'</code> format</li>
+<li><strong>ALWAYS</strong> test with a direct <code>curl</code> after any key change</li>
+<li><strong>ALWAYS</strong> restart the gateway after changing keys</li>
+<li><strong>NEVER</strong> use <code>$()</code> shell commands in plist <code>EnvironmentVariables</code> — launchd doesn't expand them</li>
+<li><strong>NEVER</strong> use <code>$()</code> shell commands in the service env file for key values</li>
+</ol>
+
+<hr>
+
+<h2>Quick Diagnostic Checklist</h2>
+
+<p>Bookmark this — it's your first-response toolkit the next time models go silent:</p>
+
+<pre><code># 1. Check for $() poison in the env file
+grep '\$(' ~/.openclaw/service-env/ai.openclaw.gateway.env
+
+# 2. Check for $() in plist
+plutil -p ~/Library/LaunchAgents/ai.openclaw.gateway.plist | \
+  grep -A5 EnvironmentVariables | grep '\$('
+
+# 3. Check models.json for placeholder keys
+python3 -c "
+import json
+m=json.load(open('$HOME/.openclaw/agents/main/agent/models.json'))
+[print(k, v.get('apiKey','')[:12])
+ for k,v in m.get('providers',{}).items()]
+"
+# Any value starting with 'YOUR_' is a placeholder — needs fixing
+
+# 4. Inspect the running process environment
+ps eww -p $(pgrep -f 'node.*gateway' | head -1) | \
+  tr ' ' '\n' | grep -E 'DEEPSEEK|ANTHROPIC|API_KEY'
+# Look for trailing -w) or $() artifacts
+
+# 5. Check gateway logs for 401
+cat /tmp/openclaw/openclaw-$(date +%Y-%m-%d).log | grep 401 | tail -5
+
+# 6. Direct key test (substitute real key)
+curl -s -o /dev/null -w "%{http_code}" \
+  -X POST https://api.deepseek.com/v1/chat/completions \
+  -H "Authorization: Bearer YOUR_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"deepseek-chat","max_tokens":5,"messages":[{"role":"user","content":"hi"}]}'
+# Should return: 200</code></pre>
+
+<hr>
+
+<h2>Why This Matters Beyond OpenClaw</h2>
+
+<p>This bug is a case study in <strong>environment-vs-config desync</strong> — a class of failure that's notoriously hard to debug because every tool you check shows the correct value, but the runtime reads from a different source.</p>
+
+<p>The pattern applies broadly:</p>
+
+<ul>
+<li><strong>systemd</strong> on Linux: <code>EnvironmentFile=</code> directives have similar shell expansion rules — know whether your unit is expanding or reading literally</li>
+<li><strong>Docker</strong>: <code>--env-file</code> vs <code>docker-compose.yml</code> <code>environment:</code> vs secrets — three layers, each with different expansion behavior</li>
+<li><strong>Kubernetes</strong>: ConfigMaps vs Secrets vs envFrom — none expand <code>$()</code>, but some expand <code>$(VAR)</code> references</li>
+<li><strong>CI/CD pipelines</strong>: GitHub Actions secrets, GitLab CI variables, env-file sourcing — each runner has its own shell behavior</li>
+</ul>
+
+<p>The lesson: <strong>know the resolution order</strong> of your config layers, and <strong>never assume shell expansion</strong> works in a non-shell context. Environment variables in plists, YAML, and systemd units are literal strings unless explicitly documented otherwise.</p>
+
+<div class="callout">
+<strong>Key takeaway:</strong> When debugging "works from CLI but not from service" problems, the answer is almost always in the environment. Use <code>ps eww</code> (macOS) or <code>/proc/PID/environ</code> (Linux) to inspect what the running process actually sees — not what you think it should see.
+</div>
+
+<hr>
+
+<h2>Files Reference</h2>
+
+<table>
+<tr><th>File</th><th>Role</th></tr>
+<tr><td><code>~/.openclaw/openclaw.json</code></td><td>Config source of truth — API keys live here (layer 3)</td></tr>
+<tr><td><code>~/.openclaw/service-env/ai.openclaw.gateway.env</code></td><td>Runtime env file — <strong>keys here win over config</strong> (layer 1)</td></tr>
+<tr><td><code>~/.openclaw/agents/main/agent/models.json</code></td><td>Agent model catalog — auto-patched by WatchPath (layer 4)</td></tr>
+<tr><td><code>~/Library/LaunchAgents/ai.openclaw.gateway.plist</code></td><td>LaunchAgent plist — check for <code>$()</code> in EnvironmentVariables (layer 2)</td></tr>
+<tr><td><code>~/Library/LaunchAgents/local.openclaw.fix-models-keys.plist</code></td><td>WatchPath defender — fires on models.json changes</td></tr>
+<tr><td><code>~/.openclaw/scripts/fix-openclaw-api-keys.sh</code></td><td>One-shot recovery script</td></tr>
+<tr><td><code>~/.openclaw/scripts/fix-models-keys.sh</code></td><td>models.json placeholder patcher</td></tr>
+<tr><td><code>/tmp/openclaw/openclaw-YYYY-MM-DD.log</code></td><td>Gateway runtime log — grep for 401 here first</td></tr>
+</table>
+
+</div>
+</section>
+
+<footer>
+    <div class="footer-inner">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <div class="footer-brand">Straya <span>Co</span></div>
+                <p>Sydney-based IT consulting helping Australian businesses secure, automate, and grow.</p>
+                <p style="margin-top:0.75rem;">ABN: 89 642 689 076</p>
+            </div>
+            <div class="footer-col">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="../services.html">Email Security & DMARC</a></li>
+                    <li><a href="../services.html">Office Automation</a></li>
+                    <li><a href="../services.html">IT Setup & Migration</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <ul>
+                    <li><a href="../about.html">About Us</a></li>
+                    <li><a href="../resources.html">Resources</a></li>
+                    <li><a href="../contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Contact</h4>
+                <ul>
+                    <li>Sydney, Australia</li>
+                    <li><a href="mailto:vincent@strayaco.com.au">vincent@strayaco.com.au</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Straya Co Pty Ltd — Sydney, Australia. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<div class="backdrop" id="backdrop"></div>
+<div class="slide-navigation" id="slideNav">
+    <div class="nav-icon" id="slideClose"><span></span><span></span><span></span></div>
+    <div class="slide-nav-logo">Straya <span>Co</span></div>
+    <div class="slide-nav-grid">
+        <div class="slide-nav-col">
+            <div class="slide-nav-title">Services</div>
+            <ul class="slide-nav-links">
+                <li><a href="../services.html">Email Security & DMARC</a></li>
+                <li><a href="../services.html">Office Automation</a></li>
+                <li><a href="../services.html">IT Setup & Migration</a></li>
+            </ul>
+        </div>
+        <div class="slide-nav-col">
+            <div class="slide-nav-title">Company</div>
+            <ul class="slide-nav-links">
+                <li><a href="../about.html">About Us</a></li>
+                <li><a href="../resources.html">Resources</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+(function(){
+    var n=document.getElementById('navIcon'),s=document.getElementById('slideNav'),c=document.getElementById('slideClose'),b=document.getElementById('backdrop');
+    function o(){n.classList.add('open');c.classList.add('open');s.classList.add('open');b.classList.add('open');document.body.style.overflow='hidden';}
+    function x(){n.classList.remove('open');c.classList.remove('open');s.classList.remove('open');b.classList.remove('open');document.body.style.overflow='';}
+    n.addEventListener('click',o);c.addEventListener('click',x);b.addEventListener('click',x);
+})();
+</script>
+
+</body>
+</html>
