@@ -101,15 +101,15 @@
 <section class="blog-list">
     <div class="container">
         <div class="blog-card">
-            <div class="date">May 4, 2026</div>
+            <div class="date">May 4, 2026 &mdash; <strong>Updated May 7, 2026</strong></div>
             <h2><a href="openclaw-api-key-corruption.html">OpenClaw API Key Corruption: Anatomy of a Silent 401</a></h2>
-            <p>A deep-dive into how macOS launchd silently poisons your API keys with shell injection artifacts — why every diagnostic tool shows the right key but the gateway gets a 401, the priority chain that hides the bug, and permanent defenses to prevent it.</p>
+            <p>A deep-dive into how macOS launchd silently poisons your API keys with shell injection artifacts — why every diagnostic tool shows the right key but the gateway gets a 401, why the original fix didn't stick (it never fixed the <code>~/.openclaw/.env</code> source of truth), and the permanent fix that prevents recurrence.</p>
             <a href="openclaw-api-key-corruption.html" class="read-more">Read More &rarr;</a>
         </div>
         <div class="blog-card">
-            <div class="date">May 4, 2026</div>
+            <div class="date">May 4, 2026 &mdash; <strong>Updated May 7, 2026</strong></div>
             <h2><a href="openclaw-dashboard-offline-fix.html">OpenClaw Dashboard Offline After Update? Here's the Fix</a></h2>
-            <p>Every time you update OpenClaw, the dashboard goes offline. Here's why the LaunchAgent plist gets silently replaced, how to fix it in 10 seconds with backup and restore scripts, and how to test without breaking anything.</p>
+            <p>Every time you update OpenClaw, the dashboard goes offline. Here's why the LaunchAgent plist gets silently replaced, how to fix it in 10 seconds with backup and restore scripts, plus how to prevent API key corruption at the source (<code>~/.openclaw/.env</code>) so it never comes back.</p>
             <a href="openclaw-dashboard-offline-fix.html" class="read-more">Read More &rarr;</a>
         </div>
         <div class="blog-card">
