@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OpenClaw Dashboard Offline After Update? Here's the Fix - Straya Co Blog</title>
-    <meta name="description" content="OpenClaw dashboard goes offline after every update? Here's why, how to fix it in 10 seconds, and a permanent solution with automated backup and restore scripts.">
+    <meta name="description" content="OpenClaw dashboard goes offline after every update? Here's why, how to fix it in 10 seconds, a permanent solution with automated backup and restore scripts, and the .env source-of-truth fix that prevents API key corruption recurrence.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
@@ -103,7 +103,7 @@
 
 <section class="page-hero">
     <div class="container">
-        <p class="meta">May 4, 2026 &mdash; Infrastructure</p>
+        <p class="meta">May 4, 2026 &mdash; Infrastructure &mdash; <strong>Updated May 7, 2026</strong> (prevent recurrence with .env fix)</p>
         <h1>OpenClaw Dashboard Offline After Update? Here's the Fix</h1>
         <div>
             <span class="tag">OpenClaw</span>
@@ -119,6 +119,10 @@
     <div class="container">
 
 <p>Every time you update OpenClaw, the dashboard goes offline. You SSH in, fiddle with configs, restart the service, and 10 minutes later it's back. Next update — same thing. Here's why it happens and how to fix it permanently.</p>
+
+<div class="callout">
+<strong>See also:</strong> If your dashboard comes back but model switching fails with 401 errors, you might have a related but separate problem: API key corruption from unresolved <code>$(security ...)</code> shell injection. Read <a href="openclaw-api-key-corruption.html" style="text-decoration:underline;">OpenClaw API Key Corruption: Anatomy of a Silent 401</a> for the permanent fix.
+</div>
 
 <div class="callout">
 <strong>TL;DR:</strong> The LaunchAgent plist gets silently replaced during updates, wiping your custom port and environment variables. The fix is a pre-update backup script and a post-update restore script. Total fix time: 10 seconds instead of 10 minutes.
@@ -149,11 +153,12 @@
 <tr><td>Log paths</td><td>Custom locations</td><td>Default locations</td></tr>
 </table>
 
-<p>There are actually <em>two</em> separate failure modes:</p>
+<p>There are actually <em>three</em> separate failure modes:</p>
 
 <ol>
 <li><strong>Plist overwrite:</strong> The plist is replaced with a vanilla one. Missing port, missing env vars, service fails to start.</li>
 <li><strong>API key desync:</strong> Even if the plist survives, <code>models.json</code> can fall out of sync with your real config. The gateway loads, but model switching fails with "assistant turn failed before producing content" because <code>models.json</code> still has placeholder keys like <code>YOUR_ANTHROPIC_API_KEY</code>.</li>
+<li><strong>Env file corruption:</strong> <code>~/.openclaw/.env</code> contains unresolved <code>$(security ...)</code> shell commands. Every <code>install --force</code> reads this file and regenerates the poisoned service env. Model calls return 401 with <code>Your api key: **** -w) is invalid</code>. See the <a href="openclaw-api-key-corruption.html" style="text-decoration:underline;">API Key Corruption post</a> for the permanent fix.</li>
 </ol>
 
 <hr>
@@ -183,6 +188,11 @@ echo "✓ Plist saved"
 # 2. Config
 cp ~/.openclaw/openclaw.json "$BACKUP_DIR/"
 echo "✓ Config saved"
+
+# 2b. State-dir .env (source of truth for API keys — prevents corruption)
+cp ~/.openclaw/.env "$BACKUP_DIR/.env" 2>/dev/null \
+  && echo "✓ .env saved" \
+  || echo "- .env file not found (ok)"
 
 # 3. Models config (gets out of sync sometimes)
 cp ~/.openclaw/agents/main/agent/models.json \
@@ -305,7 +315,7 @@ openclaw update
 # 3. If the dashboard is offline after the update:
 ~/.openclaw/scripts/post-update-restore.sh</code></pre>
 
-<p>The restore script handles all four failure modes automatically:</p>
+<p>The restore script handles all failure modes automatically:</p>
 
 <ol>
 <li><strong>Plist overwritten?</strong> → Restores from backup</li>
@@ -313,6 +323,10 @@ openclaw update
 <li><strong>Service not running?</strong> → Reinstalls and reloads the LaunchAgent</li>
 <li><strong>Not sure it worked?</strong> → Runs <code>openclaw gateway status</code> to verify</li>
 </ol>
+
+<div class="callout">
+<strong>💡 Prevention tip:</strong> The scripts above fix the symptoms, but the permanent fix for API key corruption is <strong>one step at the source</strong> — resolve all <code>$(security ...)</code> patterns in <code>~/.openclaw/.env</code> to real key values. This prevents the 401 recurrence entirely. See the <a href="openclaw-api-key-corruption.html" style="text-decoration:underline;">API Key Corruption post</a> for the one-liner fix.
+</div>
 
 <hr>
 
@@ -400,6 +414,7 @@ openclaw gateway status</code></pre>
 
 <table>
 <tr><th>File</th><th>Purpose</th></tr>
+<tr><td><code>~/.openclaw/.env</code></td><td><strong>State-dir dotenv — source of truth for API keys.</strong> Fix <code>$(security ...)</code> patterns here first. See <a href="openclaw-api-key-corruption.html" style="text-decoration:underline;">API Key Corruption post</a>.</td></tr>
 <tr><td><code>~/Library/LaunchAgents/ai.openclaw.gateway.plist</code></td><td>Active LaunchAgent config (fragile during updates)</td></tr>
 <tr><td><code>~/*.plist.backup</code></td><td>Working backup — your insurance policy</td></tr>
 <tr><td><code>~/.openclaw/openclaw.json</code></td><td>Source of truth for all config and API keys</td></tr>

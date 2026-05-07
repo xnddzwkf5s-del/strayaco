@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OpenClaw API Key Corruption: Anatomy of a Silent 401 - Straya Co Blog</title>
-    <meta name="description" content="When your AI agent goes silent and all model calls return 401, but your config file has the right key — here's how launchd silently poisons your API keys with shell injection artifacts, and how to fix it permanently.">
+    <title>OpenClaw API Key Corruption: Anatomy of a Silent 401 (Updated 2026) - Straya Co Blog</title>
+    <meta name="description" content="When your AI agent goes silent and all model calls return 401, but your config file has the right key — here's how launchd silently poisons your API keys with shell injection artifacts, why the original fix doesn't stick, and the permanent fix that prevents recurrence.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
@@ -123,7 +123,11 @@
 
 <p>Your AI agent stops responding. Model switches fail silently. Cron jobs that ran reliably for weeks start returning errors. You check your config file — the API key is there, 35 characters, correct. You test it directly with <code>curl</code> — 200 OK. But the gateway keeps logging <code>401 Authentication Fails</code>.</p>
 
-<p>This is the story of a particularly insidious bug: how <strong>macOS launchd silently poisons your API keys with shell injection artifacts</strong>, why nothing in your config shows it, and how to fix it permanently.</p>
+<p>This is the story of a particularly insidious bug: how <strong>macOS launchd silently poisons your API keys with shell injection artifacts</strong>, why nothing in your config shows it, how to fix it permanently — and critically, why the original fix didn't stick and the problem kept coming back after every gateway restart.</p>
+
+<div class="callout">
+<strong>Related:</strong> If your dashboard goes offline entirely after updates (not just failing model calls), that's a separate issue: the LaunchAgent plist gets overwritten. See <a href="openclaw-dashboard-offline-fix.html" style="text-decoration:underline;">OpenClaw Dashboard Offline After Update? Here's the Fix</a> for the backup/restore workflow.
+</div>
 
 <div class="callout danger">
 <strong>TL;DR:</strong> OpenClaw's service installer writes keys using <code>$(security find-generic-password)</code> shell substitution, but launchd doesn't expand <code>$()</code> — it sends the literal string (including <code>&nbsp;-w)</code>) as your API key. The fix: write real key values directly into the service environment file, never rely on shell command substitution in plist <code>EnvironmentVariables</code>.
@@ -202,6 +206,31 @@
 
 <h2>The Recovery: Fix It in One Shot</h2>
 
+<div class="callout danger">
+<strong>⚠️  IMPORTANT — Read this first:</strong> The most common reason this problem comes back after you've fixed the service env file is that <strong><code>~/.openclaw/.env</code> still has unresolved <code>$(security ...)</code> references.</strong> Every <code>openclaw gateway install --force</code> reads this file and regenerates the service env from it. Fix the seed first, then fix the generated files.
+</div>
+
+<h3>Step 0: Fix the actual source of truth</h3>
+
+<p>Before patching the generated service env file, fix the file that feeds into every regeneration:</p>
+
+<pre><code># Check if ~/.openclaw/.env has $() poison
+cat ~/.openclaw/.env
+
+# If you see $(security find-generic-password ...), resolve them inline:
+for key in AGENTMAIL_API_KEY DEEPSEEK_API_KEY TELEGRAM_BOT_TOKEN GATEWAY_AUTH_TOKEN; do
+  resolved=$(security find-generic-password -s "$key" -w 2>/dev/null)
+  if [ -n "$resolved" ]; then
+    sed -i '' "s|^$key=.*|$key=$resolved|" ~/.openclaw/.env
+    echo "✓ $key resolved"
+  fi
+done
+
+# Then regenerate the service env from the clean source
+openclaw gateway install --force</code></pre>
+
+<p>After this, every subsequent <code>gateway install</code> will pick up real key values. This is the <strong>permanent fix</strong> — everything else below is verification and defense-in-depth.</p>
+
 <h3>Automated recovery (recommended)</h3>
 
 <p>Run the recovery script (create it first if you don't have it):</p>
@@ -270,10 +299,28 @@ curl -s -o /dev/null -w "%{http_code}" \
 
 <h2>Permanent Defenses</h2>
 
+<h3>Update (May 7, 2026): Why the Original Fix Didn't Stick</h3>
+
+<p>After applying the original fix on May 4 (patching the service env file and <code>models.json</code>), the problem recurred within days. Why? Because <strong><code>~/.openclaw/.env</code></strong> — the state-dir dotenv file written by <code>openclaw setup</code> on first install — still contained unresolved <code>$(security ...)</code> patterns. Every <code>npm update</code> triggers <code>openclaw gateway install --force</code>, which:</p>
+
+<ol>
+<li>Reads <code>~/.openclaw/.env</code> via the <code>state-dir-dotenv.ts</code> module</li>
+<li>Treats <code>$(security ...)</code> as a literal string (dotenv doesn't do shell expansion)</li>
+<li>Passes that literal string into the service environment dict</li>
+<li>Regenerates <code>ai.openclaw.gateway.env</code> — re-injecting the poison into the runtime environment</li>
+</ol>
+
+<p>This is a classic <strong>fix-the-symptom-not-the-source</strong> pattern. The service env file is a generated artifact; the <code>~/.openclaw/.env</code> file is the seed. Fix the seed, and the generated artifacts stay clean permanently.</p>
+
+<div class="callout danger">
+<strong>Lesson:</strong> When debugging a recurring config issue, identify and fix the <strong>source of truth</strong>, not just the generated artifacts. In this case: <code>~/.openclaw/.env</code> is the seed; <code>ai.openclaw.gateway.env</code> is just a copy.
+</div>
+
 <p>After fixing the immediate issue, deploy these four defenses to prevent recurrence:</p>
 
 <table>
 <tr><th>Defense</th><th>Location</th><th>What It Does</th></tr>
+<tr><td><strong>Fix .env source file</strong></td><td><code>~/.openclaw/.env</code></td><td>Resolve all <code>$(security ...)</code> to real key values — <strong>this is the seed</strong> that prevents regeneration</td></tr>
 <tr><td><strong>Direct env keys</strong></td><td><code>~/.openclaw/service-env/ai.openclaw.gateway.env</code></td><td>Real key values — no <code>$()</code> shell commands, no plist indirection</td></tr>
 <tr><td><strong>fix-models-keys.sh</strong></td><td><code>~/.openclaw/scripts/</code></td><td>Patches placeholder keys in <code>models.json</code> after updates</td></tr>
 <tr><td><strong>launchd WatchPath</strong></td><td><code>~/Library/LaunchAgents/local.openclaw.fix-models-keys.plist</code></td><td>Automatically fires <code>fix-models-keys.sh</code> when <code>models.json</code> changes</td></tr>
@@ -285,12 +332,13 @@ curl -s -o /dev/null -w "%{http_code}" \
 <h2>Prevention Rules (Tattoo These)</h2>
 
 <ol>
-<li><strong>NEVER</strong> rely solely on <code>openclaw config set models.providers.{name}.apiKey</code> — it only writes <code>openclaw.json</code>, which is layer 3 in the priority chain</li>
-<li><strong>ALWAYS</strong> write API keys directly into <code>~/.openclaw/service-env/ai.openclaw.gateway.env</code> as literal values in <code>export KEY='value'</code> format</li>
+<li><strong>FIRST: Fix <code>~/.openclaw/.env</code></strong> — resolve all <code>$(security ...)</code> patterns to real key values. This is the seed file; everything else is derived from it.</li>
+<li><strong>NEVER</strong> rely solely on <code>openclaw config set models.providers.{name}.apiKey</code> — it only writes <code>openclaw.json</code>, which is layer 4 in the priority chain</li>
+<li><strong>ALWAYS</strong> write API keys directly into <code>~/.openclaw/.env</code> and <code>~/.openclaw/service-env/ai.openclaw.gateway.env</code> as literal values</li>
 <li><strong>ALWAYS</strong> test with a direct <code>curl</code> after any key change</li>
 <li><strong>ALWAYS</strong> restart the gateway after changing keys</li>
 <li><strong>NEVER</strong> use <code>$()</code> shell commands in plist <code>EnvironmentVariables</code> — launchd doesn't expand them</li>
-<li><strong>NEVER</strong> use <code>$()</code> shell commands in the service env file for key values</li>
+<li><strong>NEVER</strong> use <code>$()</code> shell commands in <em>any</em> env file for key values — not <code>.env</code>, not the service env file, not the plist</li>
 </ol>
 
 <hr>
@@ -299,7 +347,12 @@ curl -s -o /dev/null -w "%{http_code}" \
 
 <p>Bookmark this — it's your first-response toolkit the next time models go silent:</p>
 
-<pre><code># 1. Check for $() poison in the env file
+<pre><code># 0. Check the SOURCE OF TRUTH (MOST IMPORTANT — prevents recurrence)
+cat ~/.openclaw/.env
+# If you see $(security ...) patterns, fix this file first!
+# Then: openclaw gateway install --force
+
+# 1. Check for $() poison in the service env file
 grep '\$(' ~/.openclaw/service-env/ai.openclaw.gateway.env
 
 # 2. Check for $() in plist
@@ -358,8 +411,9 @@ curl -s -o /dev/null -w "%{http_code}" \
 
 <table>
 <tr><th>File</th><th>Role</th></tr>
-<tr><td><code>~/.openclaw/openclaw.json</code></td><td>Config source of truth — API keys live here (layer 3)</td></tr>
-<tr><td><code>~/.openclaw/service-env/ai.openclaw.gateway.env</code></td><td>Runtime env file — <strong>keys here win over config</strong> (layer 1)</td></tr>
+<tr><td><code>~/.openclaw/.env</code></td><td><strong>State-dir dotenv — actual source of truth.</strong> Written by <code>openclaw setup</code>. Contains <code>$(security ...)</code> patterns on affected installs. <strong>Fix this first.</strong></td></tr>
+<tr><td><code>~/.openclaw/openclaw.json</code></td><td>Config file — API keys live here (layer 4)</td></tr>
+<tr><td><code>~/.openclaw/service-env/ai.openclaw.gateway.env</code></td><td>Runtime env file — <strong>keys here win over config at runtime</strong> (layer 1). Generated from <code>~/.openclaw/.env</code> on install.</td></tr>
 <tr><td><code>~/.openclaw/agents/main/agent/models.json</code></td><td>Agent model catalog — auto-patched by WatchPath (layer 4)</td></tr>
 <tr><td><code>~/Library/LaunchAgents/ai.openclaw.gateway.plist</code></td><td>LaunchAgent plist — check for <code>$()</code> in EnvironmentVariables (layer 2)</td></tr>
 <tr><td><code>~/Library/LaunchAgents/local.openclaw.fix-models-keys.plist</code></td><td>WatchPath defender — fires on models.json changes</td></tr>
