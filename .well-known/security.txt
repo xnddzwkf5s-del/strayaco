@@ -1,0 +1,5 @@
+Contact: mailto:vincent@strayaco.com.au
+Expires: 2027-05-19T00:00:00+10:00
+Preferred-Languages: en
+Canonical: https://strayaco.com.au/.well-known/security.txt
+Policy: https://strayaco.com.au/privacy
