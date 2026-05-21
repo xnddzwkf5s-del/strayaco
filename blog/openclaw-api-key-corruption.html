@@ -105,7 +105,7 @@
 
 <section class="page-hero">
     <div class="container">
-        <p class="meta">May 4, 2026 &mdash; Infrastructure</p>
+        <p class="meta">4 May 2026 &mdash; Infrastructure</p>
         <h1>OpenClaw API Key Corruption: Anatomy of a Silent 401</h1>
         <div>
             <span class="tag">OpenClaw</span>
@@ -299,7 +299,7 @@ curl -s -o /dev/null -w "%{http_code}" \
 
 <h2>Permanent Defenses</h2>
 
-<h3>Update (May 7, 2026): Why the Original Fix Didn't Stick</h3>
+<h3>Update (7 May 2026): Why the Original Fix Didn't Stick</h3>
 
 <p>After applying the original fix on May 4 (patching the service env file and <code>models.json</code>), the problem recurred within days. Why? Because <strong><code>~/.openclaw/.env</code></strong> — the state-dir dotenv file written by <code>openclaw setup</code> on first install — still contained unresolved <code>$(security ...)</code> patterns. Every <code>npm update</code> triggers <code>openclaw gateway install --force</code>, which:</p>
 
