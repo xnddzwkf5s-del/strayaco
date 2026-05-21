@@ -125,7 +125,7 @@
 </div>
 
 <div class="callout">
-<strong>TL;DR:</strong> The LaunchAgent plist gets silently replaced during updates, wiping your custom port and environment variables. The fix is a pre-update backup script and a post-update restore script. Total fix time: 10 seconds instead of 10 minutes.
+<strong>TL;DR:</strong> The LaunchAgent plist gets silently replaced during updates, wiping your custom port and environment variables. <strong>Best approach: use the automated <code>update-openclaw.sh</code> script</strong> which handles backup, update, recovery, and post-update health checks automatically. If you prefer the manual method, use the backup/restore scripts below.
 </div>
 
 <hr>
@@ -428,6 +428,25 @@ openclaw gateway status</code></pre>
 <p>The backup-and-restore pattern here isn't unique to OpenClaw — it applies to any macOS LaunchAgent or Linux systemd service that stores custom configuration in a file that gets regenerated during updates. The principle is the same: identify the fragile file, back it up before mutation, and have a scripted restore path.</p>
 
 <p>Ten seconds of prevention beats ten minutes of debugging. Every time.</p>
+
+<h2>The Approved Workflow: Automated</h2>
+
+<p>For the recommended update process, Straya Co maintains a canonical <code>update-openclaw.sh</code> script that automates the entire sequence:</p>
+
+<ol>
+  <li><strong>Pre-update backup</strong> — saves plist, config, .env, models.json</li>
+  <li><strong>Graceful gateway stop</strong> — <code>launchctl bootout</code> with retry</li>
+  <li><strong>Brew upgrade</strong> — updates the OpenClaw.app cask</li>
+  <li><strong>npm update -g openclaw</strong> — updates the CLI runtime (critical: brew only updates the cask, NOT the CLI)</li>
+  <li><strong>Repair with doctor</strong> — <code>openclaw doctor --yes</code> (non-destructive enable→bootstrap, safer than install --force)</li>
+  <li><strong>Stability check</strong> — verifies gateway responds within 30s</li>
+  <li><strong>Auto-rollback</strong> — restores from backup if update fails</li>
+  <li><strong>Post-update health check</strong> — schedules a one-shot cron to verify gateway 5 min after update</li>
+</ol>
+
+<p>A companion <code>gateway-heartbeat.sh</code> script runs 30s after every system boot and detects post-update outages, auto-recovering with <code>openclaw doctor --yes</code>.</p>
+
+<p>If you prefer the manual approach, the backup/restore scripts on this page are a lightweight alternative — but they don't include the npm update step (a common source of version mismatch), auto-rollback, or post-update verification.</p>
 
 </div>
 </section>
