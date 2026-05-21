@@ -138,7 +138,7 @@
 
 <p>This plist contains everything the service needs to start: the Node.js path, the gateway command, the port number, environment variables (including API keys), and log paths.</p>
 
-<p>When you run <code>openclaw update</code> (or <code>brew upgrade openclaw</code>), the update process calls <code>openclaw gateway install --force</code> under the hood. That command <strong>writes a fresh plist from a template</strong> — and the template doesn't know about your custom port, your custom PATH, or your API keys.</p>
+<p>When you run <code>openclaw update</code> (or <code>brew upgrade openclaw</code>), the update process may replace the gateway's LaunchAgent plist. The new plist <strong>doesn't know about your custom configuration</strong> — and the template doesn't know about your custom port, custom PATH, or your API keys.</p>
 
 <p>The result: the service tries to start with a vanilla config, fails silently, and your dashboard is dead.</p>
 
@@ -158,7 +158,7 @@
 <ol>
 <li><strong>Plist overwrite:</strong> The plist is replaced with a vanilla one. Missing port, missing env vars, service fails to start.</li>
 <li><strong>API key desync:</strong> Even if the plist survives, <code>models.json</code> can fall out of sync with your real config. The gateway loads, but model switching fails with "assistant turn failed before producing content" because <code>models.json</code> still has placeholder keys like <code>YOUR_ANTHROPIC_API_KEY</code>.</li>
-<li><strong>Env file corruption:</strong> <code>~/.openclaw/.env</code> contains unresolved <code>$(security ...)</code> shell commands. Every <code>install --force</code> reads this file and regenerates the poisoned service env. Model calls return 401 with <code>Your api key: **** -w) is invalid</code>. See the <a href="openclaw-api-key-corruption.html" style="text-decoration:underline;">API Key Corruption post</a> for the permanent fix.</li>
+<li><strong>Env file corruption:</strong> <code>~/.openclaw/.env</code> contains unresolved <code>$(security ...)</code> shell commands. When the gateway reads this file, it treats the shell syntax as literal strings. Model calls return 401. See the <a href="openclaw-api-key-corruption.html" style="text-decoration:underline;">API Key Corruption post</a> for the permanent fix.</li>
 </ol>
 
 <hr>
@@ -277,16 +277,13 @@ with open(os.path.expanduser(
 print('✓ API keys synced to models.json')
 EOF
 
-# 3. Reinstall service and reload
-echo "Reinstalling gateway service..."
-openclaw gateway install --force 2>&1 || true
+# 3. Repair and reload (safe method)
+echo "Running doctor to repair gateway..."
+openclaw doctor --yes 2>&1 || true
 
-echo "Reloading service..."
-launchctl bootout gui/$(id -u)/ai.openclaw.gateway \
-    2>/dev/null || true
-sleep 1
-launchctl bootstrap gui/$(id -u) \
-    ~/Library/LaunchAgents/ai.openclaw.gateway.plist
+echo "Verifying..."
+sleep 3
+openclaw gateway status 2>&1
 
 sleep 2
 
@@ -359,12 +356,10 @@ with open('$HOME/.openclaw/agents/main/agent/models.json',
 print('Keys synced')
 "</code></pre>
 
-<h3>Step 3: Reinstall and reload</h3>
-<pre><code>openclaw gateway install --force
-launchctl bootout gui/$(id -u)/ai.openclaw.gateway 2>/dev/null
-sleep 1
-launchctl bootstrap gui/$(id -u) \
-    ~/Library/LaunchAgents/ai.openclaw.gateway.plist</code></pre>
+<h3>Step 3: Repair with doctor</h3>
+<pre><code>openclaw doctor --yes
+sleep 3
+openclaw gateway status</code></pre>
 
 <h3>Step 4: Verify</h3>
 <pre><code>openclaw gateway status</code></pre>
@@ -374,7 +369,7 @@ launchctl bootstrap gui/$(id -u) \
 
 <h2>Hardening the Plist (Prevention)</h2>
 
-<p>While we can't stop <code>openclaw gateway install --force</code> from generating a fresh plist, we can make the plist more robust so it survives <em>most</em> issues. The most common fix: add a proper <code>PATH</code> to the environment variables.</p>
+<p>While we can't stop the update process from generating a fresh plist, we can make recovery safer. Instead of the destructive <code>install --force</code> (which uses bootout→bootstrap and can leave the LaunchAgent orphaned), use <strong><code>openclaw doctor --yes</code></strong> — it uses the safer <code>enable→bootstrap→kickstart</code> fallback pattern. If the bootstrap fails, the existing LaunchAgent isn't orphaned.</p>
 
 <p>Edit <code>~/Library/LaunchAgents/ai.openclaw.gateway.plist</code> and add this inside the <code>&lt;dict&gt;</code> under <code>EnvironmentVariables</code>:</p>
 
