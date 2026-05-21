@@ -1,1 +1,50 @@
+# ── Sensitive — NEVER commit these ─────────────────────────────────────
+.env
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+*.sql
+backups/
+instance/
+data/
+
+# ── Archives (backup files) ────────────────────────────────────────────
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.7z
+*.zip
+
+# ── Crypto / secrets ───────────────────────────────────────────────────
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.cer
+*.crt
+
+# ── OS ─────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# ── IDE ────────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ── Jekyll / GitHub Pages ──────────────────────────────────────────────
+_site/
+.jekyll-cache/
+.jekyll-metadata
+vendor/
+
+# ── Legacy ─────────────────────────────────────────────────────────────
 omlx/
+node_modules/
