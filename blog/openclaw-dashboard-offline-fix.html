@@ -103,7 +103,7 @@
 
 <section class="page-hero">
     <div class="container">
-        <p class="meta">4 May 2026 &mdash; Infrastructure &mdash; <strong>Updated 7 May 2026</strong> (prevent recurrence with .env fix)</p>
+        <p class="meta">4 May 2026 &mdash; Infrastructure &mdash; <strong>Updated 21 May 2026</strong> (npm check fix, expanded features, TTY requirement)</p>
         <h1>OpenClaw Dashboard Offline After Update? Here's the Fix</h1>
         <div>
             <span class="tag">OpenClaw</span>
@@ -125,7 +125,7 @@
 </div>
 
 <div class="callout">
-<strong>TL;DR:</strong> The LaunchAgent plist gets silently replaced during updates, wiping your custom port and environment variables. <strong>Best approach: use the automated <code>update-openclaw.sh</code> script</strong> which handles backup, update, recovery, and post-update health checks automatically. If you prefer the manual method, use the backup/restore scripts below.
+<strong>TL;DR:</strong> The LaunchAgent plist gets silently replaced during updates, wiping your custom port and environment variables. <strong>Best approach: use the automated <code>update-openclaw.sh</code> script</strong> which handles backup, update, recovery, and post-update health checks automatically. Run it from Terminal.app: <code>bash ~/.openclaw/scripts/update-openclaw.sh</code>. <strong>Important:</strong> Do NOT run the update script via the OpenClaw web dashboard — it needs an interactive terminal for brew/npm upgrades, otherwise they are silently skipped. If you prefer the manual method, use the backup/restore scripts below.
 </div>
 
 <hr>
@@ -138,7 +138,7 @@
 
 <p>This plist contains everything the service needs to start: the Node.js path, the gateway command, the port number, environment variables (including API keys), and log paths.</p>
 
-<p>When you run <code>openclaw update</code> (or <code>brew upgrade openclaw</code>), the update process may replace the gateway's LaunchAgent plist. The new plist <strong>doesn't know about your custom configuration</strong> — and the template doesn't know about your custom port, custom PATH, or your API keys.</p>
+<p>When you run a standard <code>brew upgrade openclaw</code> (the desktop cask) or <code>npm update -g openclaw</code> (the CLI runtime), the update process may replace the gateway's LaunchAgent plist. The new plist <strong>doesn't know about your custom configuration</strong> — and the template doesn't know about your custom port, custom PATH, or your API keys.</p>
 
 <p>The result: the service tries to start with a vanilla config, fails silently, and your dashboard is dead.</p>
 
@@ -206,7 +206,7 @@ echo "✓ Version: $(cat "$BACKUP_DIR/version.txt")"
 
 echo ""
 echo "=== Backup complete: $BACKUP_DIR ==="
-echo "You can now run: openclaw update"
+echo "You can now run: bash ~/.openclaw/scripts/update-openclaw.sh"
 echo "If the dashboard goes offline, run:"
 echo "  ~/.openclaw/scripts/post-update-restore.sh $BACKUP_DIR"</code></pre>
 
@@ -302,15 +302,25 @@ echo "Dashboard: http://&lt;your-ip&gt;:18789/"</code></pre>
 
 <p>Once the scripts are in place, the update process becomes:</p>
 
-<pre><code># 1. Always run this first
+<pre><code># The one-command approach (recommended):
+bash ~/.openclaw/scripts/update-openclaw.sh
+
+# Or step-by-step manual:
+# 1. Always run this first
 ~/.openclaw/scripts/pre-update-backup.sh
 
 # 2. Do the update
-openclaw update
-# or: brew upgrade openclaw
+brew upgrade openclaw && npm update -g openclaw
 
-# 3. If the dashboard is offline after the update:
+# 3. Repair and restart
+openclaw doctor --yes
+
+# 4. If the dashboard is offline after any step:
 ~/.openclaw/scripts/post-update-restore.sh</code></pre>
+
+<div class="callout">
+<strong>⚠️ Important:</strong> Always run the update script from <strong>Terminal.app</strong>, not via the OpenClaw web dashboard, cron, or an SSH pipe. The script checks for an interactive terminal (<code>[ -t 0 ]</code>) and silently skips brew/npm upgrades when no TTY is present — doing only a doctor repair, not an actual update.
+</div>
 
 <p>The restore script handles all failure modes automatically:</p>
 
@@ -371,6 +381,10 @@ openclaw gateway status</code></pre>
 
 <p>While we can't stop the update process from generating a fresh plist, we can make recovery safer. Instead of the destructive <code>install --force</code> (which uses bootout→bootstrap and can leave the LaunchAgent orphaned), use <strong><code>openclaw doctor --yes</code></strong> — it uses the safer <code>enable→bootstrap→kickstart</code> fallback pattern. If the bootstrap fails, the existing LaunchAgent isn't orphaned.</p>
 
+<div class="callout">
+<strong>Note:</strong> The automated <code>update-openclaw.sh</code> script (described below) handles the plist, PATH, and LaunchAgent lifecycle automatically. If you're using the automated script, manually editing the plist to add PATH is no longer necessary.
+</div>
+
 <p>Edit <code>~/Library/LaunchAgents/ai.openclaw.gateway.plist</code> and add this inside the <code>&lt;dict&gt;</code> under <code>EnvironmentVariables</code>:</p>
 
 <pre><code>&lt;key&gt;PATH&lt;/key&gt;
@@ -390,7 +404,11 @@ $HOME/.npm-global/bin:$HOME/bin&lt;/string&gt;</code></pre>
 
 <p>Want to verify your backup and restore flow works before the next real update?</p>
 
-<pre><code># 1. Run the backup
+<pre><code># Option A: Dry-run the automated script (recommended)
+bash ~/.openclaw/scripts/update-openclaw.sh --force
+
+# Option B: Manual test of backup/restore flow
+# 1. Run the backup
 ~/.openclaw/scripts/pre-update-backup.sh
 
 # 2. Simulate a "bad" plist by renaming it
@@ -416,7 +434,10 @@ openclaw gateway status</code></pre>
 <tr><td><code>~/.openclaw/agents/main/agent/models.json</code></td><td>Model config (must stay in sync with openclaw.json)</td></tr>
 <tr><td><code>~/.openclaw/scripts/pre-update-backup.sh</code></td><td>Pre-update backup script</td></tr>
 <tr><td><code>~/.openclaw/scripts/post-update-restore.sh</code></td><td>Post-update restore script</td></tr>
+<tr><td><code>~/.openclaw/scripts/update-openclaw.sh</code></td><td>Automated update script — the recommended way to update</td></tr>
+<tr><td><code>~/.openclaw/scripts/gateway-heartbeat.sh</code></td><td>Boot-time health check — auto-recovers gateway after system restart</td></tr>
 <tr><td><code>~/.openclaw/logs/gateway.err.log</code></td><td>Error log — check here if the gateway won't start</td></tr>
+<tr><td><code>~/.openclaw/logs/update-*.log</code></td><td>Update logs — detailed output from each update run</td></tr>
 </table>
 
 <hr>
@@ -434,19 +455,31 @@ openclaw gateway status</code></pre>
 <p>For the recommended update process, Straya Co maintains a canonical <code>update-openclaw.sh</code> script that automates the entire sequence:</p>
 
 <ol>
-  <li><strong>Pre-update backup</strong> — saves plist, config, .env, models.json</li>
-  <li><strong>Graceful gateway stop</strong> — <code>launchctl bootout</code> with retry</li>
-  <li><strong>Brew upgrade</strong> — updates the OpenClaw.app cask</li>
-  <li><strong>npm update -g openclaw</strong> — updates the CLI runtime (critical: brew only updates the cask, NOT the CLI)</li>
-  <li><strong>Repair with doctor</strong> — <code>openclaw doctor --yes</code> (non-destructive enable→bootstrap, safer than install --force)</li>
-  <li><strong>Stability check</strong> — verifies gateway responds within 30s</li>
-  <li><strong>Auto-rollback</strong> — restores from backup if update fails</li>
-  <li><strong>Post-update health check</strong> — schedules a one-shot cron to verify gateway 5 min after update</li>
+  <li><strong>Pre-update backup</strong> — saves plist, config, .env, agent models (all agents), filebrowser configuration, cloudflared config, and workspaces</li>
+  <li><strong>Lock file</strong> — prevents concurrent update runs; detects and clears stale locks</li>
+  <li><strong>Connectivity check</strong> — verifies npm registry is reachable before stopping the gateway (prevents the nightmare scenario of stopping the gateway, failing to download updates, and ending up with nothing running)</li>
+  <li><strong>Graceful gateway stop</strong> — <code>launchctl bootout</code> with 30s timeout, escalating to SIGTERM → SIGKILL if the process hangs; verifies the port is free before proceeding</li>
+  <li><strong>Brew cask upgrade</strong> — updates the OpenClaw.app cask with retry</li>
+  <li><strong>npm CLI upgrade</strong> — <code>npm update -g openclaw</code> with retry (critical: brew only updates the cask, NOT the CLI runtime; skipping this means <code>openclaw --version</code> stays on the old version)</li>
+  <li><strong>Repair with doctor</strong> — <code>openclaw doctor --yes</code> (non-destructive enable→bootstrap; if bootstrap fails, existing LaunchAgent isn't orphaned — unlike the old install --force approach)</li>
+  <li><strong>Startup with layered fallback</strong> — tries bootstrap → load → kickstart in sequence, each with verification</li>
+  <li><strong>Stability verification</strong> — requires <em>2 consecutive</em> HTTP probes (1s apart) before declaring success — catches the "started but crashed 3 seconds later" edge case; up to 5 retries with kickstart last-resort</li>
+  <li><strong>Auto-rollback</strong> — if the gateway fails to start after all retries, automatically restores from the pre-update backup and sends a warning email</li>
+  <li><strong>Post-update health check</strong> — schedules a one-shot cron job to verify the gateway is still running 5 minutes after the update, with a marker-file fallback if cron scheduling isn't available</li>
+  <li><strong>Email notifications</strong> — sends ✅ success or ❌ failure emails automatically after every run</li>
 </ol>
 
-<p>A companion <code>gateway-heartbeat.sh</code> script runs 30s after every system boot and detects post-update outages, auto-recovering with <code>openclaw doctor --yes</code>.</p>
+<p><strong>Companion:</strong> A <code>gateway-heartbeat.sh</code> script runs 30s after every system boot (via LaunchAgent) and detects post-update outages the update script's 5-minute check might have missed, auto-recovering with <code>openclaw doctor --yes</code>.</p>
 
-<p>If you prefer the manual approach, the backup/restore scripts on this page are a lightweight alternative — but they don't include the npm update step (a common source of version mismatch), auto-rollback, or post-update verification.</p>
+<div class="callout">
+<strong>⚠️ Important: Run from Terminal.app only.</strong> The script checks for an interactive terminal (<code>[ -t 0 ]</code>). If run via the OpenClaw web dashboard, cron, or an SSH pipe, it will silently skip brew and npm upgrades — doing only a doctor repair, not an actual update. Always run: <code>bash ~/.openclaw/scripts/update-openclaw.sh</code> from Terminal.app.
+</div>
+
+<div class="callout">
+<strong>🔧 Fix (21 May 2026):</strong> The npm update check had a logic bug where <code>npm outdated</code> (exit code 1 = updates available) was treated as "up to date", silently skipping npm CLI upgrades. This was fixed on 21 May. If you downloaded the script before that date, re-download it — or verify both brew cask AND npm CLI match expected version with <code>openclaw --version</code> after an update.
+</div>
+
+<p>If you prefer the manual approach, the backup/restore scripts on this page are a lightweight alternative — but they don't include lock files, connectivity checks, layered startup with retries, auto-rollback, post-update verification, or email notifications.</p>
 
 </div>
 </section>
