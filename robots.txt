@@ -1,5 +1,4 @@
 User-agent: *
-Disallow: /.git/
 Allow: /
 
 Sitemap: https://strayaco.com.au/sitemap.xml
