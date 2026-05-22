@@ -320,6 +320,26 @@ sudo fail2ban-client status sshd</code></pre>
 
 
 
+<section class="post-content" style="background:var(--cream);padding:2rem 0;">
+    <div class="container">
+        <h2>📑 On This Page</h2>
+        <ol style="columns:2;column-gap:2rem;list-style-position:inside;">
+            <li><a href="#vps-security" style="color:var(--dark);">🧑 Human — VPS &amp; Security Setup</a></li>
+            <li><a href="#ai-verify" style="color:var(--dark);">🤖 AI — Execute After Human Setup</a></li>
+            <li><a href="#openclaw-install" style="color:var(--dark);">🧑 Human — OpenClaw Installation</a></li>
+            <li><a href="#openclaw-config" style="color:var(--dark);">🤖 AI — Configure &amp; Optimise</a></li>
+            <li><a href="#workspace" style="color:var(--dark);">🧑 Human — Workspace &amp; AI Soul</a></li>
+            <li><a href="#backup" style="color:var(--dark);">💾 Backup Strategy — The Three-Layer Approach</a></li>
+            <li><a href="#health-check" style="color:var(--dark);">🩺 Health Check Scripts</a></li>
+            <li><a href="#off-server" style="color:var(--dark);">📤 Off-Server Backup Pull</a></li>
+            <li><a href="#email" style="color:var(--dark);">🧑 Human — Email Setup</a></li>
+            <li><a href="#lessons" style="color:var(--dark);">📚 Complete Lessons Learned</a></li>
+        </ol>
+    </div>
+</section>
+
+
+
 <section class="post-content">
     <div class="container">
         <h2 id="ai-verify">🤖 AI — Execute After Human Setup</h2>
@@ -538,7 +558,7 @@ curl -s -o /dev/null -w "%{http_code}" https://your-domain.com
     <div class="container">
         <h2 id="openclaw-install">🧑 Human — OpenClaw Installation & Configuration</h2>
 
-        <p>OpenClaw is a Node.js application that runs as a background service (called the Gateway) on your VPS. It connects your chat channels (Telegram, webchat, etc.) to large language models like DeepSeek, Claude, and Ollama. Think of it as a smart switchboard — it routes messages from your family's phones through AI models and back to you, all while keeping your data on your own server.</p>
+        <p>OpenClaw is a Node.js application that runs as a background service (called the Gateway) on your VPS. It connects your chat channels (Telegram, webchat, etc.) to large language models like DeepSeek, Claude, and Ollama. Think of it as your personal AI assistant running on your own server — you message it via Telegram, it processes through an AI model, and replies back, all while keeping your data private.</p>
 
         <h3>Step 1: Install Node.js</h3>
         <p>OpenClaw requires Node.js v22 or later. DigitalOcean's Ubuntu 24.04 LTS ships with an older version, so you'll need the NodeSource repository:</p>
@@ -709,7 +729,7 @@ GATEWAY_AUTH_TOKEN=your-gateway-token</code></pre>
         </div>
 
         <h3>C. Agent Configuration</h3>
-        <p>Each "agent" is a personality/profile that routes messages through specific models. You have one main agent (your own) and can create separate agents for family members. Each agent has its own workspace, model preferences, and skill set.</p>
+        <p>An "agent" is your AI personality — it defines which model to use, how much context to keep, and what tools it can access. For a single-user setup, you only need one agent (the <code>main</code> agent):</p>
         <pre><code>{
   "agents": {
     "defaults": {
@@ -739,22 +759,16 @@ GATEWAY_AUTH_TOKEN=your-gateway-token</code></pre>
         "anthropic/claude-sonnet-4-6": {
           "alias": "claude-sonnet-4-6"
         }
+      },
+      "workspace": "/home/ubuntu/.openclaw/workspace",
+      "contextPruning": {
+        "mode": "cache-ttl",
+        "ttl": "5m"
       }
     },
     "list": [
       {
-        "id": "main",
-        "model": {
-          "primary": "deepseek/deepseek-v4-flash"
-        }
-      },
-      {
-        "id": "agent-family-1",
-        "name": "Family Member",
-        "workspace": "/home/ubuntu/.openclaw/workspace-melinda",
-        "model": {
-          "primary": "deepseek/deepseek-v4-flash"
-        }
+        "id": "main"
       }
     ]
   }
@@ -763,48 +777,38 @@ GATEWAY_AUTH_TOKEN=your-gateway-token</code></pre>
         <p>Key concepts:</p>
         <ul>
             <li><strong>Primary model</strong> — The default model used for conversations. Format: <code>provider/model-id</code>.</li>
-            <li><strong>Fallbacks</strong> — If the primary model is unavailable (API down, rate limited), OpenClaw automatically tries the fallback in order. This keeps your agents running even during outages.</li>
-            <li><strong>Model aliases</strong> — Short, human-readable names for your models. Instead of typing <code>deepseek/deepseek-v4-flash</code>, you can reference it as <code>deepseek-v4-flash</code>. Aliases make the config easier to read and change.</li>
-            <li><strong>Per-model params</strong> — Each model can have custom <code>max_tokens</code>, <code>timeout</code> (in ms), and <code>max_retries</code>. Fast models like V4 Flash can have short timeouts; reasoning models like DeepSeek Reasoner may need longer ones.</li>
+            <li><strong>Fallbacks</strong> — If the primary model is unavailable (API down, rate limited), OpenClaw automatically tries the next model. This keeps your agent running even during outages.</li>
+            <li><strong>Model aliases</strong> — Short, human-readable names. Instead of typing <code>deepseek/deepseek-v4-flash</code>, you just say <code>deepseek-v4-flash</code>.</li>
+            <li><strong>Workspace</strong> — Where your AI keeps its files: personality docs (SOUL.md), memory, and task lists.</li>
+            <li><strong>contextPruning</strong> — Cleans up old conversation context every 5 minutes to keep token usage low.</li>
         </ul>
 
         <h3>D. Channels — Telegram Bot Setup</h3>
-        <p>Channels are how your family talks to their agents. Telegram is the most popular — create one bot per family member using <a href="https://t.me/BotFather" target="_blank">@BotFather</a> on Telegram, then configure each one:</p>
+        <p>Telegram is the simplest way to talk to your AI agent. Create one bot using <a href="https://t.me/BotFather" target="_blank">@BotFather</a> on Telegram, then configure it:</p>
         <pre><code>{
   "channels": {
     "telegram": {
       "enabled": true,
+      "dmPolicy": "pairing",
       "accounts": {
         "default": {
           "botToken": "YOUR_TELEGRAM_BOT_TOKEN",
           "dmPolicy": "pairing",
           "allowFrom": ["1234567890"]
-        },
-        "agent-family-1": {
-          "botToken": "TELEGRAM_BOT_TOKEN_AGENT_1",
-          "dmPolicy": "allowlist",
-          "allowFrom": ["1234567890"],
-          "groupAllowFrom": ["1234567890"]
-        },
-        "agent-family-3": {
-          "botToken": "TELEGRAM_BOT_TOKEN_AGENT_2",
-          "dmPolicy": "allowlist",
-          "allowFrom": ["1234567890"],
-          "groupAllowFrom": ["1234567890"]
         }
       }
     }
   }
 }</code></pre>
 
-        <p>Each bot account gets its own Telegram bot token (created via @BotFather). Fields explained:</p>
+        <p>Fields explained:</p>
         <ul>
-            <li><strong>dmPolicy</strong> — <code>pairing</code> means users request pairing and you approve. <code>allowlist</code> means only specific Telegram user IDs can message the bot.</li>
-            <li><strong>allowFrom</strong> — Telegram user IDs (numeric) that are allowed to DM this bot. Get a user's ID by messaging <code>@userinfobot</code> on Telegram.</li>
-            <li><strong>groupAllowFrom</strong> — Same concept but for group chats where the bot is added.</li>
+            <li><strong>botToken</strong> — The token @BotFather gives you when you create your bot. Paste it here.</li>
+            <li><strong>dmPolicy</strong> — <code>pairing</code> means only users you've approved can talk to the bot. <code>allowlist</code> restricts to specific Telegram user IDs.</li>
+            <li><strong>allowFrom</strong> — Your Telegram user ID (numeric). Message <code>@userinfobot</code> on Telegram to get your ID.</li>
         </ul>
 
-        <p>To get your Telegram user ID, message the <code>@userinfobot</code> on Telegram. It will reply with your numeric ID — save that number.</p>
+        <p>To get your Telegram user ID, message <code>@userinfobot</code> on Telegram. It replies with your numeric ID — save that number.</p>
 
         <h3>E. Gateway — Port, Binding, and Auth</h3>
         <p>The Gateway is your OpenClaw server's network front door. You control who can connect and how:</p>
@@ -846,29 +850,6 @@ GATEWAY_AUTH_TOKEN=your-gateway-token</code></pre>
             <li><strong>trustedProxies</strong> — IPs that are allowed to set the <code>X-Forwarded-For</code> header. Include your reverse proxy (nginx, Cloudflare) IPs here.</li>
         </ul>
 
-        <h3>F. Bindings — Routing Family Members to Their Agents</h3>
-        <p>Bindings connect a Telegram account to a specific agent. This is how Family Member's bot routes to Family Member's agent workspace, and yours routes to yours:</p>
-        <pre><code>{
-  "bindings": [
-    {
-      "agentId": "agent-family-1",
-      "match": {
-        "channel": "telegram",
-        "accountId": "agent-family-1"
-      }
-    },
-    {
-      "agentId": "agent-family-3",
-      "match": {
-        "channel": "telegram",
-        "accountId": "agent-family-3"
-      }
-    }
-  ]
-}</code></pre>
-
-        <p>When Family Member messages her Telegram bot, OpenClaw checks the bindings, finds the <code>melinda</code> agent, and routes the message there. That agent has its own workspace, model preferences, and skill set — completely isolated from yours.</p>
-
         <hr>
 
         <h2>🤖 AI — Configure & Optimise</h2>
@@ -897,14 +878,14 @@ openclaw logs</code></pre>
   "reasoning": "hidden"   # Use reasoning internally but hide output
 }</code></pre>
 
-        <p>This is configured in <code>agents.defaults.models</code> per model, or at the agent level. For family members who don't need to see internal reasoning, set it to <code>hidden</code> to save tokens and keep responses concise.</p>
+        <p>This is configured in <code>agents.defaults.models</code> per model. For everyday use, keep reasoning <code>hidden</code> to save tokens and keep responses concise.</p>
 
         <h3>Test model fallback behaviour</h3>
         <pre><code># Temporarily test with a different primary model
 openclaw infer --model deepseek/deepseek-reasoner "Hello, test."
 
 # Or test through a specific agent
-openclaw agent --agent melinda --message "What model are you using?"</code></pre>
+openclaw agent --message "What model are you using?"</code></pre>
 
         <p>The <code>agent</code> command runs a single-turn conversation through the Gateway, respecting the agent's model config including fallbacks.</p>
 
