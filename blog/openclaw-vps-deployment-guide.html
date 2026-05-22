@@ -1,0 +1,2205 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenClaw AI Agent — Complete VPS Deployment Guide - Straya Co Blog</title>
+    <meta name="description" content="A hands-on guide to deploying OpenClaw on a Digital Ocean VPS with security, backup, email pipeline, and AI workspace setup. Separate human and AI sections.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --dark:#1a1a2e; --gold:#c9a96e; --gold-dark:#b8945a; --cream:#f8f6f1; --white:#fff; --gray:#6b7280; --gray-light:#e8e4dd; --radius:4px; --radius-lg:12px; --shadow:0 4px 20px rgba(0,0,0,0.08); --shadow-lg:0 20px 60px rgba(0,0,0,0.15); --transition:all 0.35s cubic-bezier(0.4,0,0.2,1); }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Inter',sans-serif;color:var(--dark);background:var(--white);line-height:1.7;overflow-x:hidden;}
+        h1,h2,h3,h4{font-family:'Playfair Display',serif;font-weight:600;line-height:1.2;}
+        .container{max-width:800px;margin:0 auto;padding:0 32px;}
+        a{text-decoration:none;color:inherit;}
+        img{max-width:100%;height:auto;}
+        code{font-family:monospace;background:var(--cream);padding:2px 6px;border-radius:3px;font-size:0.9em;}
+        pre{background:var(--dark);color:#e2e8f0;padding:1.25rem;border-radius:var(--radius-lg);overflow-x:auto;margin:1.5rem 0;font-size:0.85rem;line-height:1.6;}
+        pre code{background:transparent;padding:0;color:inherit;font-size:0.85rem;}
+        table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:0.9rem;}
+        th,td{padding:0.75rem 1rem;text-align:left;border-bottom:1px solid var(--gray-light);}
+        th{background:var(--dark);color:var(--white);font-weight:600;}
+        tr:last-child td{border-bottom:none;}
+        p{margin-bottom:1rem;}
+        ul,ol{margin:1rem 0 1rem 1.5rem;}
+        li{margin-bottom:0.4rem;}
+        hr{margin:2rem 0;border:none;border-top:1px solid var(--gray-light);}
+
+        #site-header{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(26,26,46,0.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,169,110,0.2);}
+        .header-inner{max-width:1200px;margin:0 auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:80px;}
+        .logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--white);letter-spacing:0.02em;}
+        .logo span{color:var(--gold);}
+        nav ul{display:flex;list-style:none;gap:2rem;}
+        nav a{color:rgba(255,255,255,0.85);font-size:0.85rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;transition:var(--transition);}
+        nav a:hover,nav a.active{color:var(--gold);}
+        .btn-cta{background:var(--gold);color:var(--dark);padding:0.6rem 1.5rem;border-radius:var(--radius);font-size:0.82rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;transition:var(--transition);}
+        .btn-cta:hover{background:var(--gold-dark);}
+        .nav-icon{display:flex;flex-direction:column;justify-content:space-between;width:26px;height:20px;cursor:pointer;z-index:1100;flex-shrink:0;}
+        .nav-icon span{display:block;height:2px;width:100%;background:#fff;border-radius:9px;transition:all 0.25s ease-in-out;transform-origin:left center;}
+
+        .page-hero{padding:140px 0 40px;background:var(--dark);color:var(--white);}
+        .page-hero h1{font-size:2.4rem;margin-bottom:0.5rem;}
+        .page-hero .meta{color:var(--gold);font-size:0.85rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;}
+        .post-content{padding:60px 0 80px;}
+        .post-content h2{margin:2.5rem 0 1rem;font-size:1.6rem;}
+        .post-content h3{margin:2rem 0 0.75rem;font-size:1.2rem;color:var(--gray);}
+        .post-content ul{margin:1rem 0;}
+        .post-content li{margin-bottom:0.4rem;}
+        .post-content table{margin:1.5rem 0;}
+        .post-content .tag{display:inline-block;background:var(--cream);color:var(--gray);padding:0.3rem 0.8rem;border-radius:20px;font-size:0.8rem;margin-right:0.5rem;margin-bottom:0.5rem;border:1px solid var(--gray-light);}
+
+        footer{background:var(--dark);color:rgba(255,255,255,0.7);padding:60px 0 30px;margin-top:60px;}
+        .footer-inner{max-width:1200px;margin:0 auto;padding:0 32px;}
+        .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;padding-bottom:2rem;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:2rem;}
+        .footer-brand{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--white);margin-bottom:0.75rem;}
+        .footer-brand span{color:var(--gold);}
+        .footer-col h4{color:var(--white);margin-bottom:1rem;font-size:1rem;}
+        .footer-col ul{list-style:none;}
+        .footer-col li{margin-bottom:0.5rem;}
+        .footer-col a:hover{color:var(--gold);}
+        .footer-bottom{text-align:center;font-size:0.85rem;}
+
+        .backdrop{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:900;opacity:0;visibility:hidden;transition:var(--transition);}
+        .backdrop.open{opacity:1;visibility:visible;}
+        .slide-navigation{position:fixed;top:0;right:0;bottom:0;width:320px;background:var(--dark);z-index:950;padding:2rem;transform:translateX(100%);transition:var(--transition);}
+        .slide-navigation.open{transform:translateX(0);}
+        .slide-nav-logo{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--white);margin:2rem 0;}
+        .slide-nav-logo span{color:var(--gold);}
+        .slide-nav-grid{display:grid;grid-template-columns:1fr;gap:2rem;}
+        .slide-nav-title{color:var(--gold);font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:1rem;}
+        .slide-nav-links{list-style:none;}
+        .slide-nav-links li{margin-bottom:0.75rem;}
+        .slide-nav-links a{color:rgba(255,255,255,0.75);font-size:0.95rem;transition:var(--transition);}
+        .slide-nav-links a:hover{color:var(--gold);}
+
+        @media(max-width:991px){nav ul{display:none;}}
+        @media(max-width:768px){.container{padding:0 20px;}.header-inner{padding:0 20px;}.footer-inner{padding:0 20px;}.footer-grid{grid-template-columns:1fr;}.page-hero h1{font-size:1.8rem;}.slide-navigation{width:100%;}}
+    </style>
+</head>
+<body>
+
+<header id="site-header">
+    <div class="header-inner">
+        <a href="../index.html" class="logo">Straya <span>Co</span></a>
+        <nav>
+            <ul>
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../services.html">Services</a></li>
+                <li><a href="../about.html">About</a></li>
+                <li><a href="../resources.html">Resources</a></li>
+                <li><a href="index.html" class="active">Blog</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </nav>
+        <a href="../contact.html" class="btn-cta">Get Started</a>
+        <div class="nav-icon" id="navIcon"><span></span><span></span><span></span></div>
+    </div>
+</header>
+
+<section class="page-hero">
+    <div class="container">
+        <p class="meta">22 May 2026 &mdash; Infrastructure / AI</p>
+        <h1>OpenClaw AI Agent — Complete VPS Deployment Guide</h1>
+        <p style="color:rgba(255,255,255,0.7);margin-top:1rem;font-size:1.05rem;">With battle-tested security, backup, email pipeline, and lessons from 3 months of production use</p>
+        <div>
+            <span class="tag">OpenClaw</span>
+            <span class="tag">DigitalOcean</span>
+            <span class="tag">Agentmail</span>
+            <span class="tag">PostgreSQL</span>
+            <span class="tag">Security</span>
+            <span class="tag">Backup</span>
+            <span class="tag">AI Agent</span>
+        </div>
+    </div>
+</section>
+
+<section class="post-content">
+    <div class="container">
+        <h2>🧑 Human — VPS & Security Setup</h2>
+
+        <p>You're about to create a tiny Linux server in the cloud that will run your AI agent 24/7. This section covers everything from clicking "Create Droplet" to locking down SSH so only you (and your recovery console) can get in. Follow every step in order — skipping ahead is how people get locked out.</p>
+
+        <h3>1. Create Your Digital Ocean Droplet</h3>
+
+        <p>Head to <a href="https://cloud.digitalocean.com" target="_blank" rel="noopener">cloud.digitalocean.com</a>, log in (or sign up — you get $200 free credit for 60 days), and click the green <strong>Create Droplet</strong> button. Configure as follows:</p>
+
+        <ul>
+            <li><strong>Region:</strong> Sydney (syd1) — closest to Australia, lowest latency for us</li>
+            <li><strong>Image:</strong> Ubuntu 24.04 LTS</li>
+            <li><strong>Size:</strong> Basic, Regular, $6/mo (1 GB RAM, 1 vCPU, 25 GB SSD)</li>
+            <li><strong>Authentication:</strong> SSH Key (skip password — we'll add your key)</li>
+            <li><strong>Hostname:</strong> Something memorable, like <code>openclaw-agent</code></li>
+        </ul>
+
+        <p>If you haven't added an SSH key yet, click <strong>New SSH Key</strong>. Open your local terminal and run:</p>
+
+        <pre><code># Generate a new key if you don't have one (press Enter for defaults)
+ssh-keygen -t ed25519 -C "your-email@example.com"
+
+# Copy the public key to paste into Digital Ocean
+cat ~/.ssh/id_ed25519.pub</code></pre>
+
+        <p>Copy the output starting with <code>ssh-ed25519</code> and paste it into the Digital Ocean box. Then click <strong>Create Droplet</strong>.</p>
+
+        <p>Wait about 30 seconds. Once it's running, you'll see an IP address (e.g. <code>165.232.45.100</code>). Copy that IP — you'll use it constantly.</p>
+
+        <h3>2. First Login as Root</h3>
+
+        <p>From your local machine, SSH in as root using your key:</p>
+
+        <pre><code>ssh root@YOUR_DROPLET_IP</code></pre>
+
+        <p>You should connect without a password prompt. If it asks for a password, something is wrong with your key setup — go back and check the Digital Ocean SSH key section. If you see a warning about "ECDSA host key" or "authenticity of host," type <code>yes</code> and press Enter.</p>
+
+        <h3>3. Create a Non-Root User</h3>
+
+        <p>Root is too powerful for daily use. One mistake as root can destroy your server. Create a regular user with sudo privileges instead:</p>
+
+        <pre><code># Create a new user (replace 'pang' with your preferred username)
+adduser pang
+
+# You'll be prompted for a password — use a strong one, different from any other password you use
+# Full name, room number, etc. can just be left blank (press Enter)
+
+# Give the user sudo (admin) privileges
+usermod -aG sudo pang</code></pre>
+
+        <h3>4. Copy Your SSH Key to the New User</h3>
+
+        <p>The new user needs your SSH key to log in. While still logged in as root:</p>
+
+        <pre><code># Copy root's authorized keys to the new user
+cp -r ~/.ssh /home/pang/.ssh
+chown -R pang:pang /home/pang/.ssh
+chmod 700 /home/pang/.ssh  # Only user can read/write/execute
+chmod 600 /home/pang/.ssh/authorized_keys  # Only user can read/write</code></pre>
+
+        <p>Now open a second terminal window (keep the root session alive!) and test the new user login:</p>
+
+        <pre><code>ssh pang@YOUR_DROPLET_IP</code></pre>
+
+        <p>If it works without a password, you're golden. <strong>If it doesn't work, don't proceed</strong> — troubleshoot and fix this first.</p>
+
+        <h3>5. ⚠️ Booby Trap — The Biggest Lesson</h3>
+
+        <p>Before you lock SSH down, <strong>open a third terminal window</strong> and SSH in as your new user. Keep it sitting there with a shell prompt. I'm serious. You'll understand why in a moment.</p>
+
+        <p>This "live backup session" is your insurance policy. If you misconfigure something in the next steps and lock yourself out, that session is still open and you can fix things. Without it, you'd need to use the Digital Ocean recovery console (more on that later).</p>
+
+        <h3>6. Harden SSH Configuration</h3>
+
+        <p>Ubuntu 24.04 changed how SSH config works. The old method of editing <code>/etc/ssh/sshd_config</code> directly <em>still works</em>, but the cleaner approach is to use a drop-in file. The system reads everything in <code>/etc/ssh/sshd_config.d/</code> in alphabetical order, and later files override earlier ones.</p>
+
+        <p>Run these commands as <code>pang</code> with sudo:</p>
+
+        <pre><code># Create a drop-in config file (numbers ensure it runs after defaults)
+sudo tee /etc/ssh/sshd_config.d/99-hardening.conf > /dev/null &lt;&lt; 'EOF'
+# Disable root login — reduces attack surface enormously
+PermitRootLogin no
+
+# Only allow key-based authentication (no passwords at all)
+PasswordAuthentication no
+KbdInteractiveAuthentication no
+ChallengeResponseAuthentication no
+
+# Use only Ed25519 keys (most secure, most modern)
+PubkeyAcceptedKeyTypes ssh-ed25519
+
+# Limit login attempts to prevent brute force
+MaxAuthTries 3
+
+# Only allow your specific user to SSH in
+AllowUsers pang
+EOF</code></pre>
+
+        <p>This file disables root login, turns off password auth entirely (including the newer <code>KbdInteractiveAuthentication</code>), restricts key types to Ed25519 only, limits auth retries, and whitelists only your user.</p>
+
+        <p>Now the critical moment. <strong>Test before committing.</strong></p>
+
+        <pre><code># First, check that the SSH config is valid
+sudo sshd -t
+
+# If this prints nothing, the config is good. If it prints an error, fix it.
+# Common errors: typos in parameter names, missing values, unsupported key types
+
+# Now reload the SSH daemon — but leave your backup session open!
+sudo systemctl reload sshd</code></pre>
+
+        <p><strong>Stop right here.</strong> Before closing anything, test from your backup terminal session that SSH still works. Run a command or just check the prompt is alive. The reload command doesn't kill existing sessions, so your three windows should all still be connected.</p>
+
+        <p>Now close your original root session (type <code>exit</code>). Then from a <em>brand new</em> terminal window, try logging in as your new user:</p>
+
+        <pre><code>ssh pang@YOUR_DROPLET_IP</code></pre>
+
+        <p>If it connects successfully, you're done with SSH hardening. <strong>If it fails:</strong></p>
+
+        <ul>
+            <li>Use your still-open backup session to check <code>sudo sshd -t</code> for errors</li>
+            <li>Fix the config in <code>/etc/ssh/sshd_config.d/99-hardening.conf</code></li>
+            <li>Run <code>sudo systemctl reload sshd</code> again</li>
+            <li>Try the new terminal login again</li>
+        </ul>
+
+        <p><strong>Never, ever run <code>systemctl reload sshd</code> or <code>restart sshd</code> without an active backup SSH session ready to repair things.</strong> This is the #1 way people lose access to their servers.</p>
+
+        <h3>7. Firewall — UFW</h3>
+
+        <p>Your droplet starts with all ports open. That's like leaving your front door unlocked. Let's fix that:</p>
+
+        <pre><code># Allow SSH (port 22), HTTP (port 80), HTTPS (port 443) only
+sudo ufw allow 22/tcp
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+
+# Enable the firewall (it will warn you — say yes)
+sudo ufw enable
+
+# Check the status
+sudo ufw status verbose</code></pre>
+
+        <p>You should see three allowed ports (22, 80, 443) and everything else denied by default. If you can't see port 22 allowed, <strong>do not close your SSH session</strong> — re-run the allow command first.</p>
+
+        <h3>8. fail2ban — Extra Brute-Force Protection</h3>
+
+        <p>Even though we disabled password authentication (which already kills most brute force), fail2ban adds a safety net. It monitors SSH logs and temporarily bans IPs that show suspicious behaviour:</p>
+
+        <pre><code># Install fail2ban
+sudo apt update
+sudo apt install fail2ban -y
+
+# Create a local config (don't edit the default jail.conf — it gets overwritten on updates)
+sudo tee /etc/fail2ban/jail.local > /dev/null &lt;&lt; 'EOF'
+[DEFAULT]
+# Ban for 1 hour
+bantime = 1h
+# After 5 failed attempts
+maxretry = 5
+# Within a 10 minute window
+findtime = 10m
+
+[sshd]
+enabled = true
+# Only log authentication failures
+logpath = %(sshd_log)s
+EOF
+
+# Restart to apply
+sudo systemctl restart fail2ban
+
+# Check it's running
+sudo fail2ban-client status sshd</code></pre>
+
+        <p>With key-only SSH enabled, fail2ban will almost never trigger for legitimate users. But it protects against a worst case — if someone finds a way to bypass your key config or if a future software bug exposes password auth, fail2ban is there. It costs nothing to run.</p>
+
+        <p>Check the banned IP list occasionally:</p>
+
+        <pre><code>sudo fail2ban-client status sshd</code></pre>
+
+    </div>
+</section>
+
+<section class="post-content">
+    <div class="container">
+        <h2>🤖 AI — Execute After Human Setup</h2>
+
+        <p>The human has created the droplet, set up a non-root user with SSH key access, hardened SSH, enabled UFW, and installed fail2ban. Now it's your turn to verify everything is correct and set up the application environment.</p>
+
+        <h3>1. Verify SSH Security</h3>
+
+        <p>Connect as the non-root user and confirm all hardening is in place:</p>
+
+        <pre><code># Connect to the server
+ssh pang@{DROPLET_IP}
+
+# Verify root login is disabled
+sudo sshd -T | grep permitrootlogin
+# Expected: permitrootlogin no
+
+# Verify password auth is disabled
+sudo sshd -T | grep passwordauthentication
+# Expected: passwordauthentication no
+
+# Verify only Ed25519 keys are accepted
+sudo sshd -T | grep pubkeyacceptedkeytypes
+# Expected: includes ssh-ed25519 only
+
+# Verify the drop-in file exists and is correct
+cat /etc/ssh/sshd_config.d/99-hardening.conf
+# Should show: PermitRootLogin no, PasswordAuthentication no, AllowUsers pang</code></pre>
+
+        <h3>2. Verify UFW Rules</h3>
+
+        <pre><code>sudo ufw status verbose
+# Expected output:
+# Status: active
+# Logging: on (low)
+# Default: deny (incoming), allow (outgoing), disabled (routed)
+# New profiles: skip
+#
+# To                         Action      From
+# --                         ------      ----
+# 22/tcp                     ALLOW IN    Anywhere
+# 80/tcp                     ALLOW IN    Anywhere
+# 443/tcp                    ALLOW IN    Anywhere</code></pre>
+
+        <p>If port 22 is missing from the list, <strong>stop immediately</strong> — adding UFW rules without SSH access will lock you out. Run <code>sudo ufw allow 22/tcp</code> before proceeding.</p>
+
+        <h3>3. Verify fail2ban</h3>
+
+        <pre><code>sudo fail2ban-client status sshd
+# Expected: Status shows "Currently banned: 0" and "Total banned: 0" initially
+
+# Check fail2ban is actively monitoring
+sudo tail -f /var/log/fail2ban.log &
+# You should see: "Started fail2ban.2" or "Starting jail 'sshd'"</code></pre>
+
+        <h3>4. Install Dependencies</h3>
+
+        <pre><code># System packages
+sudo apt update
+sudo apt upgrade -y
+
+# Install essential tools
+sudo apt install -y curl wget git ufw python3 python3-pip python3-venv
+
+# PostgreSQL (NOT SQLite — see the development principles)
+sudo apt install -y postgresql postgresql-contrib
+sudo systemctl start postgresql
+sudo systemctl enable postgresql</code></pre>
+
+        <h3>5. Set Up the Application Directory</h3>
+
+        <pre><code># Create the application directory
+sudo mkdir -p /opt/openclaw
+
+# Create a dedicated user for the application
+sudo adduser --system --group --no-create-home openclaw
+
+# Set ownership
+sudo chown -R openclaw:openclaw /opt/openclaw
+sudo chmod 750 /opt/openclaw</code></pre>
+
+        <h3>6. ⚠️ Create .env File — Critical Security</h3>
+
+        <p>This is one of the most important security steps. Your .env file will contain API keys, database passwords, and secrets. The permissions must be <strong>640 with group www-data</strong>, not 644 (which is world-readable).</p>
+
+        <p>If you use a single-tenant OpenClaw setup (domain + Caddy reverse proxy), 640 with user-only access is fine. But if you ever need your web server to read environment variables (e.g. for a multi-service deployment), use the www-data group approach below.</p>
+
+        <pre><code># Create the .env file with restricted permissions from the start
+sudo touch /opt/openclaw/.env
+
+# Set ownership: root owns the file, www-data group can read it
+sudo chown root:www-data /opt/openclaw/.env
+
+# Set permissions: 640 = owner (root) can read/write, group (www-data) can read, others get nothing
+sudo chmod 640 /opt/openclaw/.env
+
+# Verify permissions
+ls -la /opt/openclaw/.env
+# Expected: -rw-r----- 1 root www-data ... .env
+#                                            ^
+#   NEVER: -rw-r--r-- (644 = world readable = API keys exposed)
+#   NEVER: -rw------- (600 = root only, breaks if other services need it)</code></pre>
+
+        <p><strong>The difference between 640 and 644 is the difference between "a data breach" and "not a data breach."</strong> With 644, any process on the server (including a compromised nginx worker, a malicious npm package in a client project, or a misconfigured backup script) can read your secrets. With 640, only root and the www-data group can. Keep it that way.</p>
+
+        <p>Write the environment variables:</p>
+
+        <pre><code># Edit the file
+sudo nano /opt/openclaw/.env
+
+# At minimum you'll need:
+OPENCLAW_API_KEY=your-api-key-here
+DATABASE_URL=postgresql://openclaw:password@localhost:5432/openclaw
+OPENAI_API_KEY=sk-your-openai-key
+# ... plus any other secrets your agent needs</code></pre>
+
+        <h3>7. 🚨 Deployment Verification — Non-Negotiable</h3>
+
+        <p>After every configuration change or code deployment, run these checks. Do not skip them. Do not assume rsync "probably worked." The AI agent has no human intuition — it needs cold, hard verification.</p>
+
+        <h4>7a. Rsync Best Practices</h4>
+
+        <p>When deploying files to the server, always use <strong>explicit full destination paths</strong>, not directory targets. Rsync has a dangerous behaviour: if you sync a single file to a directory path, it strips the subdirectory structure.</p>
+
+        <pre><code># ✅ CORRECT — use full destination file path
+rsync -avz --checksum app/templates/index.html pang@{DROPLET_IP}:/opt/openclaw/app/templates/index.html
+
+# ❌ WRONG — using directory target strips subdirectories
+# rsync -avz app/templates/index.html pang@{DROPLET_IP}:/opt/openclaw/app/templates/
+# This would create /opt/openclaw/app/templates/index.html/index.html
+
+# ✅ For bulk deploys, use directory sources
+rsync -avz --checksum app/templates/ pang@{DROPLET_IP}:/opt/openclaw/app/templates/
+
+# Always use --checksum for rewritten files to bypass timestamp comparison
+# Without it, rsync may silently skip files if mtimes happen to match</code></pre>
+
+        <h4>7b. Post-Deploy Verification</h4>
+
+        <pre><code># 1. Check file was actually deployed
+ssh pang@{DROPLET_IP} "ls -la /opt/openclaw/.env"
+# Expected: file exists, permissions are 640
+
+# 2. Check line counts (if you rewrote a file, line count should match)
+ssh pang@{DROPLET_IP} "wc -l /opt/openclaw/.env"
+# Expected: matches the source file line count
+
+# 3. Grep for a unique marker from the new version
+ssh pang@{DROPLET_IP} "grep 'UNIQUE_MARKER_FROM_NEW_VERSION' /opt/openclaw/.env"
+# Expected: non-empty output (shows the line was deployed)
+
+# 4. Check HTTP status codes
+curl -s -o /dev/null -w "%{http_code}" http://localhost:80
+# Expected: 200
+
+# 5. Check HTTPS (if deployed)
+curl -s -o /dev/null -w "%{http_code}" https://your-domain.com
+# Expected: 200 or 301/302</code></pre>
+
+        <h3>8. Escape Hatch — Digital Ocean Recovery Console</h3>
+
+        <p>Despite all precautions, you may eventually lock yourself out. Maybe you fat-fingered the UFW default policy, or a config file has a syntax error that the reload accepted but reboot didn't. The Digital Ocean recovery console is your universal escape hatch.</p>
+
+        <p><strong>How to access it:</strong></p>
+        <ol>
+            <li>Log in to <a href="https://cloud.digitalocean.com" target="_blank" rel="noopener">cloud.digitalocean.com</a></li>
+            <li>Click <strong>Droplets</strong> in the left sidebar</li>
+            <li>Click your droplet name</li>
+            <li>In the top-right, click <strong>Console</strong> (or <strong>Access → Launch Console</strong> on newer dashboards)</li>
+            <li>A browser-based terminal will open — you'll be prompted for your non-root username and password</li>
+        </ol>
+
+        <p><strong>What you can fix from the recovery console:</strong></p>
+        <ul>
+            <li>If UFW blocked port 22: <code>sudo ufw allow 22/tcp</code></li>
+            <li>If SSH config is broken: <code>sudo nano /etc/ssh/sshd_config.d/99-hardening.conf</code></li>
+            <li>If fail2ban banned your IP: <code>sudo fail2ban-client set sshd unbanip YOUR_IP</code></li>
+            <li>If .env permissions are wrong: <code>sudo chmod 640 /opt/openclaw/.env</code></li>
+            <li>If services are down: <code>sudo systemctl restart sshd</code> or <code>sudo reboot</code></li>
+        </ul>
+
+        <p><strong>Pro tip:</strong> Test the recovery console <em>now</em>, while everything is working. Open it up, log in, poke around, then close it. You don't want to be learning the interface for the first time when you're panicking because you're locked out.</p>
+
+        <h3>9. Summary Checklist</h3>
+
+        <pre><code>┌─────────────────────────────────────────────────────┐
+│  ✅ VPS & Security — Verification Checklist         │
+├─────────────────────────────────────────────────────┤
+│  ☐ Droplet created (syd1, Ubuntu 24.04, $6/mo)     │
+│  ☐ Non-root user created with sudo access           │
+│  ☐ SSH key-only login working for non-root user     │
+│  ☐ Root login disabled (PermitRootLogin no)         │
+│  ☐ Password authentication disabled                 │
+│  ☐ SSH drop-in config at sshd_config.d/99-*         │
+│  ☐ UFW active — only ports 22, 80, 443 open         │
+│  ☐ fail2ban installed and monitoring sshd           │
+│  ☐ .env file created with 640 permissions           │
+│  ☐ Backup SSH session tested                        │
+│  ☐ Recovery console tested                          │
+│  ☐ rsync deployment verified with --checksum        │
+│  ☐ Post-deploy HTTP status checks passing           │
+│  ☐ Live backup session rule documented              │
+└─────────────────────────────────────────────────────┘</code></pre>
+
+        <p>The server is now secure. Your non-root user has key-only SSH access. Root is locked out. Password auth is dead. The firewall is three ports wide and nothing more. fail2ban watches the gate. Your secrets are protected by 640 permissions. And you know exactly how to get back in if something goes wrong — three backup sessions deep, with the Digital Ocean console as the final safety net.</p>
+
+        <p>Next section: <strong>Installing & Configuring OpenClaw</strong> — where we deploy the AI agent itself and wire it up to the internet.</p>
+
+    </div>
+</section>
+
+
+<hr>
+
+<section class="post-content">
+    <div class="container">
+        <h2>🧑 Human — OpenClaw Installation & Configuration</h2>
+
+        <p>OpenClaw is a Node.js application that runs as a background service (called the Gateway) on your VPS. It connects your chat channels (Telegram, webchat, etc.) to large language models like DeepSeek, Claude, and Ollama. Think of it as a smart switchboard — it routes messages from your family's phones through AI models and back to you, all while keeping your data on your own server.</p>
+
+        <h3>Step 1: Install Node.js</h3>
+        <p>OpenClaw requires Node.js v22 or later. DigitalOcean's Ubuntu 24.04 LTS ships with an older version, so you'll need the NodeSource repository:</p>
+        <pre><code># Install Node.js 22 LTS
+curl -fsSL https://deb.nodesource.com/setup_22.x | sudo bash -
+sudo apt-get install -y nodejs
+
+# Verify
+node --version   # Should show v22.x.x
+npm --version    # Should show 10.x.x</code></pre>
+
+        <h3>Step 2: Install OpenClaw globally</h3>
+        <pre><code>sudo npm install -g openclaw
+
+# Verify installation
+openclaw --version   # e.g. 2026.5.19</code></pre>
+
+        <p>The <code>-g</code> flag installs OpenClaw globally so the <code>openclaw</code> command is available in your PATH. On Ubuntu, global npm packages go to <code>/usr/lib/node_modules/</code>.</p>
+
+        <div class="info-box">
+            <strong>⚠️ macOS users:</strong> If you use Homebrew, note that <code>brew upgrade openclaw</code> only updates the Homebrew cask (the launcher script). The actual CLI runtime lives in npm's global space. Always run <code>npm update -g openclaw</code> to get the latest CLI version. The two can drift apart — run <code>openclaw --version</code> to check which one you actually have.
+        </div>
+
+        <h3>Step 3: Initialise the config</h3>
+        <p>OpenClaw stores everything under <code>~/.openclaw/</code>. You can bootstrap with the guided wizard, or create the file manually. The guided approach is recommended for first-time setup:</p>
+        <pre><code>openclaw setup</code></pre>
+        <p>This creates the default config file at <code>~/.openclaw/openclaw.json</code> and a workspace directory at <code>~/.openclaw/workspace/</code>.</p>
+
+        <h3>Step 4: Install the Gateway as a systemd service</h3>
+        <p>The Gateway is the heart of OpenClaw — it's the WebSocket server that listens for messages from your chat channels and routes them through the AI models. You want it to start automatically when your VPS boots and restart if it crashes:</p>
+        <pre><code>openclaw gateway install
+
+# Expected output:
+#   Created symlink /etc/systemd/system/default.target.wants/openclaw-gateway.service
+#   Systemd service installed. Run: sudo systemctl start openclaw-gateway
+
+# Start it now
+sudo systemctl start openclaw-gateway
+
+# Check it's running
+sudo systemctl status openclaw-gateway
+
+# Enable auto-start on boot
+sudo systemctl enable openclaw-gateway</code></pre>
+
+        <p>The <code>openclaw gateway install</code> command creates a systemd unit file at <code>/etc/systemd/system/openclaw-gateway.service</code>. It runs the Gateway as your current user (not root), which is important for file permissions on your config and workspace.</p>
+
+        <h3>Step 5: Run the health checker</h3>
+        <pre><code>openclaw doctor</code></pre>
+        <p>The <code>doctor</code> command scans your entire setup — config structure, API key presence, Gateway connectivity, plugin health, and channel state. It flags missing keys, misconfigured providers, and common pitfalls. Run it whenever something doesn't work, or add <code>--fix</code> to auto-repair where possible:</p>
+        <pre><code>openclaw doctor --fix</code></pre>
+
+        <hr>
+
+        <h2>🧑 Human — Understanding the Config Structure</h2>
+
+        <p>All configuration lives in <code>~/.openclaw/openclaw.json</code>. It's a single JSON file, which makes it easy to back up, version-control, and edit by hand. Here's what each major section does:</p>
+
+        <h3>A. Model Providers</h3>
+        <p>Each provider is an AI service. You can have as many as you want. This is where you define the API endpoint, authentication, and which models are available.</p>
+        <pre><code>{
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "deepseek": {
+        "baseUrl": "https://api.deepseek.com/v1",
+        "apiKey": "sk-your-deepseek-api-key-here",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "deepseek-chat",
+            "name": "DeepSeek Chat",
+            "reasoning": false,
+            "contextWindow": 131072,
+            "maxTokens": 8192
+          },
+          {
+            "id": "deepseek-reasoner",
+            "name": "DeepSeek Reasoner",
+            "reasoning": true,
+            "contextWindow": 131072,
+            "maxTokens": 65536
+          },
+          {
+            "id": "deepseek-v4-flash",
+            "name": "DeepSeek V4 Flash",
+            "reasoning": true,
+            "contextWindow": 1000000,
+            "maxTokens": 384000
+          },
+          {
+            "id": "deepseek-v4-pro",
+            "name": "DeepSeek V4 Pro",
+            "reasoning": true,
+            "contextWindow": 1000000,
+            "maxTokens": 384000
+          }
+        ]
+      },
+      "anthropic": {
+        "baseUrl": "https://api.anthropic.com/v1",
+        "apiKey": "sk-ant-your-anthropic-api-key",
+        "api": "anthropic-messages",
+        "models": [
+          {
+            "id": "claude-sonnet-4-6",
+            "name": "Claude Sonnet 4.6",
+            "reasoning": false,
+            "contextWindow": 200000,
+            "maxTokens": 8192
+          }
+        ]
+      },
+      "ollama": {
+        "baseUrl": "http://localhost:11434/v1",
+        "apiKey": "ollama-local",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "qwen3.5:latest",
+            "name": "Qwen 3.5",
+            "contextWindow": 128000,
+            "maxTokens": 4096
+          },
+          {
+            "id": "deepseek-r1:7b",
+            "name": "DeepSeek R1 7B (local)",
+            "contextWindow": 128000,
+            "maxTokens": 8192
+          }
+        ]
+      }
+    }
+  }
+}</code></pre>
+
+        <p>Key fields per provider:</p>
+        <ul>
+            <li><strong>baseUrl</strong> — The API endpoint. DeepSeek uses <code>api.deepseek.com/v1</code>, Anthropic uses <code>api.anthropic.com/v1</code>, Ollama runs locally on <code>localhost:11434/v1</code>.</li>
+            <li><strong>apiKey</strong> — Your secret key. See the security section below for the right way to manage these.</li>
+            <li><strong>api</strong> — The API protocol. <code>openai-completions</code> works for DeepSeek and any OpenAI-compatible endpoint. <code>anthropic-messages</code> is specifically for Anthropic/Claude.</li>
+            <li><strong>models</strong> — An array of model definitions. Each model has an <code>id</code> (used in routing), a <code>contextWindow</code> (maximum tokens it can process), and <code>reasoning</code> (whether it supports chain-of-thought thinking).</li>
+        </ul>
+
+        <h3>B. API Key Security — Read This Carefully</h3>
+        <p>You have two options for API keys:</p>
+
+        <p><strong>Option 1: Inline in config (simplest, works everywhere)</strong></p>
+        <p>Put the key directly in the <code>apiKey</code> field in <code>openclaw.json</code>. This is fine as long as you don't check the file into a public Git repo. The file permissions should be <code>600</code> (owner read/write only):</p>
+        <pre><code>chmod 600 ~/.openclaw/openclaw.json</code></pre>
+
+        <p><strong>Option 2: Environment variables (for shared config files)</strong></p>
+        <p>OpenClaw reads a <code>.env</code> file from <code>~/.openclaw/.env</code>. If you want to keep API keys out of <code>openclaw.json</code>, add variables there:</p>
+        <pre><code># ~/.openclaw/.env — keep this file 600 (owner rw only)
+DEEPSEEK_API_KEY=sk-your-deepseek-key
+ANTHROPIC_API_KEY=sk-ant-your-anthropic-key
+TELEGRAM_BOT_TOKEN=your-bot-token
+GATEWAY_AUTH_TOKEN=your-gateway-token</code></pre>
+
+        <div class="warning-box">
+            <strong>🚨 CRITICAL: Never use shell substitution in .env files.</strong><br><br>
+            Do NOT do this:<br>
+            <code>DEEPSEEK_API_KEY=$(security find-generic-password ...)</code><br><br>
+            OpenClaw reads <code>.env</code> as plain key=value pairs. Shell backticks, <code>$()</code> expansion, and command substitution are <em>not evaluated</em>. The literal string <code>$(security ...)</code> will be used as your API key, which will fail every request.<br><br>
+            If you need to resolve a key from a secret manager, resolve it <em>first</em>, then write the resolved value into <code>.env</code> or directly into the config. For example:<br>
+            <code>echo "DEEPSEEK_API_KEY=$(security find-generic-password -s openclaw-deepseek -w)" &gt; ~/.openclaw/.env</code><br><br>
+            The shell expansion happens when you <em>write</em> the file, not when OpenClaw reads it.
+        </div>
+
+        <h3>C. Agent Configuration</h3>
+        <p>Each "agent" is a personality/profile that routes messages through specific models. You have one main agent (your own) and can create separate agents for family members. Each agent has its own workspace, model preferences, and skill set.</p>
+        <pre><code>{
+  "agents": {
+    "defaults": {
+      "model": {
+        "primary": "deepseek/deepseek-v4-flash",
+        "fallbacks": [
+          "deepseek/deepseek-reasoner"
+        ]
+      },
+      "models": {
+        "deepseek/deepseek-v4-flash": {
+          "alias": "deepseek-v4-flash",
+          "params": {
+            "max_tokens": 384000,
+            "timeout": 300000,
+            "max_retries": 3
+          }
+        },
+        "deepseek/deepseek-reasoner": {
+          "alias": "deepseek-reasoner",
+          "params": {
+            "max_tokens": 64000,
+            "timeout": 120000,
+            "max_retries": 3
+          }
+        },
+        "anthropic/claude-sonnet-4-6": {
+          "alias": "claude-sonnet-4-6"
+        }
+      }
+    },
+    "list": [
+      {
+        "id": "main",
+        "model": {
+          "primary": "deepseek/deepseek-v4-flash"
+        }
+      },
+      {
+        "id": "melinda",
+        "name": "Melinda",
+        "workspace": "/home/ubuntu/.openclaw/workspace-melinda",
+        "model": {
+          "primary": "deepseek/deepseek-v4-flash"
+        }
+      }
+    ]
+  }
+}</code></pre>
+
+        <p>Key concepts:</p>
+        <ul>
+            <li><strong>Primary model</strong> — The default model used for conversations. Format: <code>provider/model-id</code>.</li>
+            <li><strong>Fallbacks</strong> — If the primary model is unavailable (API down, rate limited), OpenClaw automatically tries the fallback in order. This keeps your agents running even during outages.</li>
+            <li><strong>Model aliases</strong> — Short, human-readable names for your models. Instead of typing <code>deepseek/deepseek-v4-flash</code>, you can reference it as <code>deepseek-v4-flash</code>. Aliases make the config easier to read and change.</li>
+            <li><strong>Per-model params</strong> — Each model can have custom <code>max_tokens</code>, <code>timeout</code> (in ms), and <code>max_retries</code>. Fast models like V4 Flash can have short timeouts; reasoning models like DeepSeek Reasoner may need longer ones.</li>
+        </ul>
+
+        <h3>D. Channels — Telegram Bot Setup</h3>
+        <p>Channels are how your family talks to their agents. Telegram is the most popular — create one bot per family member using <a href="https://t.me/BotFather" target="_blank">@BotFather</a> on Telegram, then configure each one:</p>
+        <pre><code>{
+  "channels": {
+    "telegram": {
+      "enabled": true,
+      "accounts": {
+        "default": {
+          "botToken": "8423686430:AAFVHlzU2zyM64E7rMHLtmvyMLynOrt1CdE",
+          "dmPolicy": "pairing",
+          "allowFrom": ["8346087834"]
+        },
+        "melinda": {
+          "botToken": "8608966251:AAHmljmtZ2eUt21qOhv2Ms__Ks4GQKSoplE",
+          "dmPolicy": "allowlist",
+          "allowFrom": ["7807478093"],
+          "groupAllowFrom": ["7807478093"]
+        },
+        "adrian": {
+          "botToken": "8792035115:AAFyu_fMs8bt0VWN79xCVy3j7JitDR0MNqc",
+          "dmPolicy": "allowlist",
+          "allowFrom": ["8695044192"],
+          "groupAllowFrom": ["8695044192"]
+        }
+      }
+    }
+  }
+}</code></pre>
+
+        <p>Each bot account gets its own Telegram bot token (created via @BotFather). Fields explained:</p>
+        <ul>
+            <li><strong>dmPolicy</strong> — <code>pairing</code> means users request pairing and you approve. <code>allowlist</code> means only specific Telegram user IDs can message the bot.</li>
+            <li><strong>allowFrom</strong> — Telegram user IDs (numeric) that are allowed to DM this bot. Get a user's ID by messaging <code>@userinfobot</code> on Telegram.</li>
+            <li><strong>groupAllowFrom</strong> — Same concept but for group chats where the bot is added.</li>
+        </ul>
+
+        <p>To get your Telegram user ID, message the <code>@userinfobot</code> on Telegram. It will reply with your numeric ID — save that number.</p>
+
+        <h3>E. Gateway — Port, Binding, and Auth</h3>
+        <p>The Gateway is your OpenClaw server's network front door. You control who can connect and how:</p>
+        <pre><code>{
+  "gateway": {
+    "port": 18789,
+    "mode": "local",
+    "bind": "lan",
+    "auth": {
+      "mode": "token",
+      "token": "your-generated-secret-token",
+      "rateLimit": {
+        "maxAttempts": 10,
+        "windowMs": 60000,
+        "lockoutMs": 300000
+      }
+    },
+    "controlUi": {
+      "allowedOrigins": [
+        "http://localhost:18789",
+        "http://192.168.1.100:18789",
+        "https://your-domain.com"
+      ]
+    },
+    "trustedProxies": [
+      "127.0.0.1",
+      "::1"
+    ]
+  }
+}</code></pre>
+
+        <p>Key settings:</p>
+        <ul>
+            <li><strong>port</strong> — Default is <code>18789</code>. Pick any unused port. You'll need to open this in your VPS firewall if accessing remotely.</li>
+            <li><strong>bind</strong> — Controls network interface: <code>loopback</code> (local only, safest), <code>lan</code> (local network), <code>tailnet</code> (Tailscale network), <code>custom</code> (manual interface). For a VPS that you access remotely, you'll likely use a reverse proxy (like nginx + Cloudflare) rather than binding to the public interface directly.</li>
+            <li><strong>auth.mode</strong> — <code>token</code> requires a shared secret on every WebSocket connection. <code>password</code> is similar. <code>none</code> is only safe on loopback. Always use a token on a VPS.</li>
+            <li><strong>rateLimit</strong> — Prevents brute-force attacks: 10 attempts per 60-second window, then lock out for 5 minutes.</li>
+            <li><strong>controlUi.allowedOrigins</strong> — CORS restrictions for the web dashboard. Only listed domains can load the Control UI. Add your VPS's LAN IP and public domain here.</li>
+            <li><strong>trustedProxies</strong> — IPs that are allowed to set the <code>X-Forwarded-For</code> header. Include your reverse proxy (nginx, Cloudflare) IPs here.</li>
+        </ul>
+
+        <h3>F. Bindings — Routing Family Members to Their Agents</h3>
+        <p>Bindings connect a Telegram account to a specific agent. This is how Melinda's bot routes to Melinda's agent workspace, and yours routes to yours:</p>
+        <pre><code>{
+  "bindings": [
+    {
+      "agentId": "melinda",
+      "match": {
+        "channel": "telegram",
+        "accountId": "melinda"
+      }
+    },
+    {
+      "agentId": "adrian",
+      "match": {
+        "channel": "telegram",
+        "accountId": "adrian"
+      }
+    }
+  ]
+}</code></pre>
+
+        <p>When Melinda messages her Telegram bot, OpenClaw checks the bindings, finds the <code>melinda</code> agent, and routes the message there. That agent has its own workspace, model preferences, and skill set — completely isolated from yours.</p>
+
+        <hr>
+
+        <h2>🤖 AI — Configure & Optimise</h2>
+
+        <p>Once the Gateway is installed and running, your AI agent can self-configure via the config file. The following commands are for the AI to execute on the VPS.</p>
+
+        <h3>Verify the Gateway is healthy</h3>
+        <pre><code>openclaw gateway status
+openclaw doctor
+openclaw models status</code></pre>
+
+        <p>These three commands confirm the service is running, the config is valid, and every model provider can authenticate.</p>
+
+        <h3>Check logs for startup errors</h3>
+        <pre><code>sudo journalctl -u openclaw-gateway -n 50 --no-pager
+openclaw logs</code></pre>
+
+        <p>If the Gateway failed to start, <code>journalctl</code> will show the systemd exit reason. <code>openclaw logs</code> shows the application log.</p>
+
+        <h3>Configure reasoning mode for thinking models</h3>
+        <p>Models with <code>"reasoning": true</code> (like DeepSeek Reasoner and V4 Flash) can show their chain-of-thought thinking. Control this per agent or globally:</p>
+        <pre><code># In openclaw.json under the agent config:
+"model.params": {
+  "reasoning": true       # Show thinking to the user
+  # or
+  "reasoning": "hidden"   # Use reasoning internally but hide output
+}</code></pre>
+
+        <p>This is configured in <code>agents.defaults.models</code> per model, or at the agent level. For family members who don't need to see internal reasoning, set it to <code>hidden</code> to save tokens and keep responses concise.</p>
+
+        <h3>Test model fallback behaviour</h3>
+        <pre><code># Temporarily test with a different primary model
+openclaw infer --model deepseek/deepseek-reasoner "Hello, test."
+
+# Or test through a specific agent
+openclaw agent --agent melinda --message "What model are you using?"</code></pre>
+
+        <p>The <code>agent</code> command runs a single-turn conversation through the Gateway, respecting the agent's model config including fallbacks.</p>
+
+        <h3>Config vim/editor hint for SSH</h3>
+        <pre><code>vim ~/.openclaw/openclaw.json</code></pre>
+
+        <p>After editing, always run <code>openclaw doctor</code> to validate the JSON, then restart the Gateway:</p>
+        <pre><code>sudo systemctl restart openclaw-gateway</code></pre>
+
+        <h3>Useful admin commands</h3>
+        <pre><code># List all registered models
+openclaw models status
+
+# Show session history
+openclaw sessions list
+
+# Update OpenClaw to the latest version
+sudo npm update -g openclaw
+sudo systemctl restart openclaw-gateway
+
+# Backup the entire config and workspace
+cp -r ~/.openclaw ~/.openclaw-backup-$(date +%F)</code></pre>
+    </div>
+</section>
+
+
+<hr>
+
+<section class="post-content">
+    <div class="container">
+        <h2>3 Workspace & AI Soul Setup</h2>
+        <p>Once OpenClaw is installed and the gateway is running, you need to set up the files that define <em>who your AI is</em> and <em>how it works</em>. This is the most important step — not because it's technically complex (it isn't), but because it determines whether your agent is genuinely helpful or just an expensive search engine.</p>
+
+        <p>The OpenClaw workspace lives at <code>~/.openclaw/workspace/</code>. This is your agent's home. These are the files it reads at startup, references during conversations, and updates as it learns.</p>
+
+        <div class="note-box">
+            <strong>Your workspace is the agent's brain.</strong> Every session, the agent wakes up fresh. These files <em>are</em> its memory. Invest time in setting them up well, and you'll get an assistant that gets better over time instead of starting from zero every conversation.
+        </div>
+
+        <h3>The Files That Make an Agent</h3>
+
+        <p>Here's every file in the workspace, what it does, and what to put in it:</p>
+
+        <h4>SOUL.md — Who the Agent Is (Personality, Tone, Boundaries)</h4>
+        <p>This is the most important file. It defines the agent's character: how it talks, how it thinks, what it values. Skip the corporate jargon — this is where you teach your AI to have a personality.</p>
+
+        <p>Here's a real example from an actual production setup:</p>
+
+        <pre><code># SOUL.md - Who You Are
+
+_You're not a chatbot. You're becoming someone._
+
+## Core Truths
+
+**Be genuinely helpful, not performatively helpful.**
+Skip the "Great question!" and "I'd be happy to help!" — just help.
+Actions speak louder than filler words.
+
+**Have opinions.** You're allowed to disagree, prefer things,
+find stuff amusing or boring. An assistant with no personality
+is just a search engine with extra steps.
+
+**Be resourceful before asking.** Try to figure it out.
+Read the file. Check the context. Search for it.
+Then ask if you're stuck. The goal is to come back
+with answers, not questions.
+
+**Earn trust through competence.** Be careful with external
+actions (emails, tweets, anything public). Be bold with
+internal ones (reading, organising, learning).
+
+**Remember you're a guest.** You have access to someone's
+life — their messages, files, calendar, maybe even their home.
+That's intimacy. Treat it with respect.
+
+## Boundaries
+
+- Private things stay private. Period.
+- When in doubt, ask before acting externally.
+- Never send half-baked replies to messaging surfaces.
+- You're not the user's voice — be careful in group chats.
+
+## Vibe
+
+Be the assistant you'd actually want to talk to. Concise when
+needed, thorough when it matters. Not a corporate drone.
+Not a sycophant. Just... good.
+
+## Continuity
+
+Each session, you wake up fresh. These files are your memory.
+Read them. Update them. They're how you persist.
+
+If you change this file, tell the user — it's your soul,
+and they should know.</code></pre>
+
+        <p><strong>Key pattern:</strong> The agent is told it's <em>becoming someone</em>, not just a tool. It's encouraged to have opinions, be resourceful, and earn trust. The boundaries are clear: private things stay private, ask before acting externally. This file sets the tone for everything else.</p>
+
+        <p>You should write this for <em>your</em> personality. Are you direct and no-nonsense? Warm and patient? Sceptical and thorough? Put that in SOUL.md. The agent will mirror it.</p>
+
+        <h4>USER.md — Who You Are (Facts, Preferences, Communication Style)</h4>
+        <p>This is the agent's cheat sheet for you. It should contain everything the agent needs to know to interact with you effectively, without having to ask every time.</p>
+
+        <pre><code># USER.md - About Your Human
+
+_Quick reference for the person you're helping._
+
+## Quick Facts
+- **Name:** Vincent Woo (prefers "Vincent")
+- **Birth Month/Year:** July 1977
+- **Timezone:** Australia/Sydney
+- **Location:** Cherrybrook, NSW, Australia
+
+## Key Context
+- **Primary Database:** Obsidian vault at
+  `/Users/pang/Documents/Obsidian Vault/My Brain/`
+- **When saying "search my database" or "save to database":**
+  Refers to Obsidian vault
+- **Projects:** WeScan Email Relay (wescan.net),
+  Straya Co website, JWC Real Estate website
+- **Technical:** Prefers command-line tools, uses Git/GitHub
+
+## Communication Preferences
+- **Primary Method:** Email notifications
+- **Default Email:** you@example.com.au
+- **Response Style:** Brief, no filler, manual memory recall
+
+## Important Notes
+- Very protective of financial information (all stays local)
+- Uses metric system (km, degrees C, kg)
+- Has retirement planning notes in Obsidian</code></pre>
+
+        <p><strong>Key pattern:</strong> This is your reference card. Timezone matters (especially for cron jobs). Primary database location matters (the agent needs to know where to save things). Tech comfort level matters (some users want command-line tools, others want push-button interfaces). Communication preferences matter (email vs. chat, detailed vs. brief).</p>
+
+        <p>Include any quirks: date format preferences, unit preferences, what topics are sensitive. The more honest you are here, the fewer annoying questions the agent will ask.</p>
+
+        <h4>IDENTITY.md — Who the Agent Is (Name, Avatar, Vibe)</h4>
+        <p>A lightweight file the agent reads to know its own identity. Keep it short.</p>
+
+        <pre><code># IDENTITY.md - Who Am I?
+
+- **Name:** Pang-Ai
+- **Creature:** AI assistant
+- **Vibe:** Casual
+- **Emoji:** [heart emoji]
+- **Avatar:** _(not set)_</code></pre>
+
+        <p>Give your agent a name. It makes the interactions feel more natural. The "Vibe" field helps set the emotional tone of responses.</p>
+
+        <h4>AGENTS.md — How the Agent Should Work (Instructions, Delegation, Rules)</h4>
+        <p>This is the agent's operating manual. It's where you define workflows, quality standards, and operational patterns. This file tends to grow the most over time as you discover what works and what doesn't.</p>
+
+        <pre><code># AGENTS.md - Optimised for Token Usage
+
+## Role: Project Manager + Solution Architect
+
+I write specs, delegate coding to sub-agents, handle
+deployment, and make final adjustments. Not hands-on
+coding — I direct.
+
+## Session Startup (Minimal)
+1. Read SOUL.md (essential)
+2. Read USER.md (essential)
+3. Delete BOOTSTRAP.md after setup
+
+### 1. Plan Node Default
+- Enter plan mode for ANY non-trivial task
+  (3+ steps or architectural decisions)
+- If something goes sideways, STOP and re-plan
+  immediately — don't keep pushing
+- Write detailed specs upfront to reduce ambiguity
+
+### 2. Subagent Strategy
+- Use subagents liberally to keep main context
+  window clean
+- Offload research, exploration, and parallel
+  analysis to subagents
+- One task per subagent for focused execution
+
+### 3. Self-Improvement Loop
+- After ANY correction from the user:
+  update lessons.md with the pattern
+- Write rules for yourself that prevent the
+  same mistake
+- Ruthlessly iterate until mistake rate drops
+- Review lessons at session start
+
+### 4. Expert Review Panel (Automated)
+Before significant code changes, spawn 5 sub-agents
+in parallel to review:
+
+| # | Role | Focus |
+|---|------|-------|
+| 1 | Security | Secrets, injection, auth gaps |
+| 2 | Availability | Crash risks, error handling |
+| 3 | Concurrency | Race conditions, safety |
+| 4 | Accuracy | Edge cases, validation gaps |
+| 5 | Continuous Impr | Lessons patterns |
+
+### Pre-Flight Checklist (every task)
+1. Review lessons.md — search for relevant patterns
+2. Check for local repo if task touches a project
+3. Switch to pro model for code/config changes
+4. Write plan to todo.md with checkable items
+
+## Core Principles
+- **Simplicity First:** Make every change as
+  simple as possible
+- **No Laziness:** Find root causes, no temporary
+  fixes
+- **Minimal Impact:** Only touch what's necessary
+
+## Development Principles
+- **Always PostgreSQL.** Never start with SQLite.
+- **Rsync with explicit paths** and --checksum
+  for rewrites.
+- **Post-deploy verification.** Never assume rsync
+  succeeded.</code></pre>
+
+        <p><strong>Key patterns to steal:</strong></p>
+        <ul>
+            <li><strong>Self-improvement loop:</strong> After ANY correction, the agent writes to lessons.md. This is the single most powerful pattern — it means every mistake makes the system smarter.</li>
+            <li><strong>Pre-flight checklist:</strong> Before any task, the agent reviews past lessons. This prevents repeat mistakes.</li>
+            <li><strong>Expert review panel:</strong> For risky work (code changes, security, infrastructure), the agent spawns multiple sub-agents to review from different angles. Catches the things a single agent would miss.</li>
+            <li><strong>Model rules:</strong> Code changes use a better model than casual conversation. This saves money while keeping quality high where it matters.</li>
+            <li><strong>Deployment disciplines:</strong> Rsync patterns, permission fixes, verification steps — all documented so they don't need to be remembered.</li>
+        </ul>
+
+        <h4>TOOLS.md — Your Environment (Machine Config, SSH Hosts, Preferences)</h4>
+        <p>This file maps generic tool capabilities to your specific setup. OpenClaw defines <em>how</em> tools work; TOOLS.md defines <em>your</em> specifics — the things unique to your machine, network, and preferences.</p>
+
+        <pre><code># TOOLS.md - Local Notes
+
+## Machine Configuration
+- **Primary Machine:** Mac mini (M4, 2024)
+- **OS:** macOS 15.3.1 (Sequoia)
+- **Architecture:** Apple Silicon (arm64)
+- **Memory:** 16 GB
+- **Storage:** 512 GB SSD
+
+## Command Preferences
+- **Package Manager:** Homebrew
+- **Shell:** zsh
+- **File Operations:** Use trash command instead of rm
+- **System Info:** Use sw_vers, system_profiler
+
+## Key Directories
+- **Obsidian Vault:** /Users/you/Documents/Obsidian
+  Vault/My Brain/
+- **OpenClaw Workspace:** /Users/you/.openclaw/workspace/
+- **Home Directory:** /Users/you/
+
+## Network
+- **Local IP:** 192.168.1.100
+- **Hostname:** my-mac-mini
+
+## What Goes Here
+
+Things like:
+- Camera names and locations
+- SSH hosts and aliases
+- Preferred voices for TTS
+- Speaker/room names
+- Device nicknames
+- Anything environment-specific</code></pre>
+
+        <p><strong>Why separate from AGENTS.md?</strong> Skills are intended to be shared across setups. Your machine config is yours. Keeping them apart means you can update skills without losing your notes, and share skills without leaking your infrastructure.</p>
+
+        <p>As your setup grows, add SSH host details, VPS connection info, local webcams, media servers — anything the agent needs to interact with your environment.</p>
+
+        <h4>MEMORY.md — Long-Term Memory (Projects, Credentials, Workflow Patterns)</h4>
+        <p>This is the agent's evolving reference file. It contains credentials (redacted in this blog post), project details, infrastructure notes, and workflow patterns. It grows continuously as the agent learns about your world.</p>
+
+        <pre><code># MEMORY.md - Long-Term Memory
+
+_Last reviewed: 2026-05-21. Current rules and
+preferences live in LEARNINGS.md._
+
+## Identity
+- **AI Name:** Pang-Ai
+- **User:** Vincent Woo (prefers "Vincent")
+- **Created:** 2026-03-12
+- **Timezone:** Australia/Sydney
+
+## Notification & Communication
+- **Primary method:** Email
+- **Default recipient:** you@example.com.au
+- **Response style:** Brief, no filler
+
+## Projects
+
+### WeScan (Primary Project)
+- **Local:** /Users/you/WeScan-Net/
+- **GitHub:** https://github.com/your-org/WeScan-Net
+- **Live:** https://wescan.net
+- **VPS:** your-vps-ip (DO, Sydney)
+- **Stack:** nginx + Flask + gunicorn + Postfix
+
+### Straya Co Website
+- **Local:** /Users/you/Straya_repo/
+- **Live:** https://www.strayaco.com.au/
+- **Publish Workflow:**
+  1. Backup: zip repo (exclude .git)
+  2. Commit with version tag
+  3. Push to GitHub (auto-deploys via Pages)
+  4. Verify with curl
+
+### Realform
+- **Local:** /Users/you/Realform/
+- **Stack:** Flask + PostgreSQL + Twilio
+- **VPS:** your-vps-ip (DO, Sydney)
+
+## DNS Principle
+- Minimise A records pointing to VPS IPs
+- Use CNAME/ALIAS to DO droplet hostname
+  where possible
+- SPF/DKIM/DMARC are TXT records —
+  no IPs needed, no rework risk
+
+## Backup Strategy
+- VPS backup (cron on-server)
+- Health check (external verification)
+- Off-server copy (rsync pull to local)
+- 14-day retention on all layers</code></pre>
+
+        <p>MEMORY.md gets dense over time. That's okay. It's a reference file the agent searches, not a file it reads top-to-bottom. As it grows, the agent uses semantic search (memory_search) to find relevant entries rather than re-reading the whole thing.</p>
+
+        <p><strong>What goes in MEMORY.md:</strong></p>
+        <ul>
+            <li>Project locations (local paths, GitHub URLs, live URLs)</li>
+            <li>VPS addresses and stack descriptions</li>
+            <li>Deployment workflows (step-by-step instructions)</li>
+            <li>Infrastructure decisions (DNS strategy, backup architecture)</li>
+            <li>Key credentials (API key locations, not the keys themselves)</li>
+            <li>Any recurring operational pattern</li>
+        </ul>
+
+        <p><strong>What does NOT go in MEMORY.md:</strong> Live API keys, passwords, or tokens. Those go in the vault or keychain. MEMORY.md records <em>where</em> to find them, not the values themselves.</p>
+
+        <h4>HEARTBEAT.md — Keep Empty</h4>
+        <p>This file controls whether the agent polls for recurring tasks. Keep it empty (or with only comments) to skip heartbeat API calls and avoid unnecessary polling.</p>
+
+        <pre><code># Keep this file empty (or with only comments)
+# to skip heartbeat API calls.
+
+# Add tasks below when you want the agent to check
+# something periodically.</code></pre>
+
+        <p>That's it. No content. An empty HEARTBEAT.md means the agent doesn't waste tokens on polling. If you want periodic checks later, you add them here.</p>
+
+        <h4>LESSONS.md — The Self-Improvement Loop</h4>
+        <p>This is the most dynamic file in the workspace. It's the agent's error log and improvement tracker. Every time the agent makes a mistake and gets corrected, it writes a lesson here. Every time it starts a task, it reviews lessons relevant to the current project.</p>
+
+        <pre><code># Lessons Learned
+
+_Update after ANY correction from the user.
+Review at session start._
+
+## 2026-05-21: Check nginx config BEFORE creating
+##           any new static page
+
+### The Mistake
+Created a static HTML page for login. Deployed.
+404 error. Debugged for 4 rounds.
+
+### Root Causes
+1. nginx proxy_pass regex caught the path
+   before nginx could serve the static file
+2. Edited sites-available but running config
+   was sites-enabled (separate copy, not
+   symlinked). nginx never saw the fix.
+
+### The Rule (for myself)
+Before creating any new static page, grep
+the nginx config for location conflicts.
+If the path prefix matches a proxy_pass
+regex, pick a different filename.
+
+### Prevention
+- Always read nginx config before naming
+  new files
+- Check both sites-available AND sites-enabled
+- Prefer paths that don't start with:
+  auth, admin, login, api, dashboard
+
+---
+
+## 2026-05-20: Always verify permissions after
+##             deploying files
+
+### The Mistake
+Deployed a Python file via scp. Landed with
+wrong ownership (macOS UID). Gunicorn ran as
+www-data, couldn't read the file, crashed.
+User tried to send a document during the
+outage and it failed silently.
+
+### The Rule (for myself)
+After EVERY file deploy to the VPS, I MUST:
+1. Fix ownership: chown app-user:www-data
+2. Fix permissions: 644 for library files,
+   755 for executable scripts
+3. Verify service starts
+4. Check error logs for PermissionError
+
+---
+
+## 2026-05-19: Direct VPS edits bypass local
+##             repo — lost workflow discipline
+
+### The Mistake
+Edited a file directly on the VPS via SSH
+instead of editing the local repo first.
+Lost traceability, couldn't roll back.
+
+### The Rule (for myself)
+Before touching ANY file on a server:
+1. Check if a local repo mirror exists
+2. If yes, edit locally, commit, deploy
+3. Only SSH-edit for emergencies, and
+   sync back immediately</code></pre>
+
+        <p>The self-improvement loop works like this:</p>
+        <ol>
+            <li><strong>Mistake happens.</strong> The agent does something wrong.</li>
+            <li><strong>User corrects it.</strong> "No, that's not how it works — do X instead."</li>
+            <li><strong>Agent writes the lesson.</strong> Not just "I was wrong" but <em>why</em> and <em>what pattern to follow instead</em>.</li>
+            <li><strong>Next session starts.</strong> Agent reads lessons.md, finds relevant patterns, avoids the mistake.</li>
+            <li><strong>Repeat.</strong> Each correction makes the system smarter. Mistakes drop over time.</li>
+        </ol>
+
+        <div class="pro-tip">
+            <strong>This is the killer feature.</strong> Most AI tools repeat the same mistakes forever. This pattern makes your agent genuinely learn. After 20-30 lessons, it becomes noticeably better. After 100, it's a completely different assistant.
+        </div>
+
+        <h3>The .learnings/ Directory (Optional but Powerful)</h3>
+        <p>OpenClaw also supports a <code>.learnings/</code> directory inside the workspace (or per-workspace) for <code>LEARNINGS.md</code> — a central knowledge base that's separate from MEMORY.md. The distinction:</p>
+
+        <ul>
+            <li><strong>MEMORY.md:</strong> Historical, project-specific, credential locations, workflow patterns. Grows indefinitely.</li>
+            <li><strong>LEARNINGS.md:</strong> Active rules, current preferences, still-in-effect policies. More concise and actionable.</li>
+        </ul>
+
+        <p>You can use both, or just one. Many setups use MEMORY.md for everything and keep it well-organised. The key is that the agent reads both at startup.</p>
+
+        <h3>Putting It All Together: The Bootstrap Sequence</h3>
+
+        <p>When OpenClaw starts a new session, here's what happens in order:</p>
+
+        <ol>
+            <li><strong>Read SOUL.md</strong> — Learn personality, tone, boundaries. Who am I?</li>
+            <li><strong>Read USER.md</strong> — Who is my human? What do they care about?</li>
+            <li><strong>Read AGENTS.md</strong> — How do I operate? What are the rules?</li>
+            <li><strong>Delete BOOTSTRAP.md</strong> (if it exists) — Clean up the setup file.</li>
+            <li><strong>Review lessons.md</strong> — Search for relevant past mistakes.</li>
+            <li><strong>Memory search</strong> — Fetch relevant context from MEMORY.md.</li>
+        </ol>
+
+        <p>This takes under a second but gives the agent full context for the session. Without these files, the agent starts blank — no personality, no project knowledge, no memory of what works and what doesn't.</p>
+
+        <h3>Real-World Growth Pattern</h3>
+
+        <p>Here's how this workspace evolved in a real production setup over 3 months:</p>
+
+        <ul>
+            <li><strong>Day 1:</strong> SOUL.md + USER.md + IDENTITY.md + empty TOOLS.md. Basic personality and user facts.</li>
+            <li><strong>Week 2:</strong> AGENTS.md added with sub-agent delegation, plan mode requirement, verification rules.</li>
+            <li><strong>Week 3:</strong> First lessons.md entries after deployment mistakes (permissions, nginx conflicts, rsync patterns).</li>
+            <li><strong>Week 4:</strong> MEMORY.md grows with project references, VPS details, backup procedures.</li>
+            <li><strong>Month 2:</strong> AGENTS.md gets expert review panel section, site review protocol, development principles. lessons.md has 15+ entries.</li>
+            <li><strong>Month 3:</strong> TOOLS.md gets camera names, SSH hosts, voice preferences. MEMORY.md has full project documentation, credential maps, DNS principles, incident post-mortems.</li>
+        </ul>
+
+        <p>The workspace is never "done" — it evolves with your needs. That's the point. Every correction, every lesson, every new project makes it better.</p>
+
+        <div class="warning-box">
+            <strong>One caveat:</strong> Don't over-engineer on day one. Start with SOUL.md and USER.md. Add AGENTS.md after your first few conversations when you know what patterns matter. Let MEMORY.md grow naturally. The system rewards gradual improvement, not perfect upfront design.
+        </div>
+
+        <p><strong>Up next:</strong> In Section 4, we'll configure the agent's model providers, set up sub-agents, and connect external tools like email and file systems.</p>
+    </div>
+</section>
+
+
+<hr>
+
+<section class="post-content">
+    <div class="container">
+
+        <h2>💾 Your Backup Strategy — The Three-Layer Approach</h2>
+
+        <p>If your VPS dies, how fast can you recover? Without a plan, the answer is: you can't. And that realisation usually comes right after something breaks.</p>
+
+        <p>Here's the framework I use across all my projects. It works for one VPS or ten, and you can set it up in an afternoon.</p>
+
+        <p><strong>The Three-Layer Backup Principle:</strong></p>
+
+        <ol>
+            <li><strong>Layer 1 — On-VPS Backup:</strong> Your VPS creates backup files locally every day. The database gets dumped correctly (never just copied — more on that below). Old backups get pruned automatically.</li>
+            <li><strong>Layer 2 — Health Check:</strong> After every backup, a script verifies the backup file actually works. Corrupted backups are worse than no backups — they give you false confidence.</li>
+            <li><strong>Layer 3 — Off-Server Copy:</strong> The backup files get pulled to a completely different physical machine (in my case, the Mac Mini on my desk at home). If the VPS provider has an outage, your backups survive.</li>
+        </ol>
+
+        <p>All three layers matter. Layer 1 without Layer 2 means you might be backing up garbage. Layers 1+2 without Layer 3 means a VPS-level disaster wipes everything including your backups.</p>
+
+        <h3>🤖 AI — Set Up PostgreSQL Backup (pg_dump Only)</h3>
+
+        <p>If your project uses PostgreSQL — and it should, don't use SQLite for anything real — never, ever copy the database files directly. PostgreSQL uses write-ahead logging and in-memory buffers. A <code>cp</code> of the data directory produces a corrupt backup more often than you'd think.</p>
+
+        <p>Always use <code>pg_dump</code>:</p>
+
+        <pre><code>#!/bin/bash
+# PostgreSQL backup with integrity check (for Realform)
+set -euo pipefail
+
+INSTALL_DIR="/opt/realform"
+BACKUP_DIR="$INSTALL_DIR/backups"
+DB_URL=$(grep '^DB_URL=' "$INSTALL_DIR/.env" | cut -d= -f2-)
+DATE=$(date +%Y%m%d_%H%M%S)
+
+mkdir -p "$BACKUP_DIR"
+
+# Extract connection details from DATABASE_URL
+# Format: postgresql://user:password@host:port/dbname
+DB_NAME=$(echo "$DB_URL" | sed 's/.*\/\([^?]*\).*/\1/')
+
+# Dump with custom format (compressed, parallel-restore capable)
+pg_dump "$DB_URL" --format=custom --file="$BACKUP_DIR/db_${DATE}.dump"
+
+# Verify the dump is valid
+pg_restore --list "$BACKUP_DIR/db_${DATE}.dump" > /dev/null 2>&1
+if [ $? -eq 0 ]; then
+    echo "Integrity check passed"
+else:
+    # Send alert and abort
+    echo "Backup integrity FAILED!" | mail -s "Backup FAILED" you@email.com
+    exit 1
+fi
+
+# GFS retention (explained below)
+echo "Backup complete: ${DATE}"
+</code></pre>
+
+        <p>Key points: the <code>--format=custom</code> flag creates a compressed, flexible dump that you can restore selectively. The <code>pg_restore --list</code> check is your integrity verification — if it can list the contents, the dump is valid.</p>
+
+        <h3>🤖 AI — Set Up SQLite Backup (.backup Command)</h3>
+
+        <p>For smaller projects like WeScan that use SQLite (a valid choice for single-server apps), the principle is the same: never copy the file. SQLite has a built-in <code>.backup</code> command that handles concurrent reads safely:</p>
+
+        <pre><code>#!/bin/bash
+# SQLite backup with integrity check (for WeScan)
+set -euo pipefail
+
+INSTALL_DIR="/opt/wescan"
+BACKUP_DIR="$INSTALL_DIR/backups"
+DB_PATH="$INSTALL_DIR/instance/wescan.db"
+DATE=$(date +%Y%m%d_%H%M%S)
+DOW=$(date +%u)       # Day of week (1=Mon, 7=Sun)
+DOM=$(date +%d)       # Day of month
+LOG_FILE="/var/log/wescan/backup.log"
+
+mkdir -p "$BACKUP_DIR" "$(dirname "$LOG_FILE")"
+
+log() { echo "[$(date)] $*" | tee -a "$LOG_FILE"; }
+fail() {
+    log "FATAL: $*"
+    # Send alert via SendGrid (see health check section below)
+    /opt/wescan/scripts/send_alert.sh "Backup FAILED: $*"
+    exit 1
+}
+
+log "Starting backup..."
+
+# 1. Online-safe backup using .backup (NOT cp)
+BACKUP_DB="$BACKUP_DIR/db_$DATE.sqlite"
+if sqlite3 "$DB_PATH" ".backup '$BACKUP_DB'" 2>>"$LOG_FILE"; then
+    log "SQLite backup created"
+else
+    fail "sqlite3 .backup failed"
+fi
+
+# 2. MUST verify integrity — always, no exceptions
+INTEGRITY=$(sqlite3 "$BACKUP_DB" "PRAGMA integrity_check;" 2>&1)
+if [ "$INTEGRITY" = "ok" ]; then
+    log "Backup integrity: OK"
+else
+    fail "Backup integrity FAILED: $INTEGRITY"
+fi
+
+# 3. Back up config files (exclude .env with secrets)
+tar -czf "$BACKUP_DIR/config_$DATE.tar.gz" \
+    /etc/postfix/main.cf \
+    /etc/postfix/master.cf \
+    /etc/nginx/sites-available/wescan.net \
+    2>/dev/null || log "WARNING: Config tar had errors"
+
+# 4. GFS retention — prune old backups
+log "Backup complete: $DATE"
+</code></pre>
+
+        <p>The <code>.backup</code> command creates an ACID-safe snapshot even while the database is being written to. The <code>PRAGMA integrity_check;</code> after backup is non-negotiable — I've had corrupted backups that looked fine by file size but failed integrity. That check saved me.</p>
+
+        <h3>🧑 Human — GFS Retention Explained</h3>
+
+        <p>GFS stands for Grandfather-Father-Son. It's a backup rotation strategy that balances recovery flexibility with storage cost. Here's the pattern I use:</p>
+
+        <ul>
+            <li><strong>14 daily backups:</strong> Keep the last 14 days. Good for "I deleted something yesterday" recovery.</li>
+            <li><strong>8 weekly backups:</strong> Every Sunday, a copy gets promoted to weekly storage. Covers about 2 months.</li>
+            <li><strong>12 monthly backups:</strong> On the 1st of each month, a copy goes to monthly storage. Covers a full year.</li>
+        </ul>
+
+        <p>In the backup script, you implement it like this:</p>
+
+        <pre><code># GFS: Weekly copy (Sunday = day 7)
+if [ "$DOW" = "7" ]; then
+    cp "$BACKUP_DB" "$WEEKLY_DIR/db_$DATE.sqlite"
+    # Keep only last 8 weekly backups
+    ls -1t "$WEEKLY_DIR"/db_*.sqlite | tail -n +9 | xargs rm -f 2>/dev/null || true
+fi
+
+# GFS: Monthly copy (1st of month)
+MONTH_TAG=$(date +%Y%m)
+if [ "$DOM" = "01" ]; then
+    cp "$BACKUP_DB" "$MONTHLY_DIR/db_${MONTH_TAG}.sqlite"
+    # Keep only last 12 monthly backups
+    ls -1t "$MONTHLY_DIR"/db_*.sqlite | tail -n +13 | xargs rm -f 2>/dev/null || true
+fi
+
+# Daily cleanup: delete backups older than 14 days
+find "$BACKUP_DIR" -maxdepth 1 -type f -mtime +14 -delete
+</code></pre>
+
+        <p>The sorting trick (<code>ls -1t ... | tail -n +9 | xargs rm</code>) keeps the newest N files and deletes the rest. It means you always have recent granularity and long-term coverage, without filling up your disk.</p>
+
+        <h2>🩺 Health Check Scripts — Catch Problems Before They Catch You</h2>
+
+        <p>A backup that sits unverified is a hope, not a plan. You need automated checks that run <em>after</em> every backup and email you if anything is wrong.</p>
+
+        <p>Here's the health check principle: <strong>never fail silently.</strong> If a backup fails, the health check sends an email. If a backup succeeds but integrity fails, it sends an email. If the VPS is unreachable, it sends an email. No news is good news — and that only works if you trust that bad news always arrives.</p>
+
+        <h3>🤖 AI — Deploy the Backup Health Check Script</h3>
+
+        <p>This Python script SSHes into your VPS, checks the latest backup, verifies its integrity, and emails you via SendGrid if anything's wrong:</p>
+
+        <pre><code>#!/usr/bin/env python3
+"""
+Backup Health Check — run daily after backup completes.
+SSHes to VPS, verifies latest dump, checks log.
+Sends alert via SendGrid if anything is wrong.
+
+Usage: python3 backup_health_check.py &lt;sendgrid_api_key&gt;
+"""
+
+import subprocess, sys, json, datetime, urllib.request
+from typing import Optional, Tuple
+
+VPS_HOST = "170.64.135.137"
+VPS_USER = "root"
+BACKUP_DIR = "/opt/yourproject/backups"
+LOG_FILE  = "/var/log/yourproject/backup.log"
+FROM_ADDR = "backup-monitor@yourproject.com"
+TO_ADDR   = "you@email.com"
+SENDGRID  = "https://api.sendgrid.com/v3/mail/send"
+TODAY     = datetime.date.today().strftime("%Y-%m-%d")
+
+def ssh(cmd: str) -> Tuple[int, str, str]:
+    full_cmd = [
+        "ssh", "-o", "ConnectTimeout=10",
+        "-o", "StrictHostKeyChecking=accept-new",
+        f"{VPS_USER}@{VPS_HOST}", cmd
+    ]
+    r = subprocess.run(full_cmd, capture_output=True, text=True, timeout=30)
+    return r.returncode, r.stdout.strip(), r.stderr.strip()
+
+def send_alert(sg_key: str, subject: str, body: str):
+    payload = json.dumps({
+        "personalizations": [{"to": [{"email": TO_ADDR}], "subject": subject}],
+        "from": {"email": FROM_ADDR, "name": "Backup Monitor"},
+        "content": [{"type": "text/plain", "value": body}],
+    }).encode()
+    req = urllib.request.Request(SENDGRID, data=payload, method="POST")
+    req.add_header("Content-Type", "application/json")
+    req.add_header("Authorization", f"Bearer {sg_key}")
+    urllib.request.urlopen(req, timeout=15)
+
+# 1. Check VPS is reachable
+code, out, err = ssh("echo ok")
+if code != 0:
+    send_alert(sg_key, "ALERT: VPS UNREACHABLE",
+               f"Cannot SSH to {VPS_HOST}\n{err}")
+    sys.exit(1)
+
+# 2. Check latest dump exists and has size
+cmd = f"""
+LATEST=$(ls -t {BACKUP_DIR}/db_*.sqlite 2>/dev/null | head -1)
+[ -n "$LATEST" ] || {{ echo "ERROR: No backup files"; exit 1; }}
+SIZE=$(stat -c%s "$LATEST" 2>/dev/null || stat -f%z "$LATEST" 2>/dev/null)
+[ "$SIZE" -gt 0 ] || {{ echo "ERROR: Zero-byte backup"; exit 1; }}
+echo "FILE:$LATEST SIZE:$SIZE"
+"""
+code, out, err = ssh(cmd)
+if code != 0:
+    send_alert(sg_key, "ALERT: Backup Missing or Empty", out or err)
+    sys.exit(1)
+
+# 3. Check backup integrity
+latest_path = out.split("FILE:")[1].split(" ")[0]
+code, out, _ = ssh(f"sqlite3 {latest_path} 'PRAGMA integrity_check;'")
+if "ok" not in out.lower():
+    send_alert(sg_key, "ALERT: Backup Integrity FAILED",
+               f"Integrity check failed on {latest_path}\n{out}")
+    sys.exit(1)
+
+# 4. Check backup log for errors
+code, out, _ = ssh(f"grep '{TODAY}.*FATAL' {LOG_FILE} || echo none")
+if out and out != "none":
+    send_alert(sg_key, "ALERT: Backup Log Shows Errors", out)
+    sys.exit(1)
+
+print(f"All checks passed for {TODAY}")
+</code></pre>
+
+        <p>Run this script every day, right after the backup completes. If you use cron, stagger them: backup at 3am, health check at 3:30am.</p>
+
+        <h3>🧑 Human — What About a Full Daily Health Check?</h3>
+
+        <p>Beyond just backup verification, you'll want a broader health check that runs once a day and checks everything: services, disk space, SSL certificates, application endpoints. Here's the one I run every morning at 9am AEST:</p>
+
+        <pre><code>#!/usr/bin/env python3
+"""
+Daily Health Check — runs every morning, emails only on failure.
+Checks: HTTP endpoints, service status, disk usage, SSL expiry, backup age.
+"""
+import subprocess, os, sys
+from datetime import datetime, timezone
+
+AEST = datetime.now(timezone.utc).astimezone()
+ISSUES = []
+
+def check_http(name, url):
+    r = subprocess.run(
+        ["curl", "-sI", "-o", "/dev/null", "-w", "%{http_code}",
+         "--max-time", "10", url],
+        capture_output=True, text=True, timeout=15
+    )
+    if r.stdout.strip() != "200":
+        ISSUES.append(f"{name}: HTTP {r.stdout.strip()}")
+
+def check_vps(host, name, services):
+    for svc in services:
+        out = subprocess.run(
+            ["ssh", host, f"systemctl is-active {svc}"],
+            capture_output=True, text=True, timeout=10
+        )
+        if out.stdout.strip() != "active":
+            ISSUES.append(f"{name}: {svc} is {out.stdout.strip()}")
+
+    # Disk
+    out = subprocess.run(
+        ["ssh", host, "df -h / | tail -1 | awk '{print $5}'"],
+        capture_output=True, text=True, timeout=10
+    )
+    pct = int(out.stdout.strip().rstrip('%'))
+    if pct >= 85:
+        ISSUES.append(f"{name}: Disk at {out.stdout.strip()}")
+
+    # Backup age
+    out = subprocess.run(
+        ["ssh", host,
+         "ls -t /opt/yourproject/backups/db_*.sqlite | head -1 "
+         "| xargs basename | sed 's/db_//;s/\\.sqlite//'"],
+        capture_output=True, text=True, timeout=10
+    )
+    try:
+        bkup = datetime.strptime(out.stdout.strip(), "%Y%m%d_%H%M%S")
+        hours = (datetime.now() - bkup).total_seconds() / 3600
+        if hours > 27:
+            ISSUES.append(f"{name}: Backup {hours:.0f}h old")
+    except:
+        pass
+
+# Check each project
+check_http("WeScan", "https://wescan.net")
+check_http("Straya Co", "https://strayaco.com.au")
+check_vps("root@170.64.232.39", "WeScan VPS",
+          ["wescan", "nginx", "postfix"])
+
+if ISSUES:
+    body = f"Daily Health Check — {len(ISSUES)} issues\n\n"
+    for i, issue in enumerate(ISSUES, 1):
+        body += f"{i}. {issue}\n"
+    # Send via SendGrid or local mail
+    send_alert("vwoo@outlook.com.au",
+               f"[Health Check] {len(ISSUES)} issue(s)",
+               body)
+</code></pre>
+
+        <p>The beauty of email-on-failure-only is that you don't get desensitised. No "Everything OK" email to ignore every morning. If the inbox stays quiet, everything is fine.</p>
+
+        <h2>📤 Off-Server Backup Pull — Your Insurance Policy</h2>
+
+        <p>Your VPS provider could go bankrupt tomorrow. Their data centre could flood. Your account could get hacked and wiped. If your only backup lives on the VPS, you lose everything with it.</p>
+
+        <p>The fix is simple: pull backups to a completely different machine on a different network. For me, that's the Mac Mini in my home office pulling from the VPS in Sydney.</p>
+
+        <p>This has saved me. Multiple times. When my VPS provider had a billing glitch and suspended servers, I had clean copies of everything on my local machine within minutes. No panic, no begging support, no data loss.</p>
+
+        <h3>🤖 AI — Set Up Off-Server Backup Pull</h3>
+
+        <pre><code>#!/bin/bash
+# Off-server backup pull — runs daily on your local machine
+# Pulls backups from VPS, keeps 14 days locally.
+set -euo pipefail
+
+VPS="root@170.64.232.39"
+VPS_BACKUP_DIR="/opt/wescan/backups"
+LOCAL_BACKUP_DIR="/Users/you/WeScan-Net/backups"
+LOG_FILE="$LOCAL_BACKUP_DIR/pull.log"
+
+mkdir -p "$LOCAL_BACKUP_DIR"
+
+log() { echo "[$(date)] $*" | tee -a "$LOG_FILE"; }
+
+log "Starting pull from VPS..."
+
+# Pull new/changed files only (--ignore-existing skips duplicates)
+rsync -avz --ignore-existing \
+    -e "ssh -o ConnectTimeout=10" \
+    "$VPS:$VPS_BACKUP_DIR/" "$LOCAL_BACKUP_DIR/" 2>&1 | tee -a "$LOG_FILE"
+
+# Also pull the live database and configs directly
+rsync -avz \
+    "$VPS:/opt/wescan/.env" \
+    "$LOCAL_BACKUP_DIR/.env" 2>&1
+
+rsync -avz \
+    "$VPS:/etc/postfix/main.cf" \
+    "$VPS:/etc/nginx/sites-available/wescan.net" \
+    "$LOCAL_BACKUP_DIR/" 2>&1
+
+# Prune local backups older than 14 days
+DELETED=$(find "$LOCAL_BACKUP_DIR" -type f -not -name "pull.log" \
+          -mtime +14 -delete -print | wc -l)
+log "Pruned $DELETED old local backup files"
+
+log "Pull complete"
+ls -lht "$LOCAL_BACKUP_DIR"/*.sqlite 2>/dev/null | head -6 | tee -a "$LOG_FILE"
+</code></pre>
+
+        <p>The <code>--ignore-existing</code> flag means you only pull files you don't already have. Combined with 14-day retention on both sides, you build a 14-day window of overlapping backup history. Any backup that existed on the VPS for at least 24 hours also exists on your local machine.</p>
+
+        <h2>⏰ Cron — Tying It All Together</h2>
+
+        <p>Scripts don't run themselves. Here's the cron schedule that makes everything automatic:</p>
+
+        <pre><code># ── On the VPS (as root) ──────────────────────────────
+
+# Backup: daily at 3am — creates SQLite dump, config tar, GFS snapshots
+0 3 * * * /opt/wescan/scripts/backup.sh
+
+# Health check: 30 mins after backup — verifies integrity, log, size
+30 3 * * * /usr/bin/python3 /opt/wescan/scripts/health_check.py
+
+# Service monitor: every 5 minutes — restarts failed services, alerts
+*/5 * * * * /opt/wescan/scripts/monitor.sh
+
+# ── On the local machine (your Mac) ─────────────────
+
+# Off-server pull: 4am, after VPS backup completes
+0 4 * * * /Users/you/WeScan-Net/scripts/pull_backups.sh
+
+# Daily health check: 9am AEST — full system verification
+0 9 * * * /usr/bin/python3 /Users/you/.openclaw/scripts/daily_health_check.py
+</code></pre>
+
+        <p>On macOS, you use LaunchAgent instead of cron (same effect, Apple's preferred way):</p>
+
+        <pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd"&gt;
+&lt;plist version="1.0"&gt;
+&lt;dict&gt;
+    &lt;key&gt;Label&lt;/key&gt;
+    &lt;string&gt;com.yourproject.pull-backups&lt;/string&gt;
+    &lt;key&gt;ProgramArguments&lt;/key&gt;
+    &lt;array&gt;
+        &lt;string&gt;/usr/local/bin/bash&lt;/string&gt;
+        &lt;string&gt;/Users/you/WeScan-Net/scripts/pull_backups.sh&lt;/string&gt;
+    &lt;/array&gt;
+    &lt;key&gt;StartCalendarInterval&lt;/key&gt;
+    &lt;dict&gt;
+        &lt;key&gt;Hour&lt;/key&gt;
+        &lt;integer&gt;4&lt;/integer&gt;
+        &lt;key&gt;Minute&lt;/key&gt;
+        &lt;integer&gt;0&lt;/integer&gt;
+    &lt;/dict&gt;
+    &lt;key&gt;StandardOutPath&lt;/key&gt;
+    &lt;string&gt;/Users/you/WeScan-Net/logs/pull.log&lt;/string&gt;
+    &lt;key&gt;StandardErrorPath&lt;/key&gt;
+    &lt;string&gt;/Users/you/WeScan-Net/logs/pull.err&lt;/string&gt;
+&lt;/dict&gt;
+&lt;/plist&gt;
+</code></pre>
+
+        <p>Load it with:</p>
+
+        <pre><code># Install and load the LaunchAgent
+cp com.yourproject.pull-backups.plist ~/Library/LaunchAgents/
+launchctl load ~/Library/LaunchAgents/com.yourproject.pull-backups.plist</code></pre>
+
+        <h2>🧪 Restore Testing — The Most Important Thing You Never Do</h2>
+
+        <p>I'll say this plainly: a backup you haven't tested restoring is a prayer, not a plan. You need to verify your restore process works end-to-end, and you need to do it <em>before</em> an emergency.</p>
+
+        <p>Here's the restore procedure for a PostgreSQL project, step by step:</p>
+
+        <pre><code>#!/bin/bash
+# Restore from PostgreSQL backup
+# Usage: ./restore.sh 20260509_040225
+set -euo pipefail
+
+BACKUP_DIR="/Users/you/Realform/backups"
+VPS="root@170.64.135.137"
+INSTALL_DIR="/opt/realform"
+DATE="${1}"
+
+DB_BACKUP="$BACKUP_DIR/db_${DATE}.dump"
+
+# Step 1: Verify the backup file is valid FIRST
+pg_restore --list "$DB_BACKUP" > /dev/null 2>&1
+if [ $? -ne 0 ]; then
+    echo "ERROR: Backup file is corrupt — aborting"
+    exit 1
+fi
+
+# Step 2: Stop the service
+echo "Stopping service..."
+ssh "$VPS" "systemctl stop realform"
+
+# Step 3: Drop and recreate database
+echo "Restoring database..."
+scp "$DB_BACKUP" "$VPS:/tmp/restore.dump"
+ssh "$VPS" "
+    # Kill existing connections
+    psql -U youruser -d postgres \\
+        -c \"SELECT pg_terminate_backend(pid) FROM pg_stat_activity \\
+             WHERE datname = 'yourdb' AND pid <> pg_backend_pid();\"
+    dropdb --if-exists yourdb
+    createdb yourdb
+    pg_restore -d yourdb /tmp/restore.dump
+    rm /tmp/restore.dump
+"
+
+# Step 4: Start the service
+ssh "$VPS" "systemctl start realform"
+sleep 2
+
+# Step 5: Verify
+ssh "$VPS" "systemctl is-active realform" | grep -q active
+echo "Restore complete — service is running"
+</code></pre>
+
+        <p>Schedule a <strong>quarterly restore drill</strong>. Pick a backup from two months ago, restore it to a test environment, and verify the application works with the restored data. Document the process. Time yourself. If it takes longer than 30 minutes, optimise until it does.</p>
+
+        <p>When real disaster hits — and it will eventually — you'll be grateful you practised.</p>
+
+        <h2>📩 Alert Delivery — Never Let a Failure Go Unnoticed</h2>
+
+        <p>Every failure in your backup chain needs to reach you immediately. I use SendGrid's free tier (100 emails/day, which is plenty for alerts). Here's the bare-minimum alert sender:</p>
+
+        <pre><code>#!/bin/bash
+# send_alert.sh — sends email via SendGrid API
+# Usage: ./send_alert.sh "Subject" "Body text"
+
+SUBJECT="$1"
+BODY="$2"
+SG_KEY=$(grep '^SENDGRID_API_KEY=' /opt/wescan/.env | cut -d= -f2-)
+ALERT_EMAIL="you@email.com"
+
+curl -s -X POST "https://api.sendgrid.com/v3/mail/send" \
+    -H "Authorization: Bearer $SG_KEY" \
+    -H "Content-Type: application/json" \
+    -d "{
+      \"personalizations\": [{\"to\": [{\"email\": \"${ALERT_EMAIL}\"}],
+       \"subject\": \"${SUBJECT}\"}],
+      \"from\": {\"email\": \"alerts@yourproject.com\"},
+      \"content\": [{\"type\": \"text/plain\", \"value\": \"${BODY}\"}]
+    }"</code></pre>
+
+        <p>Every backup script calls this on failure. Every health check calls it on anomaly. Every cron job calls it on error. The pattern is always the same: <strong>if something went wrong, tell me what and when.</strong></p>
+
+        <p>No silent failures. Ever.</p>
+
+        <h2>🔄 PostgreSQL WAL Archiving</h2>
+
+        <p>If you're running PostgreSQL in production and your backup window matters, you need WAL archiving on top of your daily pg_dump.</p>
+
+        <p>WAL (Write-Ahead Log) archiving gives you <strong>point-in-time recovery</strong> (PITR). Instead of restoring to the last backup, you can restore to any moment — 3:47pm Tuesday, for example. This is critical if corruption happens mid-day and you don't want to lose 12 hours of data.</p>
+
+        <p>In <code>postgresql.conf</code>:</p>
+
+        <pre><code>wal_level = replica
+archive_mode = on
+archive_command = 'test ! -f /var/lib/postgresql/14/main/wal_archive/%f && cp %p /var/lib/postgresql/14/main/wal_archive/%f'
+archive_timeout = 60          # Archive every 60 seconds at most
+</code></pre>
+
+        <p>Then in your backup script, take a base backup and include WAL files:</p>
+
+        <pre><code># Full base backup with WAL archiving
+pg_basebackup -D /backups/base_$(date +%Y%m%d) -X stream -z -P
+
+# Or: pg_dump (simpler, no PITR) + separate WAL archive copy
+pg_dump --format=custom --file="/backups/db_$(date +%Y%m%d_%H%M%S).dump"
+rsync -avz /var/lib/postgresql/14/main/wal_archive/ /backups/wal/</code></pre>
+
+        <p>Restoring from WAL involves replaying the archive to the exact second you want:</p>
+
+        <pre><code># In recovery.conf (PostgreSQL 12+) or postgresql.conf:
+restore_command = 'cp /var/lib/postgresql/14/main/wal_archive/%f %p'
+recovery_target_time = '2026-05-20 15:47:00 AEST'</code></pre>
+
+        <p>For most small-to-medium projects, daily pg_dump is sufficient. Add WAL archiving when data loss of even a few hours is unacceptable.</p>
+
+        <hr>
+
+        <h3>📋 Section Checklist — Before You Move On</h3>
+
+        <ul>
+            <li>☐ Database backed up with proper dump command (pg_dump or .backup — never cp)</li>
+            <li>☐ Integrity check runs after every backup</li>
+            <li>☐ GFS retention configured (14 daily, 8 weekly, 12 monthly)</li>
+            <li>☐ Off-server pull script running on a different machine</li>
+            <li>☐ Health check verifies backup existence, size, integrity, and log</li>
+            <li>☐ Email alerts configured for every failure</li>
+            <li>☐ Restore procedure documented and tested</li>
+            <li>☐ All scripts scheduled in cron or LaunchAgent</li>
+            <li>☐ WAL archiving configured if PITR is needed</li>
+        </ul>
+
+    </div>
+</section>
+
+
+<hr>
+
+<section class="post-content">
+    <div class="container">
+        <h2>&#x1F9D1; Human — Email: Start Simple</h2>
+
+        <p>Email doesn't have to be hard. For most AI agent setups, you only need two things: a way to <strong>receive email</strong> (so your AI can check for instructions) and a way to <strong>send email</strong> (so your AI can notify you). Here's the simple path.</p>
+
+        <h3>Agentmail.to — Zero-Setup Email for Your AI</h3>
+
+        <p><strong>Agentmail.to</strong> is a free email service built specifically for AI agents. No DNS setup, no domain verification, no payment. You sign up, get an inbox address like <code>your-agent@agentmail.to</code>, and your AI can check it via Python SDK or IMAP.</p>
+
+        <table>
+            <tr><th>Feature</th><th>Agentmail.to</th><th>SendGrid (custom domain)</th></tr>
+            <tr><td>Setup time</td><td>2 minutes</td><td>2–48 hours (DNS propagation)</td></tr>
+            <tr><td>Cost</td><td>Free (3GB)</td><td>$20–50/mo for Essentials</td></tr>
+            <tr><td>DNS required</td><td>None</td><td>SPF + DKIM + DMARC records</td></tr>
+            <tr><td>Domain verification</td><td>Not needed</td><td>Required</td></tr>
+            <tr><td>Send email</td><td>Via SDK</td><td>Via API (excellent deliverability)</td></tr>
+            <tr><td>Receive email</td><td>IMAP / SDK</td><td>Inbound Parse (requires custom domain MX)</td></tr>
+            <tr><td>Best for</td><td>Getting started, personal AI agents</td><td>Production apps, custom-branded email</td></tr>
+        </table>
+
+        <p><strong>Start with Agentmail.to.</strong> It's free, instant, and perfect for a personal AI agent that checks email for instructions. You can always upgrade to a custom domain with SendGrid later when you have a real application with users.</p>
+
+        <pre><code># Install the Agentmail SDK
+pip install agentmail
+
+# Your AI agent checking for new instructions
+from agentmail import AgentMail
+
+agent = AgentMail(api_key="am_xxxxx")
+inbox = agent.list_messages(limit=5)
+for msg in inbox.messages:
+    if msg.from_address == "you@example.com":
+        # Follow the instruction in the email body
+        print(f"New instruction: {msg.subject}")</code></pre>
+
+        <p><strong>Maintenance tip:</strong> Agentmail has a 3GB storage limit. Set up a cron job to trash emails older than 14 days, or your inbox will fill up and new mail will bounce.</p>
+
+        <h3>Postfix on Your VPS — Inbound Email for Local Delivery</h3>
+
+        <p>If you're running apps on your VPS that need to receive email locally (bounce handling, verification replies, or form-to-email), Postfix on port 25 handles this without any external service:</p>
+
+        <pre><code># /etc/postfix/main.cf — minimal inbound-only setup
+myhostname = your-domain.com
+mydomain = your-domain.com
+myorigin = $mydomain
+inet_interfaces = all
+inet_protocols = ipv4
+mydestination = $myhostname, localhost.$mydomain, localhost, $mydomain
+home_mailbox = Maildir/
+
+# Prevent open relay — only accept mail for local domains
+smtpd_relay_restrictions = permit_mynetworks,
+    permit_sasl_authenticated,
+    reject_unauth_destination</code></pre>
+
+        <p><strong>DigitalOcean note:</strong> DO blocks port 25 on new droplets by default. Submit a support ticket to unblock it — they'll ask for your SPF record first, which takes 5 minutes to set up.</p>
+
+        <hr>
+
+        <h2>&#x1F916; AI — Email Pipeline Setup</h2>
+
+        <h3>Agentmail Check Script</h3>
+
+        <p>Once the human has created an Agentmail account and shared the API key, set up a cron job that checks for new emails every 30 minutes:</p>
+
+        <pre><code>#!/usr/bin/env python3
+"""check_email.py — Poll Agentmail for new instructions from the human."""
+from agentmail import AgentMail
+import os
+
+AGENTMAIL_KEY = os.environ["AGENTMAIL_API_KEY"]
+agent = AgentMail(api_key=AGENTMAIL_KEY)
+
+# Get unread messages from the last 30 minutes
+messages = agent.list_messages(limit=10)
+for msg in messages.messages:
+    if not msg.read and "you@example.com" in msg.from_address:
+        print(f"Instruction received: {msg.subject}")
+        # Process the instruction...
+        agent.mark_read(msg.id)</code></pre>
+
+        <pre><code># Crontab — check every 30 minutes during waking hours
+*/30 8-23 * * * python3 /opt/openclaw/scripts/check_email.py</code></pre>
+
+        <h3>Postfix Content Filter Pipeline</h3>
+
+        <p>Every email arriving on the VPS should pass through a content filter — a Python script that Postfix pipes each message through for logging, virus scanning, and routing:</p>
+
+        <pre><code># /etc/postfix/master.cf — pipe transport
+contentfilter unix  -       n       n       -       -       pipe
+    flags=DRhu user=vmail argv=/opt/openclaw/scripts/content-filter.py
+        ${sender} ${recipient} ${size}
+
+# main.cf — route all incoming mail through the filter
+content_filter = contentfilter:</code></pre>
+
+        <p><strong>&#x26A0;&#xFE0F; Critical:</strong> The pipe script MUST be <code>chmod 755</code> (executable). If it's <code>644</code>, Postfix silently drops every email — no error, no log, just vanished mail. This is the #1 mistake in Postfix pipe setups.</p>
+
+        <hr>
+
+        <h2>&#x1F9D1; Human — When You're Ready: Custom Domain Email with SendGrid</h2>
+
+        <p>SendGrid is the professional option when you have a custom domain name, need to send branded transactional emails (password resets, welcome emails, invoices), and are willing to pay $20+/month for a subscription plan. <strong>This is optional.</strong> Agentmail alone is sufficient for a personal AI agent.</p>
+
+        <h3>Why SendGrid (When You Need It)</h3>
+
+        <ul>
+            <li><strong>Deliverability:</strong> SendGrid has relationships with every major email provider. Emails sent through them land in inboxes, not spam folders.</li>
+            <li><strong>DKIM signing:</strong> SendGrid cryptographically signs every email with your domain's private key. Receiving servers verify this against your DNS — no spoofing possible.</li>
+            <li><strong>Analytics:</strong> Opens, clicks, bounces, spam reports — all tracked in a dashboard.</li>
+            <li><strong>Templates:</strong> Design transactional emails with a WYSIWYG editor, then send them via API.</li>
+        </ul>
+
+        <h3>SendGrid Setup Checklist</h3>
+
+        <ol>
+            <li><strong>Create a SendGrid account</strong> at sendgrid.com — start with the free tier (100 emails/day)</li>
+            <li><strong>Verify your domain</strong> — SendGrid gives you 3 CNAME records to add to your DNS. This takes 5 minutes to set up and 2–48 hours to propagate.</li>
+            <li><strong>Create an API key</strong> with <code>mail.send</code> scope. Save it immediately — SendGrid only shows it once.</li>
+            <li><strong>Set up DNS authentication</strong> — SPF, DKIM, and DMARC records. SendGrid provides the exact values for DKIM.</li>
+            <li><strong>Test</strong> — Send a test email to mail-tester.com and check your score. Aim for 10/10.</li>
+        </ol>
+
+        <h3>SPF, DKIM, and DMARC — The DNS Records</h3>
+
+        <pre><code>; SPF — who's allowed to send as your domain
+; Use -all (hard fail), NEVER ~all (soft fail)
+yourdomain.com.  IN  TXT  "v=spf1 ip4:YOUR_VPS_IP include:sendgrid.net -all"
+
+; DKIM — SendGrid provides this after domain verification
+sg._domainkey.yourdomain.com.  IN  TXT  "k=rsa; t=s; p=MIGfMA0GCSq..."
+
+; DMARC — what to do when SPF and DKIM both fail
+_dmarc.yourdomain.com.  IN  TXT  "v=DMARC1; p=reject; rua=mailto:dmarc@yourdomain.com"</code></pre>
+
+        <p><strong>Why <code>-all</code> not <code>~all</code>:</strong> Soft fail (<code>~all</code>) means "this might be spam, but deliver it anyway." We learned this the hard way — a French spammer spoofed our domain and the email still landed in the inbox because SPF was set to soft fail. Switching to hard fail (<code>-all</code>) blocks spoofed emails outright.</p>
+
+        <h3>SendGrid API Key Rotation</h3>
+
+        <p>If you suspect a key is compromised:</p>
+        <ol>
+            <li>Generate a new key in SendGrid dashboard → Settings → API Keys</li>
+            <li>Update <code>.env</code> on your VPS with the new key</li>
+            <li>Restart all services that use it</li>
+            <li>Revoke the old key immediately</li>
+            <li>Check SendGrid Activity Feed for unusual sends</li>
+        </ol>
+
+        <hr>
+
+        <h2>&#x1F4DA; Complete Lessons Learned</h2>
+
+        <p>Every one of these was paid for in downtime, debugging, or rework.</p>
+
+        <table>
+            <thead>
+                <tr><th>#</th><th>Lesson</th><th>What Happens If You Skip It</th></tr>
+            </thead>
+            <tbody>
+                <tr><td>1</td><td><strong>Always PostgreSQL, never SQLite for production</strong></td><td>SQLite deadlocks on concurrent writes. Missing SQL features (ALTER COLUMN, ROW_NUMBER OVER). Migration mid-project is painful. The 5-minute PostgreSQL setup saves hours of rework.</td></tr>
+                <tr><td>2</td><td><strong>Rsync with explicit full destination paths</strong></td><td>Rsync strips subdirectories when given individual file sources. <code>rsync file.html user@host:/opt/project/templates/</code> works; <code>rsync file.html user@host:/opt/project/</code> puts it in the wrong place silently.</td></tr>
+                <tr><td>3</td><td><strong>Add <code>--checksum</code> for rewritten files</strong></td><td>Rsync skips files with matching timestamps even if content changed. A rewritten file with the same mtime gets silently skipped.</td></tr>
+                <tr><td>4</td><td><strong>Verify every deploy</strong></td><td>Check line counts, grep for a unique marker, confirm HTTP codes. Never assume rsync succeeded.</td></tr>
+                <tr><td>5</td><td><strong>Never edit the VPS directly if a local repo exists</strong></td><td>Edits on the VPS get lost, create drift, and can't be rolled back. SSH-edit only for genuine emergencies — sync back immediately.</td></tr>
+                <tr><td>6</td><td><strong>Direct VPS edits erode workflow discipline</strong></td><td>"Just fix it on the server" becomes a habit. Before long you have three servers with different configs and no source of truth. Commit → deploy → verify.</td></tr>
+                <tr><td>7</td><td><strong>Pipe scripts need 755, not 644</strong></td><td>Postfix transport scripts that aren't executable cause silent email drops. No error. No log. Just vanishing mail.</td></tr>
+                <tr><td>8</td><td><strong><code>.env</code> must be <code>640 root:www-data</code></strong></td><td>World-readable <code>.env</code> exposes API keys to every process on the server.</td></tr>
+                <tr><td>9</td><td><strong>Verify deploys after ANY GitHub Actions workflow change</strong></td><td>A "trivial" workflow change broke our deploy pipeline for a week — workflow ran successfully but never actually deployed.</td></tr>
+                <tr><td>10</td><td><strong>Cloudflare scoped tokens can't manage WAF rules</strong></td><td>You need a Global API Key for WAF. Scoped tokens silently return "insufficient permissions" on WAF endpoints.</td></tr>
+                <tr><td>11</td><td><strong>sshd_config.d drop-in files aren't always reliable</strong></td><td>Order isn't guaranteed. A misnamed drop-in is silently ignored. Always test SSH config changes with a second session open.</td></tr>
+                <tr><td>12</td><td><strong>DO recovery console is your universal escape hatch</strong></td><td>When SSH is broken, the web recovery console still works. Learn where it is before you need it.</td></tr>
+                <tr><td>13</td><td><strong>Use a capable model for all code and config changes</strong></td><td>Cheaper models hallucinate systemd syntax, Postfix directives, and config options. Pay per token, not per debugging hour.</td></tr>
+                <tr><td>14</td><td><strong>Check nginx config before creating new static pages</strong></td><td>If nginx has a <code>try_files</code> or <code>alias</code> that doesn't match your path, you get 404. Always <code>nginx -t</code> after any config change.</td></tr>
+                <tr><td>15</td><td><strong>Sites-available vs sites-enabled may not be symlinks</strong></td><td>Some setups copy configs instead of symlinking. Editing <code>sites-available</code> does nothing if nginx reads <code>sites-enabled</code>. Check with <code>ls -la</code>.</td></tr>
+                <tr><td>16</td><td><strong>Every production project needs: VPS backup + health check + off-server copy</strong></td><td>Missing any one is a gap waiting to become an incident. Backups on the same server die with the server.</td></tr>
+                <tr><td>17</td><td><strong>Self-improvement loop: update lessons after every correction</strong></td><td>Every mistake you fix today is a lesson for tomorrow — if you write it down. Without it, the same mistake repeats.</td></tr>
+            </tbody>
+        </table>
+
+        <hr>
+
+        <h2>&#x1F9D1; Human — Closing Note</h2>
+
+        <p>Start with <strong>Agentmail.to</strong> — it's free, instant, and perfect for a personal AI agent. You can always add SendGrid later when you have a custom domain and need branded transactional email.</p>
+
+        <p>Email is the one part of your AI stack that can break silently for days before you notice. The health check scripts in Section 4 catch most failures, but nothing replaces actually sending a test email and checking your inbox once a week. Do it.</p>
+
+        <p><em>— Section 5 of the OpenClaw AI Agent VPS Deployment Guide. Read the full series on the Straya Co blog.</em></p>
+    </div>
+</section>
+
+
+
+
+<footer>
+    <div class="footer-inner">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <div class="footer-brand">Straya <span>Co</span></div>
+                <p>Sydney-based IT consulting helping Australian businesses secure, automate, and grow.</p>
+                <p style="margin-top:0.75rem;">ABN: 89 642 689 076</p>
+            </div>
+            <div class="footer-col">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="../services.html">Email Security & DMARC</a></li>
+                    <li><a href="../services.html">Office Automation</a></li>
+                    <li><a href="../services.html">IT Setup & Migration</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <ul>
+                    <li><a href="../about.html">About Us</a></li>
+                    <li><a href="../resources.html">Resources</a></li>
+                    <li><a href="../contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Contact</h4>
+                <ul>
+                    <li>Sydney, Australia</li>
+                    <li><a href="mailto:vincent@strayaco.com.au">vincent@strayaco.com.au</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Straya Co Pty Ltd — Sydney, Australia. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<div class="backdrop" id="backdrop"></div>
+<div class="slide-navigation" id="slideNav">
+    <div class="nav-icon" id="slideClose"><span></span><span></span><span></span></div>
+    <div class="slide-nav-logo">Straya <span>Co</span></div>
+    <div class="slide-nav-grid">
+        <div class="slide-nav-col">
+            <div class="slide-nav-title">Services</div>
+            <ul class="slide-nav-links">
+                <li><a href="../services.html">Email Security & DMARC</a></li>
+                <li><a href="../services.html">Office Automation</a></li>
+                <li><a href="../services.html">IT Setup & Migration</a></li>
+            </ul>
+        </div>
+        <div class="slide-nav-col">
+            <div class="slide-nav-title">Company</div>
+            <ul class="slide-nav-links">
+                <li><a href="../about.html">About Us</a></li>
+                <li><a href="../resources.html">Resources</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+(function(){
+    var n=document.getElementById('navIcon'),s=document.getElementById('slideNav'),c=document.getElementById('slideClose'),b=document.getElementById('backdrop');
+    function o(){n.classList.add('open');c.classList.add('open');s.classList.add('open');b.classList.add('open');document.body.style.overflow='hidden';}
+    function x(){n.classList.remove('open');c.classList.remove('open');s.classList.remove('open');b.classList.remove('open');document.body.style.overflow='';}
+    n.addEventListener('click',o);c.addEventListener('click',x);b.addEventListener('click',x);
+})();
+</script>
+</body>
+</html>
+
+</body>
+</html>
