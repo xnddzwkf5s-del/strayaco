@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OpenClaw AI Agent — Complete VPS Deployment Guide - Straya Co Blog</title>
-    <meta name="description" content="A hands-on guide to deploying OpenClaw on a Digital Ocean VPS with security, backup, email pipeline, and AI workspace setup. Separate human and AI sections.">
+    <meta name="description" content="A hands-on guide to deploying OpenClaw on a DigitalOcean VPS with security, backup, email pipeline, and AI workspace setup. Separate human and AI sections.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -122,7 +122,7 @@
 
         <p>You're about to create a tiny Linux server in the cloud that will run your AI agent 24/7. This section covers everything from clicking "Create Droplet" to locking down SSH so only you (and your recovery console) can get in. Follow every step in order — skipping ahead is how people get locked out.</p>
 
-        <h3>1. Create Your Digital Ocean Droplet</h3>
+        <h3>1. Create Your DigitalOcean Droplet</h3>
 
         <p>Head to <a href="https://cloud.digitalocean.com" target="_blank" rel="noopener">cloud.digitalocean.com</a>, log in (or sign up — you get $200 free credit for 60 days), and click the green <strong>Create Droplet</strong> button. Configure as follows:</p>
 
@@ -139,10 +139,10 @@
         <pre><code># Generate a new key if you don't have one (press Enter for defaults)
 ssh-keygen -t ed25519 -C "your-email@example.com"
 
-# Copy the public key to paste into Digital Ocean
+# Copy the public key to paste into DigitalOcean
 cat ~/.ssh/id_ed25519.pub</code></pre>
 
-        <p>Copy the output starting with <code>ssh-ed25519</code> and paste it into the Digital Ocean box. Then click <strong>Create Droplet</strong>.</p>
+        <p>Copy the output starting with <code>ssh-ed25519</code> and paste it into the DigitalOcean box. Then click <strong>Create Droplet</strong>.</p>
 
         <p>Wait about 30 seconds. Once it's running, you'll see an IP address (e.g. <code>165.232.45.100</code>). Copy that IP — you'll use it constantly.</p>
 
@@ -152,7 +152,7 @@ cat ~/.ssh/id_ed25519.pub</code></pre>
 
         <pre><code>ssh root@YOUR_DROPLET_IP</code></pre>
 
-        <p>You should connect without a password prompt. If it asks for a password, something is wrong with your key setup — go back and check the Digital Ocean SSH key section. If you see a warning about "ECDSA host key" or "authenticity of host," type <code>yes</code> and press Enter.</p>
+        <p>You should connect without a password prompt. If it asks for a password, something is wrong with your key setup — go back and check the DigitalOcean SSH key section. If you see a warning about "ECDSA host key" or "authenticity of host," type <code>yes</code> and press Enter.</p>
 
         <h3>3. Create a Non-Root User</h3>
 
@@ -187,7 +187,7 @@ chmod 600 /home/pang/.ssh/authorized_keys  # Only user can read/write</code></pr
 
         <p>Before you lock SSH down, <strong>open a third terminal window</strong> and SSH in as your new user. Keep it sitting there with a shell prompt. I'm serious. You'll understand why in a moment.</p>
 
-        <p>This "live backup session" is your insurance policy. If you misconfigure something in the next steps and lock yourself out, that session is still open and you can fix things. Without it, you'd need to use the Digital Ocean recovery console (more on that later).</p>
+        <p>This "live backup session" is your insurance policy. If you misconfigure something in the next steps and lock yourself out, that session is still open and you can fix things. Without it, you'd need to use the DigitalOcean recovery console (more on that later).</p>
 
         <h3>6. Harden SSH Configuration</h3>
 
@@ -203,7 +203,6 @@ PermitRootLogin no
 # Only allow key-based authentication (no passwords at all)
 PasswordAuthentication no
 KbdInteractiveAuthentication no
-ChallengeResponseAuthentication no
 
 # Use only Ed25519 keys (most secure, most modern)
 PubkeyAcceptedKeyTypes ssh-ed25519
@@ -301,9 +300,29 @@ sudo fail2ban-client status sshd</code></pre>
     </div>
 </section>
 
+<section class="post-content" style="background:var(--cream);padding:2rem 0;">
+    <div class="container">
+        <h2>📑 On This Page</h2>
+        <ol style="columns:2;column-gap:2rem;list-style-position:inside;">
+            <li><a href="#vps-security" style="color:var(--dark);">🧑 Human — VPS &amp; Security Setup</a></li>
+            <li><a href="#ai-verify" style="color:var(--dark);">🤖 AI — Execute After Human Setup</a></li>
+            <li><a href="#openclaw-install" style="color:var(--dark);">🧑 Human — OpenClaw Installation</a></li>
+            <li><a href="#openclaw-config" style="color:var(--dark);">🤖 AI — Configure &amp; Optimise</a></li>
+            <li><a href="#workspace" style="color:var(--dark);">🧑 Human — Workspace &amp; AI Soul</a></li>
+            <li><a href="#backup" style="color:var(--dark);">💾 Backup Strategy — The Three-Layer Approach</a></li>
+            <li><a href="#health-check" style="color:var(--dark);">🩺 Health Check Scripts</a></li>
+            <li><a href="#off-server" style="color:var(--dark);">📤 Off-Server Backup Pull</a></li>
+            <li><a href="#email" style="color:var(--dark);">🧑 Human — Email Setup</a></li>
+            <li><a href="#lessons" style="color:var(--dark);">📚 Complete Lessons Learned</a></li>
+        </ol>
+    </div>
+</section>
+
+
+
 <section class="post-content">
     <div class="container">
-        <h2>🤖 AI — Execute After Human Setup</h2>
+        <h2 id="ai-verify">🤖 AI — Execute After Human Setup</h2>
 
         <p>The human has created the droplet, set up a non-root user with SSH key access, hardened SSH, enabled UFW, and installed fail2ban. Now it's your turn to verify everything is correct and set up the application environment.</p>
 
@@ -460,9 +479,9 @@ curl -s -o /dev/null -w "%{http_code}" http://localhost:80
 curl -s -o /dev/null -w "%{http_code}" https://your-domain.com
 # Expected: 200 or 301/302</code></pre>
 
-        <h3>8. Escape Hatch — Digital Ocean Recovery Console</h3>
+        <h3>8. Escape Hatch — DigitalOcean Recovery Console</h3>
 
-        <p>Despite all precautions, you may eventually lock yourself out. Maybe you fat-fingered the UFW default policy, or a config file has a syntax error that the reload accepted but reboot didn't. The Digital Ocean recovery console is your universal escape hatch.</p>
+        <p>Despite all precautions, you may eventually lock yourself out. Maybe you fat-fingered the UFW default policy, or a config file has a syntax error that the reload accepted but reboot didn't. The DigitalOcean recovery console is your universal escape hatch.</p>
 
         <p><strong>How to access it:</strong></p>
         <ol>
@@ -505,7 +524,7 @@ curl -s -o /dev/null -w "%{http_code}" https://your-domain.com
 │  ☐ Live backup session rule documented              │
 └─────────────────────────────────────────────────────┘</code></pre>
 
-        <p>The server is now secure. Your non-root user has key-only SSH access. Root is locked out. Password auth is dead. The firewall is three ports wide and nothing more. fail2ban watches the gate. Your secrets are protected by 640 permissions. And you know exactly how to get back in if something goes wrong — three backup sessions deep, with the Digital Ocean console as the final safety net.</p>
+        <p>The server is now secure. Your non-root user has key-only SSH access. Root is locked out. Password auth is dead. The firewall is three ports wide and nothing more. fail2ban watches the gate. Your secrets are protected by 640 permissions. And you know exactly how to get back in if something goes wrong — three backup sessions deep, with the DigitalOcean console as the final safety net.</p>
 
         <p>Next section: <strong>Installing & Configuring OpenClaw</strong> — where we deploy the AI agent itself and wire it up to the internet.</p>
 
@@ -517,7 +536,7 @@ curl -s -o /dev/null -w "%{http_code}" https://your-domain.com
 
 <section class="post-content">
     <div class="container">
-        <h2>🧑 Human — OpenClaw Installation & Configuration</h2>
+        <h2 id="openclaw-install">🧑 Human — OpenClaw Installation & Configuration</h2>
 
         <p>OpenClaw is a Node.js application that runs as a background service (called the Gateway) on your VPS. It connects your chat channels (Telegram, webchat, etc.) to large language models like DeepSeek, Claude, and Ollama. Think of it as a smart switchboard — it routes messages from your family's phones through AI models and back to you, all while keeping your data on your own server.</p>
 
@@ -730,8 +749,8 @@ GATEWAY_AUTH_TOKEN=your-gateway-token</code></pre>
         }
       },
       {
-        "id": "melinda",
-        "name": "Melinda",
+        "id": "agent-family-1",
+        "name": "Family Member",
         "workspace": "/home/ubuntu/.openclaw/workspace-melinda",
         "model": {
           "primary": "deepseek/deepseek-v4-flash"
@@ -757,21 +776,21 @@ GATEWAY_AUTH_TOKEN=your-gateway-token</code></pre>
       "enabled": true,
       "accounts": {
         "default": {
-          "botToken": "8423686430:AAFVHlzU2zyM64E7rMHLtmvyMLynOrt1CdE",
+          "botToken": "YOUR_TELEGRAM_BOT_TOKEN",
           "dmPolicy": "pairing",
-          "allowFrom": ["8346087834"]
+          "allowFrom": ["1234567890"]
         },
-        "melinda": {
-          "botToken": "8608966251:AAHmljmtZ2eUt21qOhv2Ms__Ks4GQKSoplE",
+        "agent-family-1": {
+          "botToken": "TELEGRAM_BOT_TOKEN_AGENT_1",
           "dmPolicy": "allowlist",
-          "allowFrom": ["7807478093"],
-          "groupAllowFrom": ["7807478093"]
+          "allowFrom": ["1234567890"],
+          "groupAllowFrom": ["1234567890"]
         },
-        "adrian": {
-          "botToken": "8792035115:AAFyu_fMs8bt0VWN79xCVy3j7JitDR0MNqc",
+        "agent-family-3": {
+          "botToken": "TELEGRAM_BOT_TOKEN_AGENT_2",
           "dmPolicy": "allowlist",
-          "allowFrom": ["8695044192"],
-          "groupAllowFrom": ["8695044192"]
+          "allowFrom": ["1234567890"],
+          "groupAllowFrom": ["1234567890"]
         }
       }
     }
@@ -828,27 +847,27 @@ GATEWAY_AUTH_TOKEN=your-gateway-token</code></pre>
         </ul>
 
         <h3>F. Bindings — Routing Family Members to Their Agents</h3>
-        <p>Bindings connect a Telegram account to a specific agent. This is how Melinda's bot routes to Melinda's agent workspace, and yours routes to yours:</p>
+        <p>Bindings connect a Telegram account to a specific agent. This is how Family Member's bot routes to Family Member's agent workspace, and yours routes to yours:</p>
         <pre><code>{
   "bindings": [
     {
-      "agentId": "melinda",
+      "agentId": "agent-family-1",
       "match": {
         "channel": "telegram",
-        "accountId": "melinda"
+        "accountId": "agent-family-1"
       }
     },
     {
-      "agentId": "adrian",
+      "agentId": "agent-family-3",
       "match": {
         "channel": "telegram",
-        "accountId": "adrian"
+        "accountId": "agent-family-3"
       }
     }
   ]
 }</code></pre>
 
-        <p>When Melinda messages her Telegram bot, OpenClaw checks the bindings, finds the <code>melinda</code> agent, and routes the message there. That agent has its own workspace, model preferences, and skill set — completely isolated from yours.</p>
+        <p>When Family Member messages her Telegram bot, OpenClaw checks the bindings, finds the <code>melinda</code> agent, and routes the message there. That agent has its own workspace, model preferences, and skill set — completely isolated from yours.</p>
 
         <hr>
 
@@ -994,18 +1013,18 @@ and they should know.</code></pre>
 _Quick reference for the person you're helping._
 
 ## Quick Facts
-- **Name:** Vincent Woo (prefers "Vincent")
+- **Name:** Alex Sample (prefers "Alex")
 - **Birth Month/Year:** July 1977
 - **Timezone:** Australia/Sydney
-- **Location:** Cherrybrook, NSW, Australia
+- **Location:** Sydney, NSW, Australia
 
 ## Key Context
 - **Primary Database:** Obsidian vault at
-  `/Users/pang/Documents/Obsidian Vault/My Brain/`
+  `/Users/you/Documents/Obsidian Vault/your-vault/`
 - **When saying "search my database" or "save to database":**
   Refers to Obsidian vault
-- **Projects:** WeScan Email Relay (wescan.net),
-  Straya Co website, JWC Real Estate website
+- **Projects:** Your Project Email Relay (your-project.net),
+  Straya Co website, Your Real Estate Business website
 - **Technical:** Prefers command-line tools, uses Git/GitHub
 
 ## Communication Preferences
@@ -1166,7 +1185,7 @@ preferences live in LEARNINGS.md._
 
 ## Identity
 - **AI Name:** Pang-Ai
-- **User:** Vincent Woo (prefers "Vincent")
+- **User:** Alex Sample (prefers "Alex")
 - **Created:** 2026-03-12
 - **Timezone:** Australia/Sydney
 
@@ -1177,24 +1196,24 @@ preferences live in LEARNINGS.md._
 
 ## Projects
 
-### WeScan (Primary Project)
-- **Local:** /Users/you/WeScan-Net/
-- **GitHub:** https://github.com/your-org/WeScan-Net
-- **Live:** https://wescan.net
+### Your Project (Primary Project)
+- **Local:** /Users/you/Your Project-Net/
+- **GitHub:** https://github.com/your-org/Your Project-Net
+- **Live:** https://your-project.net
 - **VPS:** your-vps-ip (DO, Sydney)
 - **Stack:** nginx + Flask + gunicorn + Postfix
 
 ### Straya Co Website
 - **Local:** /Users/you/Straya_repo/
-- **Live:** https://www.strayaco.com.au/
+- **Live:** https://www.your-domain.com.au/
 - **Publish Workflow:**
   1. Backup: zip repo (exclude .git)
   2. Commit with version tag
   3. Push to GitHub (auto-deploys via Pages)
   4. Verify with curl
 
-### Realform
-- **Local:** /Users/you/Realform/
+### Your SaaS Project
+- **Local:** /Users/you/Your SaaS Project/
 - **Stack:** Flask + PostgreSQL + Twilio
 - **VPS:** your-vps-ip (DO, Sydney)
 
@@ -1375,7 +1394,7 @@ Before touching ANY file on a server:
 <section class="post-content">
     <div class="container">
 
-        <h2>💾 Your Backup Strategy — The Three-Layer Approach</h2>
+        <h2 id="backup">💾 Your Backup Strategy — The Three-Layer Approach</h2>
 
         <p>If your VPS dies, how fast can you recover? Without a plan, the answer is: you can't. And that realisation usually comes right after something breaks.</p>
 
@@ -1398,7 +1417,7 @@ Before touching ANY file on a server:
         <p>Always use <code>pg_dump</code>:</p>
 
         <pre><code>#!/bin/bash
-# PostgreSQL backup with integrity check (for Realform)
+# PostgreSQL backup with integrity check (for Your SaaS Project)
 set -euo pipefail
 
 INSTALL_DIR="/opt/realform"
@@ -1433,19 +1452,19 @@ echo "Backup complete: ${DATE}"
 
         <h3>🤖 AI — Set Up SQLite Backup (.backup Command)</h3>
 
-        <p>For smaller projects like WeScan that use SQLite (a valid choice for single-server apps), the principle is the same: never copy the file. SQLite has a built-in <code>.backup</code> command that handles concurrent reads safely:</p>
+        <p>For smaller projects like Your Project that use SQLite (a valid choice for single-server apps), the principle is the same: never copy the file. SQLite has a built-in <code>.backup</code> command that handles concurrent reads safely:</p>
 
         <pre><code>#!/bin/bash
-# SQLite backup with integrity check (for WeScan)
+# SQLite backup with integrity check (for Your Project)
 set -euo pipefail
 
-INSTALL_DIR="/opt/wescan"
+INSTALL_DIR="/opt/your-project"
 BACKUP_DIR="$INSTALL_DIR/backups"
-DB_PATH="$INSTALL_DIR/instance/wescan.db"
+DB_PATH="$INSTALL_DIR/instance/your-project.db"
 DATE=$(date +%Y%m%d_%H%M%S)
 DOW=$(date +%u)       # Day of week (1=Mon, 7=Sun)
 DOM=$(date +%d)       # Day of month
-LOG_FILE="/var/log/wescan/backup.log"
+LOG_FILE="/var/log/your-project/backup.log"
 
 mkdir -p "$BACKUP_DIR" "$(dirname "$LOG_FILE")"
 
@@ -1453,7 +1472,7 @@ log() { echo "[$(date)] $*" | tee -a "$LOG_FILE"; }
 fail() {
     log "FATAL: $*"
     # Send alert via SendGrid (see health check section below)
-    /opt/wescan/scripts/send_alert.sh "Backup FAILED: $*"
+    /opt/your-project/scripts/send_alert.sh "Backup FAILED: $*"
     exit 1
 }
 
@@ -1479,7 +1498,7 @@ fi
 tar -czf "$BACKUP_DIR/config_$DATE.tar.gz" \
     /etc/postfix/main.cf \
     /etc/postfix/master.cf \
-    /etc/nginx/sites-available/wescan.net \
+    /etc/nginx/sites-available/your-project.net \
     2>/dev/null || log "WARNING: Config tar had errors"
 
 # 4. GFS retention — prune old backups
@@ -1521,7 +1540,7 @@ find "$BACKUP_DIR" -maxdepth 1 -type f -mtime +14 -delete
 
         <p>The sorting trick (<code>ls -1t ... | tail -n +9 | xargs rm</code>) keeps the newest N files and deletes the rest. It means you always have recent granularity and long-term coverage, without filling up your disk.</p>
 
-        <h2>🩺 Health Check Scripts — Catch Problems Before They Catch You</h2>
+        <h2 id="health-check">🩺 Health Check Scripts — Catch Problems Before They Catch You</h2>
 
         <p>A backup that sits unverified is a hope, not a plan. You need automated checks that run <em>after</em> every backup and email you if anything is wrong.</p>
 
@@ -1543,7 +1562,7 @@ Usage: python3 backup_health_check.py &lt;sendgrid_api_key&gt;
 import subprocess, sys, json, datetime, urllib.request
 from typing import Optional, Tuple
 
-VPS_HOST = "170.64.135.137"
+VPS_HOST = "YOUR_VPS_IP"
 VPS_USER = "root"
 BACKUP_DIR = "/opt/yourproject/backups"
 LOG_FILE  = "/var/log/yourproject/backup.log"
@@ -1669,24 +1688,24 @@ def check_vps(host, name, services):
         pass
 
 # Check each project
-check_http("WeScan", "https://wescan.net")
+check_http("Your Project", "https://your-project.net")
 check_http("Straya Co", "https://strayaco.com.au")
-check_vps("root@170.64.232.39", "WeScan VPS",
-          ["wescan", "nginx", "postfix"])
+check_vps("root@YOUR_SECOND_VPS_IP", "Your Project VPS",
+          ["your-project", "nginx", "postfix"])
 
 if ISSUES:
     body = f"Daily Health Check — {len(ISSUES)} issues\n\n"
     for i, issue in enumerate(ISSUES, 1):
         body += f"{i}. {issue}\n"
     # Send via SendGrid or local mail
-    send_alert("vwoo@outlook.com.au",
+    send_alert("you@example.com.au",
                f"[Health Check] {len(ISSUES)} issue(s)",
                body)
 </code></pre>
 
         <p>The beauty of email-on-failure-only is that you don't get desensitised. No "Everything OK" email to ignore every morning. If the inbox stays quiet, everything is fine.</p>
 
-        <h2>📤 Off-Server Backup Pull — Your Insurance Policy</h2>
+        <h2 id="off-server">📤 Off-Server Backup Pull — Your Insurance Policy</h2>
 
         <p>Your VPS provider could go bankrupt tomorrow. Their data centre could flood. Your account could get hacked and wiped. If your only backup lives on the VPS, you lose everything with it.</p>
 
@@ -1701,9 +1720,9 @@ if ISSUES:
 # Pulls backups from VPS, keeps 14 days locally.
 set -euo pipefail
 
-VPS="root@170.64.232.39"
-VPS_BACKUP_DIR="/opt/wescan/backups"
-LOCAL_BACKUP_DIR="/Users/you/WeScan-Net/backups"
+VPS="root@YOUR_SECOND_VPS_IP"
+VPS_BACKUP_DIR="/opt/your-project/backups"
+LOCAL_BACKUP_DIR="/Users/you/Your Project-Net/backups"
 LOG_FILE="$LOCAL_BACKUP_DIR/pull.log"
 
 mkdir -p "$LOCAL_BACKUP_DIR"
@@ -1719,12 +1738,12 @@ rsync -avz --ignore-existing \
 
 # Also pull the live database and configs directly
 rsync -avz \
-    "$VPS:/opt/wescan/.env" \
+    "$VPS:/opt/your-project/.env" \
     "$LOCAL_BACKUP_DIR/.env" 2>&1
 
 rsync -avz \
     "$VPS:/etc/postfix/main.cf" \
-    "$VPS:/etc/nginx/sites-available/wescan.net" \
+    "$VPS:/etc/nginx/sites-available/your-project.net" \
     "$LOCAL_BACKUP_DIR/" 2>&1
 
 # Prune local backups older than 14 days
@@ -1745,18 +1764,18 @@ ls -lht "$LOCAL_BACKUP_DIR"/*.sqlite 2>/dev/null | head -6 | tee -a "$LOG_FILE"
         <pre><code># ── On the VPS (as root) ──────────────────────────────
 
 # Backup: daily at 3am — creates SQLite dump, config tar, GFS snapshots
-0 3 * * * /opt/wescan/scripts/backup.sh
+0 3 * * * /opt/your-project/scripts/backup.sh
 
 # Health check: 30 mins after backup — verifies integrity, log, size
-30 3 * * * /usr/bin/python3 /opt/wescan/scripts/health_check.py
+30 3 * * * /usr/bin/python3 /opt/your-project/scripts/health_check.py
 
 # Service monitor: every 5 minutes — restarts failed services, alerts
-*/5 * * * * /opt/wescan/scripts/monitor.sh
+*/5 * * * * /opt/your-project/scripts/monitor.sh
 
 # ── On the local machine (your Mac) ─────────────────
 
 # Off-server pull: 4am, after VPS backup completes
-0 4 * * * /Users/you/WeScan-Net/scripts/pull_backups.sh
+0 4 * * * /Users/you/Your Project-Net/scripts/pull_backups.sh
 
 # Daily health check: 9am AEST — full system verification
 0 9 * * * /usr/bin/python3 /Users/you/.openclaw/scripts/daily_health_check.py
@@ -1774,7 +1793,7 @@ ls -lht "$LOCAL_BACKUP_DIR"/*.sqlite 2>/dev/null | head -6 | tee -a "$LOG_FILE"
     &lt;key&gt;ProgramArguments&lt;/key&gt;
     &lt;array&gt;
         &lt;string&gt;/usr/local/bin/bash&lt;/string&gt;
-        &lt;string&gt;/Users/you/WeScan-Net/scripts/pull_backups.sh&lt;/string&gt;
+        &lt;string&gt;/Users/you/Your Project-Net/scripts/pull_backups.sh&lt;/string&gt;
     &lt;/array&gt;
     &lt;key&gt;StartCalendarInterval&lt;/key&gt;
     &lt;dict&gt;
@@ -1784,9 +1803,9 @@ ls -lht "$LOCAL_BACKUP_DIR"/*.sqlite 2>/dev/null | head -6 | tee -a "$LOG_FILE"
         &lt;integer&gt;0&lt;/integer&gt;
     &lt;/dict&gt;
     &lt;key&gt;StandardOutPath&lt;/key&gt;
-    &lt;string&gt;/Users/you/WeScan-Net/logs/pull.log&lt;/string&gt;
+    &lt;string&gt;/Users/you/Your Project-Net/logs/pull.log&lt;/string&gt;
     &lt;key&gt;StandardErrorPath&lt;/key&gt;
-    &lt;string&gt;/Users/you/WeScan-Net/logs/pull.err&lt;/string&gt;
+    &lt;string&gt;/Users/you/Your Project-Net/logs/pull.err&lt;/string&gt;
 &lt;/dict&gt;
 &lt;/plist&gt;
 </code></pre>
@@ -1808,8 +1827,8 @@ launchctl load ~/Library/LaunchAgents/com.yourproject.pull-backups.plist</code><
 # Usage: ./restore.sh 20260509_040225
 set -euo pipefail
 
-BACKUP_DIR="/Users/you/Realform/backups"
-VPS="root@170.64.135.137"
+BACKUP_DIR="/Users/you/Your SaaS Project/backups"
+VPS="root@YOUR_VPS_IP"
 INSTALL_DIR="/opt/realform"
 DATE="${1}"
 
@@ -1863,7 +1882,7 @@ echo "Restore complete — service is running"
 
 SUBJECT="$1"
 BODY="$2"
-SG_KEY=$(grep '^SENDGRID_API_KEY=' /opt/wescan/.env | cut -d= -f2-)
+SG_KEY=$(grep '^SENDGRID_API_KEY=' /opt/your-project/.env | cut -d= -f2-)
 ALERT_EMAIL="you@email.com"
 
 curl -s -X POST "https://api.sendgrid.com/v3/mail/send" \
@@ -1884,7 +1903,7 @@ curl -s -X POST "https://api.sendgrid.com/v3/mail/send" \
 
         <p>If you're running PostgreSQL in production and your backup window matters, you need WAL archiving on top of your daily pg_dump.</p>
 
-        <p>WAL (Write-Ahead Log) archiving gives you <strong>point-in-time recovery</strong> (PITR). Instead of restoring to the last backup, you can restore to any moment — 3:47pm Tuesday, for example. This is critical if corruption happens mid-day and you don't want to lose 12 hours of data.</p>
+        <p>WAL (Write-Ahead Log) archiving gives you <strong>point-in-time recovery</strong> (PITR). Instead of restoring to the last backup, you can restore to any moment — 3:47 pm Tuesday, for example. This is critical if corruption happens mid-day and you don't want to lose 12 hours of data.</p>
 
         <p>In <code>postgresql.conf</code>:</p>
 
@@ -2109,7 +2128,9 @@ _dmarc.yourdomain.com.  IN  TXT  "v=DMARC1; p=reject; rua=mailto:dmarc@yourdomai
                 <tr><td>14</td><td><strong>Check nginx config before creating new static pages</strong></td><td>If nginx has a <code>try_files</code> or <code>alias</code> that doesn't match your path, you get 404. Always <code>nginx -t</code> after any config change.</td></tr>
                 <tr><td>15</td><td><strong>Sites-available vs sites-enabled may not be symlinks</strong></td><td>Some setups copy configs instead of symlinking. Editing <code>sites-available</code> does nothing if nginx reads <code>sites-enabled</code>. Check with <code>ls -la</code>.</td></tr>
                 <tr><td>16</td><td><strong>Every production project needs: VPS backup + health check + off-server copy</strong></td><td>Missing any one is a gap waiting to become an incident. Backups on the same server die with the server.</td></tr>
-                <tr><td>17</td><td><strong>Self-improvement loop: update lessons after every correction</strong></td><td>Every mistake you fix today is a lesson for tomorrow — if you write it down. Without it, the same mistake repeats.</td></tr>
+                <tr><td>17</td><td><strong>Never use <code>$(security find-generic-password …)</code> in your OpenClaw <code>.env</code> file</strong></td><td>The <code>dotenv</code> parser treats shell substitution syntax as a literal string — your API key becomes the text "$(security …)" instead of the actual password. Every API call returns 401. Resolve all secrets to their actual values before they touch <code>.env</code>. This caused 7 hours of outage and is the #1 trap for OpenClaw on macOS.</td></tr>
+<tr><td>18</td><td><strong>Never use <code>openclaw gateway install --force</code> as a post-update fix</strong></td><td><code>install --force</code> uses a destructive <code>bootout</code>→<code>bootstrap</code> pattern. If <code>bootstrap</code> fails (and it often does after major updates), your LaunchAgent is orphaned — KeepAlive can't recover it, and the gateway stays dead. Use <code>openclaw doctor --yes</code> instead. It uses <code>enable</code>→<code>bootstrap</code>+<code>kickstart</code>, the non-destructive fallback that actually works. This bug killed our gateway for 7 hours.</td></tr>
+<tr><td>19</td><td><strong>Self-improvement loop: update lessons after every correction</strong></td><td>Every mistake you fix today is a lesson for tomorrow — if you write it down. Without it, the same mistake repeats.</td></tr>
             </tbody>
         </table>
 
@@ -2156,7 +2177,7 @@ _dmarc.yourdomain.com.  IN  TXT  "v=DMARC1; p=reject; rua=mailto:dmarc@yourdomai
                 <h4>Contact</h4>
                 <ul>
                     <li>Sydney, Australia</li>
-                    <li><a href="mailto:vincent@strayaco.com.au">vincent@strayaco.com.au</a></li>
+                    <li><a href="mailto:hello@example.com">hello@example.com</a></li>
                 </ul>
             </div>
         </div>
