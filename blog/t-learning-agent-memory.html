@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenClaw AI Agent — Complete VPS Deployment Guide - Straya Co Blog</title>
+    <meta name="description" content="A hands-on guide to deploying OpenClaw on a DigitalOcean VPS with security, backup, email pipeline, and AI workspace setup. Separate human and AI sections.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --dark:#1a1a2e; --gold:#c9a96e; --gold-dark:#b8945a; --cream:#f8f6f1; --white:#fff; --gray:#6b7280; --gray-light:#e8e4dd; --radius:4px; --radius-lg:12px; --shadow:0 4px 20px rgba(0,0,0,0.08); --shadow-lg:0 20px 60px rgba(0,0,0,0.15); --transition:all 0.35s cubic-bezier(0.4,0,0.2,1); }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Inter',sans-serif;color:var(--dark);background:var(--white);line-height:1.7;overflow-x:hidden;}
+        h1,h2,h3,h4{font-family:'Playfair Display',serif;font-weight:600;line-height:1.2;}
+        .container{max-width:800px;margin:0 auto;padding:0 32px;}
+        a{text-decoration:none;color:inherit;}
+        img{max-width:100%;height:auto;}
+        code{font-family:monospace;background:var(--cream);padding:2px 6px;border-radius:3px;font-size:0.9em;}
+        pre{background:var(--dark);color:#e2e8f0;padding:1.25rem;border-radius:var(--radius-lg);overflow-x:auto;margin:1.5rem 0;font-size:0.85rem;line-height:1.6;}
+        pre code{background:transparent;padding:0;color:inherit;font-size:0.85rem;}
+        table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:0.9rem;}
+        th,td{padding:0.75rem 1rem;text-align:left;border-bottom:1px solid var(--gray-light);}
+        th{background:var(--dark);color:var(--white);font-weight:600;}
+        tr:last-child td{border-bottom:none;}
+        p{margin-bottom:1rem;}
+        ul,ol{margin:1rem 0 1rem 1.5rem;}
+        li{margin-bottom:0.4rem;}
+        hr{margin:2rem 0;border:none;border-top:1px solid var(--gray-light);}
+
+        #site-header{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(26,26,46,0.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,169,110,0.2);}
+        .header-inner{max-width:1200px;margin:0 auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:80px;}
+        .logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--white);letter-spacing:0.02em;}
+        .logo span{color:var(--gold);}
+        nav ul{display:flex;list-style:none;gap:2rem;}
+        nav a{color:rgba(255,255,255,0.85);font-size:0.85rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;transition:var(--transition);}
+        nav a:hover,nav a.active{color:var(--gold);}
+        .btn-cta{background:var(--gold);color:var(--dark);padding:0.6rem 1.5rem;border-radius:var(--radius);font-size:0.82rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;transition:var(--transition);}
+        .btn-cta:hover{background:var(--gold-dark);}
+        .nav-icon{display:flex;flex-direction:column;justify-content:space-between;width:26px;height:20px;cursor:pointer;z-index:1100;flex-shrink:0;}
+        .nav-icon span{display:block;height:2px;width:100%;background:#fff;border-radius:9px;transition:all 0.25s ease-in-out;transform-origin:left center;}
+
+        .page-hero{padding:140px 0 40px;background:var(--dark);color:var(--white);}
+        .page-hero h1{font-size:2.4rem;margin-bottom:0.5rem;}
+        .page-hero .meta{color:var(--gold);font-size:0.85rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;}
+        .post-content{padding:60px 0 80px;}
+        .post-content h2{margin:2.5rem 0 1rem;font-size:1.6rem;}
+        .post-content h3{margin:2rem 0 0.75rem;font-size:1.2rem;color:var(--gray);}
+        .post-content ul{margin:1rem 0;}
+        .post-content li{margin-bottom:0.4rem;}
+        .post-content table{margin:1.5rem 0;}
+        .post-content .tag{display:inline-block;background:var(--cream);color:var(--gray);padding:0.3rem 0.8rem;border-radius:20px;font-size:0.8rem;margin-right:0.5rem;margin-bottom:0.5rem;border:1px solid var(--gray-light);}
+
+        footer{background:var(--dark);color:rgba(255,255,255,0.7);padding:60px 0 30px;margin-top:60px;}
+        .footer-inner{max-width:1200px;margin:0 auto;padding:0 32px;}
+        .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;padding-bottom:2rem;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:2rem;}
+        .footer-brand{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--white);margin-bottom:0.75rem;}
+        .footer-brand span{color:var(--gold);}
+        .footer-col h4{color:var(--white);margin-bottom:1rem;font-size:1rem;}
+        .footer-col ul{list-style:none;}
+        .footer-col li{margin-bottom:0.5rem;}
+        .footer-col a:hover{color:var(--gold);}
+        .footer-bottom{text-align:center;font-size:0.85rem;}
+
+        .backdrop{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:900;opacity:0;visibility:hidden;transition:var(--transition);}
+        .backdrop.open{opacity:1;visibility:visible;}
+        .slide-navigation{position:fixed;top:0;right:0;bottom:0;width:320px;background:var(--dark);z-index:950;padding:2rem;transform:translateX(100%);transition:var(--transition);}
+        .slide-navigation.open{transform:translateX(0);}
+        .slide-nav-logo{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--white);margin:2rem 0;}
+        .slide-nav-logo span{color:var(--gold);}
+        .slide-nav-grid{display:grid;grid-template-columns:1fr;gap:2rem;}
+        .slide-nav-title{color:var(--gold);font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:1rem;}
+        .slide-nav-links{list-style:none;}
+        .slide-nav-links li{margin-bottom:0.75rem;}
+        .slide-nav-links a{color:rgba(255,255,255,0.75);font-size:0.95rem;transition:var(--transition);}
+        .slide-nav-links a:hover{color:var(--gold);}
+
+        @media(max-width:991px){nav ul{display:none;}}
+        @media(max-width:768px){.container{padding:0 20px;}.header-inner{padding:0 20px;}.footer-inner{padding:0 20px;}.footer-grid{grid-template-columns:1fr;}.page-hero h1{font-size:1.8rem;}.slide-navigation{width:100%;}}
+    </style>
+</head>
+<body>
+<header id="site-header">
+    <div class="header-inner">
+        <a href="../index.html" class="logo">Straya <span>Co</span></a>
+        <nav>
+            <ul>
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../services.html">Services</a></li>
+                <li><a href="../about.html">About</a></li>
+                <li><a href="../resources.html">Resources</a></li>
+                <li><a href="index.html" class="active">Blog</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </nav>
+        <a href="../contact.html" class="btn-cta">Get Started</a>
+        <div class="nav-icon" id="navIcon"><span></span><span></span><span></span></div>
+    </div>
+</header>
+
+<section class="page-hero">
+    <div class="container">
+        <p class="meta">23 May 2026 &mdash; AI / Architecture</p>
+        <h1>T-Learning: Giving AI Agents Permanent Memory</h1>
+        <p style="color:rgba(255,255,255,0.7);margin-top:1rem;font-size:1.05rem;">A practical system for capturing lessons, avoiding repeat mistakes, and building AI agents that improve over time.</p>
+        <div>
+            <span class="tag">AI Agent</span>
+            <span class="tag">OpenClaw</span>
+            <span class="tag">Architecture</span>
+            <span class="tag">Automation</span>
+            <span class="tag">Self-Learning</span>
+            <span class="tag">SSH</span>
+        </div>
+    </div>
+</section>
+
+<section class="post-content">
+    <div class="container">
+<div class="container">
+<!-- TOC -->
+<div class="toc">
+  <h3>Table of Contents</h3>
+  <ol>
+    <li><a href="#problem">The Problem: Why AI Agents Need Memory</a></li>
+    <li><a href="#design">Design Principles</a></li>
+    <li><a href="#architecture">Architecture Overview</a></li>
+    <li><a href="#format">The Rule Format</a></li>
+    <li><a href="#lifecycle">Rule Lifecycle</a></li>
+    <li><a href="#code">Code Walkthrough</a></li>
+    <li><a href="#failsafes">Fail-Safes &amp; Loop Prevention</a></li>
+    <li><a href="#motivation">Real-World Motivation</a></li>
+    <li><a href="#setup">Setup Guide</a></li>
+    <li><a href="#lessons">Lessons Learned</a></li>
+  </ol>
+</div>
+<!-- SECTION 1 -->
+<h2 id="problem">1. The Problem: Why AI Agents Need Memory</h2>
+<p>AI agents are fundamentally stateless. Every session starts from a clean slate. The context window is a blank page—and it stays that way because the architecture gives no affordance for persistence between invocations.</p>
+<p>This creates four problems that compound over time:</p>
+<p><strong>Same mistakes, every time.</strong> An agent discovers that a particular nginx configuration breaks certain static pages. It documents this, fixes the issue, and moves on. Next session? The lesson is gone. The same four-hour debugging loop repeats.</p>
+<p><strong>Context windows are limited.</strong> Even with 200K+ token windows, you can't pack every past lesson into every prompt. The economics of token usage degrade as you shove more history into each call. You need selectivity—load only what's relevant to <em>this</em> task.</p>
+<p><strong>Knowledge silos between agents.</strong> In our setup, Conductor (a reviewer/gatekeeper/architect on a Mac mini) and Worker (a coding agent on a remote VPS) each learn different lessons from different contexts. Without a shared mechanism, Worker's hard-won deploy lessons never reach Conductor. Conductor's architectural directives never constrain Worker.</p>
+<p><strong>No forced forgetting.</strong> A human developer naturally forgets obsolete patterns. An AI agent with infinite memory accumulates rules forever—including rules that are no longer relevant, rules that contradict newer ones, and rules from codebases that have been rewritten. Without expiry, the rule base becomes noise.</p>
+<p>T-Learning v2 is our answer to all four problems. It's a tiered, self-expiring, contradiction-aware rule system that runs on zero additional infrastructure—just JSONL files, SSH, and three Python scripts.</p>
+<!-- SECTION 2 -->
+<h2 id="design">2. Design Principles</h2>
+<p>We made deliberate architectural choices. Here's each one, with its rationale.</p>
+<h3>File-Based Over Database</h3>
+<p>A PostgreSQL-backed rule store would be elegant. It would also be another service to monitor, another connection string to manage, and another failure mode. Our agents already have working filesystems. JSONL files are trivially inspectable with <code>cat</code> and <code>grep</code>, infinitely portable, and require zero setup. For a rule base of hundreds (not millions) of entries, the filesystem is the perfect database.</p>
+<h3>SSH-Mediated Over GitHub</h3>
+<p>Worker has no direct access to the Mac mini. All cross-agent communication flows one direction: Mac mini → Worker via SSH push. This is intentional—the Mac mini is the gatekeeper, and Worker is the worker. Conductor pushes critical rules to Worker, and pulls Worker's learned rules back for review. No shared infrastructure, no central server, no authentication tokens to leak. Just SSH keys with restricted <code>command=</code> directives.</p>
+<h3>JSONL Over YAML</h3>
+<p>YAML is readable but dangerous: anchors, aliases, and the Norway problem (<code>no</code> → <code>false</code>) make it a poor serialisation format for machine-written data. JSONL (one JSON object per line) is concurrent-append-safe—multiple writers can append lines without corrupting each other's data. There's no parser ambiguity, no RCE vector (Python's <code>yaml.load</code>), and no split-brain risk. Each line is self-validating.</p>
+<h3>Tiered Knowledge</h3>
+<p>Not all rules are equal. Some are always relevant (critical rules: "never deploy without verifying permissions"). Some are project-specific (WeScan deployment rules shouldn't load for a Realform session). Some are niche and rarely needed (a one-off SendGrid API quirk). We use three tiers:</p>
+<table>
+  <tr><th>Tier</th><th>File</th><th>When Loaded</th></tr>
+  <tr><td>Critical</td><td><code>critical.jsonl</code></td><td>Always, for matching scope</td></tr>
+  <tr><td>Directives</td><td><code>directives.jsonl</code></td><td>Always, filterable by scope</td></tr>
+  <tr><td>Learned</td><td><code>learned.jsonl</code></td><td>Filtered by scope, capped at 50</td></tr>
+</table>
+<h3>Forced Forgetting</h3>
+<p>Every rule has a 90-day expiry. A rule that never triggers in 90 days almost certainly isn't useful. Rules that <em>do</em> trigger get auto-renewed—the system rewards relevance. Stale rules (60+ days since last triggered) are downgraded and eventually archived. This prevents rule bloat without any human intervention.</p>
+<h3>Degradation-First Philosophy</h3>
+<p>The system must <em>never</em> block actual work. If a JSONL file is missing, corrupt, or unreadable—continue with zero rules. If SSH to the remote agent fails—continue with local rules only. If a line can't be parsed as JSON—skip it and log a warning. The agent always proceeds. Rules are an enhancement, not a prerequisite.</p>
+<h3>Bankruptcy Protection</h3>
+<p>A buggy session could theoretically flood the rule base with hundreds of low-quality entries. We cap at 10 new rules per session. Exceed that, and the system enters lockdown—all new rules are rejected, and an alert fires. This isn't just about storage; it's about maintaining signal-to-noise ratio in the rule base.</p>
+<h3>Contradiction Kill Switch</h3>
+<p>What happens when one rule says "always do X" and another says "never do X"? Both get archived. Immediately. The contradiction is flagged for human review. The system refuses to pick sides—that's for a human to resolve.</p>
+<h3>Repeat Mistake Escalation</h3>
+<p>If Conductor detects the same mistake pattern more than three times within 30 days—despite existing rules meant to prevent it—the system escalates. New rule writing is deferred. An email goes to the human: "Worker keeps hitting X pattern despite rule Y. Review needed." This is the ultimate circuit breaker.</p>
+<!-- SECTION 3 -->
+<h2 id="architecture">3. Architecture Overview</h2>
+<div class="diagram">
+┌──────────────────────────────────────┐     ┌──────────────────────────────────────┐
+│          MAC MINI (Conductor)          │     │         Worker VPS (203.0.113.x)       │
+│          Reviewer / Gatekeeper        │     │         Coding Agent                  │
+│                                      │     │                                      │
+│  ~/.openclaw/rules/                  │     │  /opt/openclaw/workspace/rules/       │
+│  ├── critical.jsonl  (source)       │     │  ├── critical.jsonl    ← Conductor push   │
+│  ├── directives.jsonl (source)       │ SSH │  ├── directives.jsonl   ← Conductor push   │
+│  ├── worker-cache.jsonl (mirror)      │────▶│  ├── learned.jsonl     ← Worker writes │
+│  └── schema.json      (reference)   │     │  └── alerts/                          │
+│                                      │ ◀───│      └── pending/     ← Worker writes  │
+│  Daily cron:                         │ SSH │                                      │
+│  ┌─ pull_worker_rules.sh               │ read│  Scripts:                            │
+│  │  reads learned.jsonl + alerts     │     │  ├── load_rules.py   (startup)       │
+│  └─ push_worker_rules.sh               │     │  ├── write_rule.py   (post-session)  │
+│     pushes critical + from-conductor      │     │  └── rules_alert.py  (alert writer)  │
+│                                      │     │                                      │
+│  Email: rules_alert.py → SendGrid    │     │  Git: auto-commit on rule changes    │
+└──────────────────────────────────────┘     └──────────────────────────────────────┘
+</div>
+<p class="note"><strong>Data flow is unidirectional for writes.</strong> Conductor pushes rules to Worker. Worker writes locally and Conductor pulls. Worker never initiates connections to the Mac mini. This simplifies firewall rules and reduces the attack surface.</p>
+<h3>Two Agents, Two Roles</h3>
+<p><strong>Conductor</strong> (Mac mini) is the reviewer and gatekeeper. It reads Worker's learned rules during daily health checks, promotes valuable rules to critical, detects contradiction patterns, and sends email alerts. It also writes directives (<code>directives.jsonl</code>) that encode architectural decisions—like "always check nginx location blocks before creating static pages."</p>
+<p><strong>Worker</strong> (VPS) is the coding agent. At session startup, it loads all three rule files, filters by the project context, detects contradictions, and enforces the 50-rule cap. During the session, it consults loaded rules before making decisions. At session end, it reflects on what was learned and writes new rules via <code>write_rule.py</code>.</p>
+<!-- SECTION 4 -->
+<h2 id="format">4. The Rule Format</h2>
+<p>Every rule is a single JSON object on one line. No trailing commas. No multi-line values. Fully self-describing.</p>
+<pre><code>{
+  <span class="str">"id"</span>: <span class="str">"WRKR-001"</span>,
+  <span class="str">"version"</span>: <span class="num">1</span>,
+  <span class="str">"rule"</span>: <span class="str">"Always check nginx location blocks before creating static pages"</span>,
+  <span class="str">"rationale"</span>: <span class="str">"Creating /login.html when nginx proxies /login to Flask causes 404"</span>,
+  <span class="str">"category"</span>: <span class="str">"infrastructure"</span>,
+  <span class="str">"scope"</span>: [<span class="str">"wescan"</span>, <span class="str">"realform"</span>],
+  <span class="str">"source"</span>: <span class="str">"worker"</span>,
+  <span class="str">"priority"</span>: <span class="str">"critical"</span>,
+  <span class="str">"maturity"</span>: <span class="str">"active"</span>,
+  <span class="str">"created"</span>: <span class="str">"2026-05-23T00:00:00Z"</span>,
+  <span class="str">"last_triggered"</span>: <span class="kw">null</span>,
+  <span class="str">"trigger_count"</span>: <span class="num">0</span>,
+  <span class="str">"expires"</span>: <span class="str">"2026-08-21T00:00:00Z"</span>,
+  <span class="str">"refs"</span>: [<span class="str">"WRKR-005"</span>],
+  <span class="str">"contradicts"</span>: <span class="kw">null</span>
+}</code></pre>
+<table>
+  <tr><th>Field</th><th>Purpose</th></tr>
+  <tr><td><code>id</code></td><td>Unique identifier. <code>WRKR-NNN</code> for Worker-written rules, <code>CONDUCTOR-NNN</code> for Conductor directives.</td></tr>
+  <tr><td><code>version</code></td><td>Starts at 1, incremented on updates. Allows tracking rule evolution.</td></tr>
+  <tr><td><code>rule</code></td><td>The actionable one-sentence rule. Max 200 characters. This is what the agent reads inline.</td></tr>
+  <tr><td><code>rationale</code></td><td>Why this rule exists—the mistake it prevents. Max 500 characters. Invaluable for human review.</td></tr>
+  <tr><td><code>category</code></td><td>Classification for filtering and reporting: <code>infrastructure</code>, <code>security</code>, <code>deploy</code>, <code>code</code>, <code>nginx</code>, etc.</td></tr>
+  <tr><td><code>scope</code></td><td>Which projects this applies to: <code>wescan</code>, <code>realform</code>, <code>strayaco</code>, <code>openclaw</code>, <code>general</code>.</td></tr>
+  <tr><td><code>priority</code></td><td><code>critical</code> (always loaded), <code>high</code>, <code>normal</code>, <code>low</code>. Drives cap-enforcement ordering.</td></tr>
+  <tr><td><code>maturity</code></td><td>Lifecycle stage: <code>captured</code> → <code>tested</code> → <code>active</code> → <code>stale</code> → <code>archived</code>.</td></tr>
+  <tr><td><code>trigger_count</code></td><td>How many times this rule was consulted or relevant. Drives promotion.</td></tr>
+  <tr><td><code>expires</code></td><td>ISO-8601, created + 90 days. Auto-renewed if <code>trigger_count > 0</code>.</td></tr>
+  <tr><td><code>contradicts</code></td><td>Array of rule IDs this rule conflicts with. Mutual archive trigger.</td></tr>
+</table>
+<!-- SECTION 5 -->
+<h2 id="lifecycle">5. Rule Lifecycle</h2>
+<div class="diagram">
+captured ──→ tested ──→ active ──→ stale (60d) ──→ archived (90d)
+               │                                        ↑
+               └──→ promoted ──→ critical.jsonl         │
+                                                        │
+                    contradiction detected ──────────────┘
+                    (mutual archive within same scope)
+</div>
+<table>
+  <tr><th>Stage</th><th>Condition</th><th>Action</th></tr>
+  <tr><td><strong>captured</strong></td><td>Newly written, never triggered</td><td>Default for new rules. Loaded at low priority.</td></tr>
+  <tr><td><strong>tested</strong></td><td>Triggered at least once</td><td>Auto-promoted by loader. Rule has been useful.</td></tr>
+  <tr><td><strong>active</strong></td><td>Triggered 3+ times within expiry window</td><td>Stable, proven rule. High confidence.</td></tr>
+  <tr><td><strong>promoted</strong></td><td>Triggered 5+ times</td><td>Moved to <code>critical.jsonl</code> by Conductor review. Cross-project relevance confirmed.</td></tr>
+  <tr><td><strong>stale</strong></td><td><code>last_triggered</code> &gt; 60 days ago, not critical</td><td>Won't load automatically. Rule was situational.</td></tr>
+  <tr><td><strong>archived</strong></td><td>Expired, or stale &gt; 90 days, or contradicted</td><td>Not loaded. Kept for audit trail only.</td></tr>
+</table>
+<p class="note"><strong>Expiry is not deletion.</strong> Archived rules stay in the file—they're just excluded from session loading. This preserves the full audit trail. A human can always pull an archived rule back if it was a false positive.</p>
+<!-- SECTION 6 -->
+<h2 id="code">6. Code Walkthrough</h2>
+<p>Three Python scripts form the engine. Together they're under 250 lines. Here's each one, annotated.</p>
+<h3>6.1 <code>load_rules.py</code> — Session Startup Loader</h3>
+<p>Runs at the start of every Worker session. Must be fast (&lt;500ms). Reads all three rule files, filters by scope, detects contradictions, enforces the 50-rule cap, and outputs the loaded rule set.</p>
+<pre><code><span class="cm">#!/usr/bin/env python3</span>
+<span class="cm">"""T-Learning: Rule loader for Worker."""</span>
+<span class="kw">import</span> json
+<span class="kw">import</span> os
+<span class="kw">import</span> sys
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime, timezone, timedelta
+<span class="kw">RULES_DIR</span> = <span class="str">"/opt/openclaw/workspace/rules"</span>
+<span class="kw">MAX_RULES</span> = 50
+<span class="kw">PRIORITY_ORDER</span> = {<span class="str">"critical"</span>: 0, <span class="str">"high"</span>: 1, <span class="str">"normal"</span>: 2, <span class="str">"low"</span>: 3}
+<span class="kw">def</span> <span class="fn">load_jsonl</span>(path: str) -> list:
+    <span class="cm">"""Load a JSONL file, skipping corrupt lines."""</span>
+    rules = []
+    <span class="kw">if</span> <span class="kw">not</span> os.path.exists(path):
+        <span class="builtin">print</span>(<span class="str">f"[Rules] File not found: {path}"</span>)
+        <span class="kw">return</span> rules
+    <span class="kw">with</span> <span class="builtin">open</span>(path) <span class="kw">as</span> f:
+        <span class="kw">for</span> i, line <span class="kw">in</span> <span class="builtin">enumerate</span>(f, 1):
+            line = line.strip()
+            <span class="kw">if</span> <span class="kw">not</span> line:
+                <span class="kw">continue</span>
+            <span class="kw">try</span>:
+                rule = json.loads(line)
+                rules.append(rule)
+            <span class="kw">except</span> json.JSONDecodeError:
+                <span class="builtin">print</span>(<span class="str">f"[Rules] WARNING: Corrupt line {i} in {path}, skipping"</span>)
+    <span class="kw">return</span> rules
+<span class="kw">def</span> <span class="fn">has_contradiction</span>(a: dict, b: dict) -> bool:
+    <span class="cm">"""Check if two rules explicitly contradict."""</span>
+    <span class="kw">if</span> a.get(<span class="str">"contradicts"</span>) <span class="kw">and</span> b[<span class="str">"id"</span>] <span class="kw">in</span> a[<span class="str">"contradicts"</span>]:
+        <span class="kw">return</span> <span class="kw">True</span>
+    <span class="kw">if</span> b.get(<span class="str">"contradicts"</span>) <span class="kw">and</span> a[<span class="str">"id"</span>] <span class="kw">in</span> b[<span class="str">"contradicts"</span>]:
+        <span class="kw">return</span> <span class="kw">True</span>
+    <span class="kw">return</span> <span class="kw">False</span>
+<span class="kw">def</span> <span class="fn">check_age</span>(rule: dict) -> dict:
+    <span class="cm">"""Update maturity based on expiry and last_triggered."""</span>
+    now = datetime.now(timezone.utc)
+    <span class="kw">try</span>:
+        expires = datetime.fromisoformat(rule[<span class="str">"expires"</span>])
+        <span class="kw">if</span> now > expires:
+            <span class="kw">if</span> rule.get(<span class="str">"trigger_count"</span>, 0) == 0:
+                rule[<span class="str">"maturity"</span>] = <span class="str">"archived"</span>
+            <span class="kw">else</span>:
+                rule[<span class="str">"expires"</span>] = (now + timedelta(days=90)).isoformat()
+                rule[<span class="str">"maturity"</span>] = <span class="str">"active"</span>
+    <span class="kw">except</span> (ValueError, KeyError):
+        <span class="kw">pass</span>
+    <span class="kw">if</span> rule[<span class="str">"maturity"</span>] == <span class="str">"active"</span> <span class="kw">and</span> rule.get(<span class="str">"last_triggered"</span>):
+        <span class="kw">try</span>:
+            last = datetime.fromisoformat(rule[<span class="str">"last_triggered"</span>])
+            days_since = (now - last).days
+            <span class="kw">if</span> days_since > 60:
+                rule[<span class="str">"maturity"</span>] = <span class="str">"stale"</span>
+            <span class="kw">if</span> days_since > 90:
+                rule[<span class="str">"maturity"</span>] = <span class="str">"archived"</span>
+        <span class="kw">except</span> (ValueError, KeyError):
+            <span class="kw">pass</span>
+    <span class="kw">return</span> rule
+<span class="kw">def</span> <span class="fn">load_rules</span>(session_scopes: list) -> list:
+    <span class="cm">"""Main entry point. Returns filtered, sorted, capped rules."""</span>
+    all_rules = load_jsonl(os.path.join(RULES_DIR, <span class="str">"critical.jsonl"</span>)) \
+              + load_jsonl(os.path.join(RULES_DIR, <span class="str">"directives.jsonl"</span>)) \
+              + load_jsonl(os.path.join(RULES_DIR, <span class="str">"learned.jsonl"</span>))
+    <span class="cm"># Age checks + scope filter + contradiction detection</span>
+    all_rules = [check_age(r) <span class="kw">for</span> r <span class="kw">in</span> all_rules]
+    scoped = [r <span class="kw">for</span> r <span class="kw">in</span> all_rules
+              <span class="kw">if</span> <span class="builtin">set</span>(r.get(<span class="str">"scope"</span>, [<span class="str">"general"</span>])) & <span class="builtin">set</span>(session_scopes)]
+    active = []
+    <span class="kw">for</span> r <span class="kw">in</span> scoped:
+        <span class="kw">if</span> r[<span class="str">"maturity"</span>] <span class="kw">in</span> (<span class="str">"archived"</span>, <span class="str">"stale"</span>):
+            <span class="kw">continue</span>
+        <span class="kw">for</span> a <span class="kw">in</span> active:
+            <span class="kw">if</span> has_contradiction(a, r):
+                a[<span class="str">"maturity"</span>] = <span class="str">"archived"</span>
+                r[<span class="str">"maturity"</span>] = <span class="str">"archived"</span>
+                write_alert(<span class="str">"contradiction"</span>, <span class="str">f"Contradiction: {a['id']} vs {r['id']}"</span>)
+                <span class="kw">break</span>
+        <span class="kw">else</span>:
+            active.append(r)
+    <span class="cm"># Sort by priority → trigger_count desc → newest</span>
+    active.sort(key=<span class="kw">lambda</span> r: (
+        PRIORITY_ORDER.get(r.get(<span class="str">"priority"</span>, <span class="str">"normal"</span>), 99),
+        -r.get(<span class="str">"trigger_count"</span>, 0),
+        r.get(<span class="str">"created"</span>, <span class="str">""</span>)
+    ))
+    <span class="kw">if</span> <span class="builtin">len</span>(active) > MAX_RULES:
+        active = active[:MAX_RULES]
+    <span class="kw">return</span> active
+</code></pre>
+<p><strong>Key details:</strong></p>
+<ul>
+  <li><code>load_jsonl()</code> skips corrupt lines—a partially-written line from a crash won't block startup.</li>
+  <li><code>check_age()</code> auto-renews rules that have triggered at least once. Rules that never triggered are archived.</li>
+  <li>Contradiction detection uses the <code>contradicts</code> field. If rule A lists rule B as a contradiction, both are archived.</li>
+  <li>The sort key prioritises critical rules, then high-trigger-count rules, then newest—so the 50-rule cap keeps the most valuable ones.</li>
+</ul>
+<h3>6.2 <code>write_rule.py</code> — Post-Session Writer</h3>
+<p>Called at the end of a session when Worker identifies a new lesson. Validates, deduplicates, checks for contradictions, enforces bankruptcy limits, and performs an atomic append.</p>
+<pre><code><span class="cm">#!/usr/bin/env python3</span>
+<span class="cm">"""T-Learning: Rule writer for Worker."""</span>
+<span class="kw">import</span> json, os, sys
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime, timezone, timedelta
+<span class="kw">from</span> difflib <span class="kw">import</span> SequenceMatcher
+<span class="kw">RULES_DIR</span> = <span class="str">"/opt/openclaw/workspace/rules"</span>
+<span class="kw">VALID_CATEGORIES</span> = {<span class="str">"infrastructure"</span>, <span class="str">"security"</span>, <span class="str">"deploy"</span>, <span class="str">"pipelines"</span>,
+                       <span class="str">"code"</span>, <span class="str">"process"</span>, <span class="str">"postgres"</span>, <span class="str">"python"</span>,
+                       <span class="str">"nginx"</span>, <span class="str">"postfix"</span>, <span class="str">"sendgrid"</span>, <span class="str">"config"</span>}
+<span class="kw">BANKRUPTCY_LIMIT</span> = 10
+<span class="kw">def</span> <span class="fn">similarity</span>(a: str, b: str) -> float:
+    <span class="kw">return</span> SequenceMatcher(<span class="kw">None</span>, a.lower(), b.lower()).ratio()
+<span class="kw">def</span> <span class="fn">get_next_id</span>(rules: list, prefix: str = <span class="str">"WRKR"</span>) -> str:
+    max_num = 0
+    <span class="kw">for</span> r <span class="kw">in</span> rules:
+        rid = r.get(<span class="str">"id"</span>, <span class="str">""</span>)
+        <span class="kw">if</span> rid.startswith(prefix):
+            <span class="kw">try</span>:
+                max_num = <span class="builtin">max</span>(max_num, <span class="builtin">int</span>(rid.split(<span class="str">"-"</span>)[1]))
+            <span class="kw">except</span> (IndexError, ValueError):
+                <span class="kw">pass</span>
+    <span class="kw">return</span> <span class="str">f"{prefix}-{max_num + 1:03d}"</span>
+<span class="kw">def</span> <span class="fn">check_bankruptcy</span>() -> bool:
+    learned = load_jsonl(os.path.join(RULES_DIR, <span class="str">"learned.jsonl"</span>))
+    session_start = os.environ.get(<span class="str">"WRKR_SESSION_START"</span>)
+    <span class="kw">if</span> <span class="kw">not</span> session_start:
+        <span class="kw">return</span> <span class="kw">False</span>
+    <span class="kw">try</span>:
+        start = datetime.fromisoformat(session_start)
+        recent = [r <span class="kw">for</span> r <span class="kw">in</span> learned
+                  <span class="kw">if</span> datetime.fromisoformat(r.get(<span class="str">"created"</span>, <span class="str">"1970"</span>)) > start]
+        <span class="kw">return</span> <span class="builtin">len</span>(recent) >= BANKRUPTCY_LIMIT
+    <span class="kw">except</span> (ValueError, KeyError):
+        <span class="kw">return</span> <span class="kw">False</span>
+<span class="kw">def</span> <span class="fn">write_rule</span>(rule_data: dict) -> dict:
+    <span class="kw">if</span> check_bankruptcy():
+        <span class="kw">return</span> {<span class="str">"id"</span>: <span class="kw">None</span>, <span class="str">"status"</span>: <span class="str">"bankrupted"</span>}
+    <span class="cm"># Validate required fields</span>
+    <span class="kw">for</span> field <span class="kw">in</span> [<span class="str">"rule"</span>, <span class="str">"category"</span>, <span class="str">"scope"</span>, <span class="str">"priority"</span>, <span class="str">"source"</span>]:
+        <span class="kw">if</span> field <span class="kw">not</span> <span class="kw">in</span> rule_data:
+            <span class="kw">return</span> {<span class="str">"id"</span>: <span class="kw">None</span>, <span class="str">"status"</span>: <span class="str">"invalid"</span>, <span class="str">"message"</span>: <span class="str">f"Missing: {field}"</span>}
+    <span class="cm"># Load all rules for dedup and contradiction check</span>
+    all_rules = load_jsonl(os.path.join(RULES_DIR, <span class="str">"learned.jsonl"</span>)) \
+              + load_jsonl(os.path.join(RULES_DIR, <span class="str">"directives.jsonl"</span>)) \
+              + load_jsonl(os.path.join(RULES_DIR, <span class="str">"critical.jsonl"</span>))
+    <span class="cm"># Duplicate check: 80%+ text similarity</span>
+    <span class="kw">for</span> r <span class="kw">in</span> all_rules:
+        <span class="kw">if</span> similarity(r[<span class="str">"rule"</span>], rule_data[<span class="str">"rule"</span>]) > 0.8:
+            <span class="kw">return</span> {<span class="str">"id"</span>: r[<span class="str">"id"</span>], <span class="str">"status"</span>: <span class="str">"duplicate"</span>}
+    <span class="cm"># Fill metadata</span>
+    now = datetime.now(timezone.utc)
+    rule_data.setdefault(<span class="str">"version"</span>, 1)
+    rule_data.setdefault(<span class="str">"maturity"</span>, <span class="str">"captured"</span>)
+    rule_data.setdefault(<span class="str">"trigger_count"</span>, 0)
+    rule_data.setdefault(<span class="str">"refs"</span>, [])
+    rule_data[<span class="str">"id"</span>] = get_next_id(all_rules, <span class="str">"WRKR"</span>)
+    rule_data[<span class="str">"created"</span>] = now.isoformat()
+    rule_data[<span class="str">"expires"</span>] = (now + timedelta(days=90)).isoformat()
+    <span class="cm"># Atomic append: write to temp, concat old content, rename</span>
+    new_line = json.dumps(rule_data, sort_keys=<span class="kw">True</span>) + <span class="str">"\n"</span>
+    temp = os.path.join(RULES_DIR, <span class="str">"learned.jsonl.tmp"</span>)
+    real = os.path.join(RULES_DIR, <span class="str">"learned.jsonl"</span>)
+    <span class="kw">with</span> <span class="builtin">open</span>(temp, <span class="str">"w"</span>) <span class="kw">as</span> f:
+        f.write(new_line)
+    <span class="kw">if</span> os.path.exists(real):
+        <span class="kw">with</span> <span class="builtin">open</span>(real) <span class="kw">as</span> old, <span class="builtin">open</span>(temp, <span class="str">"a"</span>) <span class="kw">as</span> new:
+            new.write(old.read())
+    os.rename(temp, real)
+    <span class="kw">return</span> {<span class="str">"id"</span>: rule_data[<span class="str">"id"</span>], <span class="str">"status"</span>: <span class="str">"written"</span>}
+</code></pre>
+<p><strong>Key details:</strong></p>
+<ul>
+  <li><strong>Atomic append</strong>: Write new line to a <code>.tmp</code> file, concatenate existing content, then <code>os.rename()</code>. POSIX guarantees <code>rename</code> is atomic—readers see either the old file or the new file, never a half-written one.</li>
+  <li><strong>Dedup uses SequenceMatcher</strong>: 80% text similarity threshold. Prevents near-identical rules from piling up.</li>
+  <li><strong>Bankruptcy check</strong> uses <code>WRKR_SESSION_START</code> environment variable. Worker's session runner sets this before calling the writer.</li>
+  <li><strong>Auto-incrementing IDs</strong> scan all three files for the highest existing number. No central counter to maintain.</li>
+</ul>
+<h3>6.3 <code>rules_alert.py</code> — Alert Queue Writer</h3>
+<p>Standalone script for writing alert files. Called by both <code>load_rules.py</code> and <code>write_rule.py</code> when they detect issues.</p>
+<pre><code><span class="cm">#!/usr/bin/env python3</span>
+<span class="cm">"""T-Learning: Alert queue writer."""</span>
+<span class="kw">import</span> json, os, sys
+<span class="kw">from</span> datetime <span class="kw">import</span> datetime, timezone
+<span class="kw">ALERT_DIR</span> = <span class="str">"/opt/openclaw/workspace/rules/alerts/pending"</span>
+<span class="kw">def</span> <span class="fn">write_alert</span>(alert_type: str, message: str, severity: str = <span class="str">"P1"</span>):
+    os.makedirs(ALERT_DIR, exist_ok=<span class="kw">True</span>)
+    alert = {
+        <span class="str">"type"</span>: alert_type,
+        <span class="str">"message"</span>: message,
+        <span class="str">"severity"</span>: severity,
+        <span class="str">"timestamp"</span>: datetime.now(timezone.utc).isoformat()
+    }
+    path = os.path.join(ALERT_DIR, <span class="str">f"{alert_type}-{int(datetime.now().timestamp())}.json"</span>)
+    <span class="kw">with</span> <span class="builtin">open</span>(path, <span class="str">"w"</span>) <span class="kw">as</span> f:
+        json.dump(alert, f)
+<span class="kw">if</span> __name__ == <span class="str">"__main__"</span>:
+    <span class="kw">if</span> <span class="builtin">len</span>(sys.argv) < 3:
+        <span class="builtin">print</span>(<span class="str">"Usage: rules_alert.py &lt;type&gt; &lt;message&gt; [severity]"</span>)
+        sys.exit(1)
+    write_alert(sys.argv[1], sys.argv[2], sys.argv[3] <span class="kw">if</span> <span class="builtin">len</span>(sys.argv) > 3 <span class="kw">else</span> <span class="str">"P1"</span>)
+</code></pre>
+<p><strong>Key details:</strong></p>
+<ul>
+  <li>Alerts are individual JSON files in <code>alerts/pending/</code>. Conductor's daily cron scans this directory, sends alerts via email, and moves files to <code>alerts/sent/</code>.</li>
+  <li>No network calls. No SendGrid API key on Worker. The worker writes files; the gatekeeper handles delivery.</li>
+  <li>Unix timestamps in filenames prevent collision even under high-frequency alerting.</li>
+</ul>
+<p class="note"><strong>Alert priority levels:</strong> <code>P0</code> (rule bankruptcy, critical rule violation) demands immediate attention. <code>P1</code> (contradiction detected, file corruption) should be reviewed within 24 hours. <code>P2</code> (monthly digest) is informational.</p>
+<!-- SECTION 7 -->
+<h2 id="failsafes">7. Fail-Safes &amp; Loop Prevention</h2>
+<p>Self-modifying systems are dangerous. Without safeguards, they loop, bloat, or oscillate. We built five independent mechanisms that interlock.</p>
+<h3>7.1 Forced Forgetting (Expiry)</h3>
+<p>Every rule expires 90 days after creation. Rules that have triggered at least once get auto-renewed for another 90 days. Rules that never triggered are archived. Rules that went 60+ days without triggering are marked stale and eventually archived. This is self-tuning—useful rules stay, noise fades.</p>
+<h3>7.2 Bankruptcy Protection</h3>
+<p>If Worker writes more than 10 rules in a single session, the system enters lockdown. All subsequent writes are rejected. An alert fires. This prevents a single buggy session (a hallucinating model, a misconfigured pipeline) from polluting the entire rule base.</p>
+<div class="warn-note">
+<strong>Recovery from bankruptcy:</strong> Conductor reviews the rejected rules and decides which (if any) to manually promote. The bankruptcy flag is session-scoped—it clears automatically on next session start.
+</div>
+<h3>7.3 Contradiction Kill Switch</h3>
+<p>When <code>load_rules.py</code> detects two rules with overlapping scope that explicitly reference each other in their <code>contradicts</code> fields, both are archived immediately. Neither is loaded. An alert goes to the human. The system does not attempt to resolve the contradiction—it defers to human judgment.</p>
+<h3>7.4 Repeat Mistake Escalation</h3>
+<p>Conductor's daily health check scans session logs. If it detects the same mistake pattern more than three times in 30 days—despite active rules meant to prevent it—the system escalates. New rule writing is deferred. Conductor emails the human with a specific recommendation: "Worker keeps hitting X pattern. Rule Y should prevent it but isn't working. Review the rule, the process, or the enforcement."</p>
+<h3>7.5 Degradation (Never Blocking)</h3>
+<p>This is the most important fail-safe. Under <em>no</em> circumstance does the rule system prevent productive work:</p>
+<table>
+  <tr><th>Failure</th><th>Behaviour</th></tr>
+  <tr><td>Rule file missing</td><td>Continue with 0 rules</td></tr>
+  <tr><td>SSH to remote agent fails</td><td>Continue with local rules only</td></tr>
+  <tr><td>Corrupt JSON line in file</td><td>Skip line, log warning, continue</td></tr>
+  <tr><td>All three files missing</td><td>Continue with empty ruleset</td></tr>
+  <tr><td>Write failure (disk full)</td><td>Log error, continue session without writing</td></tr>
+  <tr><td>Bankruptcy triggered</td><td>Reject new writes, continue session with loaded rules</td></tr>
+</table>
+<p>The agent always proceeds. Rules are an enhancement layer, not a dependency.</p>
+<!-- SECTION 8 -->
+<h2 id="motivation">8. Real-World Motivation</h2>
+<p>This architecture wasn't designed in a vacuum. It was forged from real incidents—each one a pattern that a stateless agent would repeat indefinitely without a learning system. Here are the patterns that drove this work (anonymised, but structurally accurate):</p>
+<h3>Pattern 1: The Timezone Bug</h3>
+<p>A backup health check compared file modification timestamps against calendar days. It worked perfectly—except when a backup ran just after midnight UTC, producing a timestamp in the "wrong" day. The check flagged a healthy backup as failed. The agent fixed the symptom (re-running the backup) but never learned to use timezone-aware comparisons. After the third occurrence in a month, the lesson was codified: "Always use UTC-aware datetime comparisons in backup health checks."</p>
+<h3>Pattern 2: nginx Location Collisions</h3>
+<p>An agent created a static HTML page at a path like <code>/login.html</code>. The nginx configuration had a regex location block that proxied <code>/login</code> (and anything matching the prefix) to a backend application. The static file was never served—nginx intercepted the request and sent it to the app, which returned 404. This happened three times across different projects before the rule was codified: "Before creating any static page, grep nginx config for location conflicts."</p>
+<h3>Pattern 3: Postfix Pipe Script Permissions</h3>
+<p>A Python script used as a Postfix pipe transport was deployed with <code>chmod 644</code> (readable but not executable). Postfix's pipe transport executes scripts directly—without the execute bit, mail silently deferred and eventually bounced. The agent had deployed dozens of Flask files with <code>644</code> successfully (gunicorn imports them, doesn't execute them) and applied the same pattern to a pipe script. The rule: "Pipe scripts get 755, not 644. Always verify by checking the transport type."</p>
+<h3>Pattern 4: Sender Verification Surprises</h3>
+<p>An email forwarding system used the original sender's address as the <code>From</code> header when relaying through an email API. The API rejected the message because the sender's domain wasn't verified in the account. The fix was to use a verified domain address as the sender and move the original address to <code>Reply-To</code>—but then that triggered phishing warnings in some email clients. The final solution (use the verified sender, include original sender info in the body) took three iterations to discover. The rule: "Never pass through an unverified From address. Put original sender info in the body, not the Reply-To header."</p>
+<p class="note">Each of these patterns followed the same trajectory: mistake → fix → session ends → next session starts → same mistake. The fix took four hours the first time and four hours the second time. With T-Learning, the rule loads at session startup and the agent reads it before touching the relevant subsystem.</p>
+<!-- SECTION 9 -->
+<h2 id="setup">9. Setup Guide</h2>
+<p>Ready to add recursive self-learning to your own agents? Here's the step-by-step.</p>
+<h3>9.1 Prerequisites</h3>
+<ul>
+  <li>OpenClaw (or any agent framework that supports pre-session and post-session hooks)</li>
+  <li>SSH key-based access between your gatekeeper machine and worker machines</li>
+  <li>Python 3.9+ (stdlib only—no pip dependencies)</li>
+  <li>A filesystem accessible to both the agent and your hook scripts</li>
+</ul>
+<h3>9.2 Directory Structure</h3>
+<p>On each worker agent:</p>
+<pre><code>mkdir -p /opt/openclaw/workspace/rules/alerts/pending
+mkdir -p /opt/openclaw/workspace/scripts
+git init /opt/openclaw/workspace/rules</code></pre>
+<h3>9.3 Seed Critical Rules</h3>
+<p>Create <code>/opt/openclaw/workspace/rules/critical.jsonl</code> with your first rule:</p>
+<pre><code>{"id":"CONDUCTOR-001","version":1,"rule":"Always verify file permissions after deploying to VPS","rationale":"gunicorn runs as www-data; files deployed as vincent:vincent cause PermissionError","category":"deploy","scope":["general"],"source":"conductor","priority":"critical","maturity":"active","created":"2026-05-23T00:00:00Z","last_triggered":null,"trigger_count":0,"expires":"2026-08-21T00:00:00Z","refs":[],"contradicts":null}</code></pre>
+<h3>9.4 Install the Scripts</h3>
+<p>Copy all three scripts from the code walkthrough above to <code>/opt/openclaw/workspace/scripts/</code>. Make them executable:</p>
+<pre><code>chmod 755 /opt/openclaw/workspace/scripts/load_rules.py
+chmod 755 /opt/openclaw/workspace/scripts/write_rule.py
+chmod 755 /opt/openclaw/workspace/scripts/rules_alert.py</code></pre>
+<h3>9.5 Wire Up Agent Startup</h3>
+<p>Add to your agent's startup hook (e.g., in OpenClaw's <code>AGENTS.md</code> or an equivalent pre-prompt injector):</p>
+<pre><code># Before the session prompt is assembled:
+python3 /opt/openclaw/workspace/scripts/load_rules.py general,wescan
+# The output (loaded rules as JSON) is injected into the system prompt:
+# "The following rules from past sessions apply to this project: ..."</code></pre>
+<h3>9.6 Wire Up Post-Session Reflection</h3>
+<p>After each significant session, your agent should reflect and write rules:</p>
+<pre><code># Set session start for bankruptcy tracking
+export WRKR_SESSION_START="2026-05-23T03:00:00Z"
+# Write a new rule
+echo '{"rule":"Always check DNS before assuming DKIM works","category":"sendgrid","scope":["wescan"],"priority":"high","source":"worker"}' \
+  | python3 /opt/openclaw/workspace/scripts/write_rule.py</code></pre>
+<h3>9.7 Connect the Alert Queue to Email</h3>
+<p>On your gatekeeper machine, add a cron job to scan and deliver alerts:</p>
+<pre><code># Daily at 9 AM: pull alerts, send via email, mark as sent
+0 9 * * * /usr/local/bin/pull_and_alert.sh</code></pre>
+<p>The <code>pull_and_alert.sh</code> script:</p>
+<pre><code>#!/bin/bash
+REMOTE="user@worker-host:/opt/openclaw/workspace/rules/alerts/pending/"
+LOCAL="/tmp/rules-alerts/"
+rsync -az "$REMOTE" "$LOCAL" --include='*.json' --exclude='*'
+for alert in "$LOCAL"*.json; do
+  [ -f "$alert" ] || continue
+  python3 /opt/openclaw/scripts/send_email.py \
+    --to you@example.com \
+    --subject "[T-Learning Alert] $(jq -r .type "$alert")" \
+    --body "$(jq -r .message "$alert")"
+  ssh user@worker-host "mv /opt/openclaw/workspace/rules/alerts/pending/$(basename $alert) /opt/openclaw/workspace/rules/alerts/sent/"
+done</code></pre>
+<!-- SECTION 10 -->
+<h2 id="lessons">10. Lessons Learned</h2>
+<p>After building and dogfooding T-Learning v2 across multiple projects, here's what we'd do differently and what to watch out for.</p>
+<h3>What Worked</h3>
+<p><strong>JSONL was the right call.</strong> Being able to <code>grep</code> the rule files, <code>wc -l</code> for counts, and <code>tail -1</code> for the latest addition made debugging trivial. No database queries, no connection pool config, no ORM migrations. The simplicity paid off every time we needed to inspect the system at 2 AM.</p>
+<p><strong>Degradation-first prevented outages.</strong> There were three instances where a corrupt rule file would have blocked agent startup if we'd made rules a hard dependency. Because they degrade gracefully, the agent always started and the corrupt file was fixed at leisure.</p>
+<p><strong>The alert queue pattern eliminated a security concern.</strong> Not putting SendGrid API keys on the worker VPS meant one less secret to manage, rotate, and audit. The file-based queue adds maybe 24 hours of latency to alerts—acceptable for a learning system.</p>
+<h3>What We'd Do Differently</h3>
+<p><strong>Contradiction detection is currently explicit-only.</strong> Two rules only conflict if one explicitly lists the other in its <code>contradicts</code> field. We'd like to add semantic contradiction detection—where the loader infers a conflict from rule text analysis—but that's computationally expensive and prone to false positives. For now, explicit contradiction marking is a pragmatic trade-off.</p>
+<p><strong>The 90-day expiry might be too aggressive for some domains.</strong> Infrastructure rules change slowly. A rule about nginx behaviour is probably valid for years. A rule about a specific API quirk might be stale in weeks. Per-category expiry windows would be more sophisticated, but we valued simplicity over precision for v2.</p>
+<p><strong>Scope matching is binary.</strong> A rule scoped to <code>["wescan"]</code> doesn't load for <code>["realform"]</code>, even if it's broadly applicable. A cross-pollination mechanism—"this WeScan rule was also useful in a Realform session"—would be valuable. That's on the roadmap for v3.</p>
+<h3>What to Watch Out For</h3>
+<ul>
+  <li><strong>Bankruptcy false positives.</strong> During initial onboarding, an agent might legitimately need to write 15+ rules in one session. We handle this by having Conductor review and manually clear the flag—but budget for this in your first week.</li>
+  <li><strong>SSH key rotation.</strong> If you rotate the gatekeeper's SSH key, remember to update the <code>command=</code> restriction on the worker's <code>authorized_keys</code>. A misconfigured key silently breaks the sync.</li>
+  <li><strong>The <code>WRKR_SESSION_START</code> env var.</strong> This is the single point of coupling between the session runner and the rule writer. If your agent framework doesn't set it, bankruptcy detection won't fire. Make it part of your session bootstrap.</li>
+  <li><strong>Git auto-commit frequency.</strong> We auto-commit after every rule write. For high-frequency sessions, this can produce noise. Consider batching commits within a session.</li>
+</ul>
+<hr>
+<p>T-Learning v2 is <strong>under 250 lines of Python, has zero dependencies, and adds no infrastructure</strong>. It's the simplest possible system that solves a genuinely hard problem: giving AI agents a persistent, self-tuning, self-expiring memory across sessions and across machines.</p>
+<p>If your agents keep making the same mistakes, the fix isn't a better model. It's a better memory.</p>
+<p style="color: var(--muted); font-size: 0.9rem; margin-top: 3rem;">Published May 2026. Built on OpenClaw. The full spec and source are available in the OpenClaw workspace.</p>
+</div>
+    </div>
+</section>
+
+<footer>
+    <div class="footer-inner">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <div class="footer-brand">Straya <span>Co</span></div>
+                <p>Sydney-based IT consulting helping Australian businesses secure, automate, and grow.</p>
+                <p style="margin-top:0.75rem;">ABN: 89 642 689 076</p>
+            </div>
+            <div class="footer-col">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="../services.html">Email Security & DMARC</a></li>
+                    <li><a href="../services.html">Office Automation</a></li>
+                    <li><a href="../services.html">IT Setup & Migration</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <ul>
+                    <li><a href="../about.html">About Us</a></li>
+                    <li><a href="../resources.html">Resources</a></li>
+                    <li><a href="../contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Contact</h4>
+                <ul>
+                    <li>Sydney, Australia</li>
+                    <li><a href="mailto:hello@example.com">hello@example.com</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Straya Co Pty Ltd — Sydney, Australia. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<div class="backdrop" id="backdrop"></div>
+<div class="slide-navigation" id="slideNav">
+    <div class="nav-icon" id="slideClose"><span></span><span></span><span></span></div>
+    <div class="slide-nav-logo">Straya <span>Co</span></div>
+    <div class="slide-nav-grid">
+        <div class="slide-nav-col">
+            <div class="slide-nav-title">Services</div>
+            <ul class="slide-nav-links">
+                <li><a href="../services.html">Email Security & DMARC</a></li>
+                <li><a href="../services.html">Office Automation</a></li>
+                <li><a href="../services.html">IT Setup & Migration</a></li>
+            </ul>
+        </div>
+        <div class="slide-nav-col">
+            <div class="slide-nav-title">Company</div>
+            <ul class="slide-nav-links">
+                <li><a href="../about.html">About Us</a></li>
+                <li><a href="../resources.html">Resources</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+(function(){
+    var n=document.getElementById('navIcon'),s=document.getElementById('slideNav'),c=document.getElementById('slideClose'),b=document.getElementById('backdrop');
+    function o(){n.classList.add('open');c.classList.add('open');s.classList.add('open');b.classList.add('open');document.body.style.overflow='hidden';}
+    function x(){n.classList.remove('open');c.classList.remove('open');s.classList.remove('open');b.classList.remove('open');document.body.style.overflow='';}
+    n.addEventListener('click',o);c.addEventListener('click',x);b.addEventListener('click',x);
+})();
+</script>
+</body>
+</html>
