@@ -173,24 +173,24 @@
 <!-- SECTION 3 -->
 <h2 id="architecture">3. Architecture Overview</h2>
 <pre class="diagram">
-┌──────────────────────────────────────┐     ┌──────────────────────────────────────┐
+┌────────────────────────────────────────┐     ┌────────────────────────────────────────┐
 │          MAC MINI (Conductor)          │     │         Worker VPS (203.0.113.x)       │
-│          Reviewer / Gatekeeper        │     │         Coding Agent                  │
-│                                      │     │                                      │
-│  ~/.openclaw/rules/                  │     │  /opt/openclaw/workspace/rules/       │
-│  ├── critical.jsonl  (source)       │     │  ├── critical.jsonl    ← Conductor push   │
-│  ├── directives.jsonl (source)       │ SSH │  ├── directives.jsonl   ← Conductor push   │
-│  ├── worker-cache.jsonl (mirror)      │────▶│  ├── learned.jsonl     ← Worker writes │
-│  └── schema.json      (reference)   │     │  └── alerts/                          │
-│                                      │ ◀───│      └── pending/     ← Worker writes  │
-│  Daily cron:                         │ SSH │                                      │
-│  ┌─ pull_worker_rules.sh               │ read│  Scripts:                            │
-│  │  reads learned.jsonl + alerts     │     │  ├── load_rules.py   (startup)       │
-│  └─ push_worker_rules.sh               │     │  ├── write_rule.py   (post-session)  │
-│     pushes critical + from-conductor      │     │  └── rules_alert.py  (alert writer)  │
-│                                      │     │                                      │
-│  Email: rules_alert.py → SendGrid    │     │  Git: auto-commit on rule changes    │
-└──────────────────────────────────────┘     └──────────────────────────────────────┘
+│          Reviewer / Gatekeeper         │     │         Coding Agent                   │
+│                                        │     │                                        │
+│  ~/.openclaw/rules/                    │     │  /opt/openclaw/workspace/rules/        │
+│  ├── critical.jsonl  (source)          │     │  ├── critical.jsonl   ← Conductor push │
+│  ├── directives.jsonl (source)         │     │  ├── directives.jsonl  ← Conductor push│
+│  ├── worker-cache.jsonl (mirror)       │     │  ├── learned.jsonl    ← Worker writes  │
+│  └── schema.json      (reference)      │     │  └── alerts/                           │
+│                                        │     │      └── pending/    ← Worker writes   │
+│  Daily cron:                           │     │                                        │
+│  ┌─ pull_worker_rules.sh               │     │  Scripts:                              │
+│  │  reads learned.jsonl + alerts       │     │  ├── load_rules.py   (startup)         │
+│  └─ push_worker_rules.sh               │     │  ├── write_rule.py   (post-session)    │
+│     pushes critical + directives       │     │  └── rules_alert.py  (alert writer)    │
+│                                        │     │                                        │
+│  Email: rules_alert.py → SendGrid      │     │  Git: auto-commit on rule changes      │
+└────────────────────────────────────────┘     └────────────────────────────────────────┘
 </pre>
 <p class="note"><strong>Data flow is unidirectional for writes.</strong> Conductor pushes rules to Worker. Worker writes locally and Conductor pulls. Worker never initiates connections to the Mac mini. This simplifies firewall rules and reduces the attack surface.</p>
 <h3>Two Agents, Two Roles</h3>
