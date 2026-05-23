@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OpenClaw AI Agent — Complete VPS Deployment Guide - Straya Co Blog</title>
-    <meta name="description" content="A hands-on guide to deploying OpenClaw on a DigitalOcean VPS with security, backup, email pipeline, and AI workspace setup. Separate human and AI sections.">
+    <title>OpenClaw Recursive Learning: Teaching AI Agents to Learn from Their Mistakes — Straya Co Blog</title>
+    <meta name="description" content="How to build recursive learning AI agents on OpenClaw. A production-tested architecture for teaching agents to learn, remember, and improve across every session.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -101,9 +101,9 @@
 
 <section class="page-hero">
     <div class="container">
-        <p class="meta">23 May 2026 &mdash; AI / Architecture</p>
-        <h1>T-Learning: Giving AI Agents Permanent Memory</h1>
-        <p style="color:rgba(255,255,255,0.7);margin-top:1rem;font-size:1.05rem;">A practical system for capturing lessons, avoiding repeat mistakes, and building AI agents that improve over time.</p>
+        <p class="meta">23 May 2026 23 May 2026 &mdash; AI / Architecturemdash; AI / OpenClaw</p>
+        <h1>OpenClaw Recursive Learning: Teaching AI Agents to Learn from Their Mistakes</h1>
+        <p style="color:rgba(255,255,255,0.7);margin-top:1rem;font-size:1.05rem;">A complete architecture for recursive learning on OpenClaw — capturing lessons, avoiding repeat mistakes, and building AI agents that improve over time.</p>
         <div>
             <span class="tag">AI Agent</span>
             <span class="tag">OpenClaw</span>
@@ -142,7 +142,7 @@
 <p><strong>Context windows are limited.</strong> Even with 200K+ token windows, you can't pack every past lesson into every prompt. The economics of token usage degrade as you shove more history into each call. You need selectivity—load only what's relevant to <em>this</em> task.</p>
 <p><strong>Knowledge silos between agents.</strong> In our setup, Conductor (a reviewer/gatekeeper/architect on a Mac mini) and Worker (a coding agent on a remote VPS) each learn different lessons from different contexts. Without a shared mechanism, Worker's hard-won deploy lessons never reach Conductor. Conductor's architectural directives never constrain Worker.</p>
 <p><strong>No forced forgetting.</strong> A human developer naturally forgets obsolete patterns. An AI agent with infinite memory accumulates rules forever—including rules that are no longer relevant, rules that contradict newer ones, and rules from codebases that have been rewritten. Without expiry, the rule base becomes noise.</p>
-<p>T-Learning v2 is our answer to all four problems. It's a tiered, self-expiring, contradiction-aware rule system that runs on zero additional infrastructure—just JSONL files, SSH, and three Python scripts.</p>
+<p>Recursive learning is our answer to all four problems. It's a tiered, self-expiring, contradiction-aware rule system that captures lessons from each session and feeds them back into the next — creating a closed loop of continuous improvement. It runs on zero additional infrastructure—just JSONL files, SSH, and three Python scripts.</p>
 <!-- SECTION 2 -->
 <h2 id="design">2. Design Principles</h2>
 <p>We made deliberate architectural choices. Here's each one, with its rationale.</p>
@@ -171,7 +171,7 @@
 <h3>Repeat Mistake Escalation</h3>
 <p>If Conductor detects the same mistake pattern more than three times within 30 days—despite existing rules meant to prevent it—the system escalates. New rule writing is deferred. An email goes to the human: "Worker keeps hitting X pattern despite rule Y. Review needed." This is the ultimate circuit breaker.</p>
 <!-- SECTION 3 -->
-<h2 id="architecture">3. Architecture Overview</h2>
+<h2 id="architecture">3. Recursive Learning Architecture</h2>
 <pre class="diagram">
 ┌────────────────────────────────────────┐     ┌────────────────────────────────────────┐
 │          MAC MINI (Conductor)          │     │         Worker VPS (203.0.113.x)       │
@@ -197,7 +197,7 @@
 <p><strong>Conductor</strong> (Mac mini) is the reviewer and gatekeeper. It reads Worker's learned rules during daily health checks, promotes valuable rules to critical, detects contradiction patterns, and sends email alerts. It also writes directives (<code>directives.jsonl</code>) that encode architectural decisions—like "always check nginx location blocks before creating static pages."</p>
 <p><strong>Worker</strong> (VPS) is the coding agent. At session startup, it loads all three rule files, filters by the project context, detects contradictions, and enforces the 50-rule cap. During the session, it consults loaded rules before making decisions. At session end, it reflects on what was learned and writes new rules via <code>write_rule.py</code>.</p>
 <!-- SECTION 4 -->
-<h2 id="format">4. The Rule Format</h2>
+<h2 id="format">4. Rule Format (JSONL)</h2>
 <p>Every rule is a single JSON object on one line. No trailing commas. No multi-line values. Fully self-describing.</p>
 <pre><code>{
   <span class="str">"id"</span>: <span class="str">"WRKR-001"</span>,
@@ -231,7 +231,7 @@
   <tr><td><code>contradicts</code></td><td>Array of rule IDs this rule conflicts with. Mutual archive trigger.</td></tr>
 </table>
 <!-- SECTION 5 -->
-<h2 id="lifecycle">5. Rule Lifecycle</h2>
+<h2 id="lifecycle">5. Recursive Learning Lifecycle</h2>
 <div class="diagram">
 captured ──→ tested ──→ active ──→ stale (60d) ──→ archived (90d)
                │                                        ↑
@@ -251,7 +251,7 @@ captured ──→ tested ──→ active ──→ stale (60d) ──→ archi
 </table>
 <p class="note"><strong>Expiry is not deletion.</strong> Archived rules stay in the file—they're just excluded from session loading. This preserves the full audit trail. A human can always pull an archived rule back if it was a false positive.</p>
 <!-- SECTION 6 -->
-<h2 id="code">6. Code Walkthrough</h2>
+<h2 id="code">6. Core Implementation</h2>
 <p>Three Python scripts form the engine. Together they're under 250 lines. Here's each one, annotated.</p>
 <h3>6.1 <code>load_rules.py</code> — Session Startup Loader</h3>
 <p>Runs at the start of every Worker session. Must be fast (&lt;500ms). Reads all three rule files, filters by scope, detects contradictions, enforces the 50-rule cap, and outputs the loaded rule set.</p>
@@ -571,7 +571,7 @@ done</code></pre>
 </ul>
 <hr>
 <p>T-Learning v2 is <strong>under 250 lines of Python, has zero dependencies, and adds no infrastructure</strong>. It's the simplest possible system that solves a genuinely hard problem: giving AI agents a persistent, self-tuning, self-expiring memory across sessions and across machines.</p>
-<p>If your agents keep making the same mistakes, the fix isn't a better model. It's a better memory.</p>
+<p>If your agents keep making the same mistakes, the fix isn't a better model. It's recursive learning — the ability to capture, remember, and apply lessons across every session. On OpenClaw, it's three files and an SSH key away.</p>
 <p style="color: var(--muted); font-size: 0.9rem; margin-top: 3rem;">Published May 2026. Built on OpenClaw. The full spec and source are available in the OpenClaw workspace.</p>
 </div>
     </div>
