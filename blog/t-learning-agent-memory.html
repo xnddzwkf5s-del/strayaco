@@ -50,6 +50,7 @@
         .post-content li{margin-bottom:0.4rem;}
         .post-content table{margin:1.5rem 0;}
         .post-content .tag{display:inline-block;background:var(--cream);color:var(--gray);padding:0.3rem 0.8rem;border-radius:20px;font-size:0.8rem;margin-right:0.5rem;margin-bottom:0.5rem;border:1px solid var(--gray-light);}
+        .diagram{font-size:0.72rem;line-height:1.35;padding:0.5rem 0.75rem;overflow-x:auto;white-space:pre;}
 
         footer{background:var(--dark);color:rgba(255,255,255,0.7);padding:60px 0 30px;margin-top:60px;}
         .footer-inner{max-width:1200px;margin:0 auto;padding:0 32px;}
@@ -171,7 +172,7 @@
 <p>If Conductor detects the same mistake pattern more than three times within 30 days—despite existing rules meant to prevent it—the system escalates. New rule writing is deferred. An email goes to the human: "Worker keeps hitting X pattern despite rule Y. Review needed." This is the ultimate circuit breaker.</p>
 <!-- SECTION 3 -->
 <h2 id="architecture">3. Architecture Overview</h2>
-<div class="diagram">
+<pre class="diagram">
 ┌──────────────────────────────────────┐     ┌──────────────────────────────────────┐
 │          MAC MINI (Conductor)          │     │         Worker VPS (203.0.113.x)       │
 │          Reviewer / Gatekeeper        │     │         Coding Agent                  │
@@ -190,7 +191,7 @@
 │                                      │     │                                      │
 │  Email: rules_alert.py → SendGrid    │     │  Git: auto-commit on rule changes    │
 └──────────────────────────────────────┘     └──────────────────────────────────────┘
-</div>
+</pre>
 <p class="note"><strong>Data flow is unidirectional for writes.</strong> Conductor pushes rules to Worker. Worker writes locally and Conductor pulls. Worker never initiates connections to the Mac mini. This simplifies firewall rules and reduces the attack surface.</p>
 <h3>Two Agents, Two Roles</h3>
 <p><strong>Conductor</strong> (Mac mini) is the reviewer and gatekeeper. It reads Worker's learned rules during daily health checks, promotes valuable rules to critical, detects contradiction patterns, and sends email alerts. It also writes directives (<code>directives.jsonl</code>) that encode architectural decisions—like "always check nginx location blocks before creating static pages."</p>
