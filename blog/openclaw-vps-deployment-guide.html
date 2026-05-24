@@ -101,7 +101,7 @@
 
 <section class="page-hero">
     <div class="container">
-        <p class="meta">22 May 2026 &mdash; Infrastructure / AI</p>
+        <p class="meta">Updated 24 May 2026 — Infrastructure / AI — lessons from 4 live deployments</p>
         <h1>OpenClaw AI Agent — Complete VPS Deployment Guide</h1>
         <p style="color:rgba(255,255,255,0.7);margin-top:1rem;font-size:1.05rem;">With battle-tested security, backup, email pipeline, and lessons from 3 months of production use</p>
         <div>
@@ -314,6 +314,12 @@ sudo fail2ban-client status sshd</code></pre>
             <li><a href="#off-server" style="color:var(--dark);">📤 Off-Server Backup Pull</a></li>
             <li><a href="#email" style="color:var(--dark);">🧑 Human — Email Setup</a></li>
             <li><a href="#lessons" style="color:var(--dark);">📚 Complete Lessons Learned</a></li>
+            <li><a href="#multi-agent" style="color:var(--dark);">🤖 Multi-Agent Deployment</a></li>
+            <li><a href="#deploy-bugs" style="color:var(--dark);">🐛 Lessons from Live Testing</a></li>
+            <li><a href="#post-deploy" style="color:var(--dark);">✅ Post-Deployment Checklist</a></li>
+            <li><a href="#multi-agent" style="color:var(--dark);">🤖 Multi-Agent Deployment</a></li>
+            <li><a href="#deploy-bugs" style="color:var(--dark);">🐛 Lessons from Live Testing</a></li>
+            <li><a href="#post-deploy" style="color:var(--dark);">✅ Post-Deployment Checklist</a></li>
         </ol>
     </div>
 </section>
@@ -920,6 +926,8 @@ cp -r ~/.openclaw ~/.openclaw-backup-$(date +%F)</code></pre>
         <p>Once OpenClaw is installed and the gateway is running, you need to set up the files that define <em>who your AI is</em> and <em>how it works</em>. This is the most important step — not because it's technically complex (it isn't), but because it determines whether your agent is genuinely helpful or just an expensive search engine.</p>
 
         <p>The OpenClaw workspace lives at <code>~/.openclaw/workspace/</code>. This is your agent's home. These are the files it reads at startup, references during conversations, and updates as it learns.</p>
+
+        <p><strong>Production tip:</strong> For multi-agent deployments, all workspace files (SOUL.md, AGENTS.md, MEMORY.md, etc.) are deployed from a template directory on the primary machine with placeholder variables — <code>__SLUG__</code>, <code>__TITLE__</code>, <code>__IP__</code>, <code>__DOMAIN__</code> — that get auto-replaced during deployment. This means every agent gets a personalised workspace while maintaining a single source of truth. The template system also handles utility scripts like <code>send_email.py</code>, <code>update-openclaw.sh</code>, <code>disk-check.sh</code>, and <code>maintenance-report.sh</code>, which are deployed automatically alongside the workspace files.</p>
 
         <div class="note-box">
             <strong>Your workspace is the agent's brain.</strong> Every session, the agent wakes up fresh. These files <em>are</em> its memory. Invest time in setting them up well, and you'll get an assistant that gets better over time instead of starting from zero every conversation.
@@ -2081,6 +2089,150 @@ _dmarc.yourdomain.com.  IN  TXT  "v=DMARC1; p=reject; rua=mailto:dmarc@yourdomai
             <li>Revoke the old key immediately</li>
             <li>Check SendGrid Activity Feed for unusual sends</li>
         </ol>
+
+        <hr>
+
+        <h2 id="multi-agent">🤖 Multi-Agent Deployment</h2>
+
+        <p>Once you have one agent running, spinning up a second is almost trivial — provided you built the automation right the first time. The <code>deploy-kobi-vps.sh</code> script is parameterised so that every referenceable name comes from a single variable called <code>DEPLOY_SLUG</code>.</p>
+
+        <pre><code># Spin up a second agent alongside your existing one
+DEPLOY_SLUG=pang2 bash deploy-kobi-vps.sh</code></pre>
+
+        <p>This single environment variable drives <strong>all naming</strong> across the deployment:</p>
+
+        <ul>
+            <li><strong>Agent ID</strong> — used in openclaw.json, systemd service units, and workspace metadata</li>
+            <li><strong>Service names</strong> — systemd units like <code>openclaw-gateway-{slug}.service</code></li>
+            <li><strong>Cookie names</strong> — session cookies for the Gateway web UI (isolated per agent)</li>
+            <li><strong>Backup prefixes</strong> — backup filenames prefixed with the slug so off-server pulls don't collide</li>
+            <li><strong>Nginx site configs</strong> — each agent gets its own <code>/etc/nginx/sites-available/{slug}.conf</code> pointing to its own subdomain</li>
+            <li><strong>Subdomain</strong> — each agent is deployed to <code>{slug}.your-domain.com</code></li>
+        </ul>
+
+        <p>Each agent runs on its own DigitalOcean droplet, has its own subdomain, its own isolated backup directory, and its own systemd service. There is zero interference between agents — they share nothing except the deployment script itself.</p>
+
+        <pre><code># Example: deploying a second agent "pang2" alongside "kobi"
+# The script creates:
+#   - DO droplet: pang2 (syd1, Ubuntu 24.04, $6/mo)
+#   - System user: pang2
+#   - Service: openclaw-gateway-pang2.service
+#   - Backup dir: /opt/backups/pang2/
+#   - Nginx site: kobi.your-domain.com → pang2's gateway
+#   - Workspace: /home/pang2/.openclaw/workspace/ (templated from pang-mini)
+#   - Cron jobs: all prefixed with pang2- for clarity</code></pre>
+
+        <p>This is the pattern for scaling from 1 agent to N: each agent is an independent, isolated unit with its own identity, workspace, and infrastructure — all provisioned from a single parameterised script.</p>
+
+        <hr>
+
+        <h2 id="deploy-bugs">🐛 Lessons from Live Testing — 3 Bugs That Only Surface During Real Deployment</h2>
+
+        <p>No amount of local testing can simulate a live VPS deployment. These three bugs were discovered during the first four real deployments of new agents. They're subtle, silent, and each one cost hours of debugging.</p>
+
+        <h3>Bug #1: systemd Startup Race — <code>.openclaw/</code> Directory Must Exist Before Service Start</h3>
+
+        <p>OpenClaw's systemd service unit uses <code>ProtectHome=yes</code> and <code>ReadWritePaths=</code> to restrict filesystem access. The <code>.openclaw/</code> directory must <em>already exist</em> before <code>systemctl start</code> is called — otherwise systemd creates it with the wrong context, and the service fails to write its runtime files.</p>
+
+        <p><strong>The fix:</strong> In the service setup function of the deployment script, create the target directories <strong>before</strong> calling <code>systemctl start</code>:</p>
+
+        <pre><code># ✅ CORRECT: create directories before starting the service
+mkdir -p /home/{slug}/.openclaw/workspace
+chown -R {slug}:{slug} /home/{slug}/.openclaw
+systemctl start openclaw-gateway-{slug}</code></pre>
+
+        <p>Without this step, <code>systemctl status</code> shows the service as "activating" indefinitely, <code>journalctl</code> shows <code>Permission denied</code> on every write attempt, and the gateway never becomes reachable. The error is misleading because the systemd unit <em>exists</em> — it just can't do its job.</p>
+
+        <h3>Bug #2: CLI Remote Token — Missing <code>gateway.remote.token</code> Causes Silent Hangs</h3>
+
+        <p>The <code>openclaw devices</code> command — used for pairing remote agents with the main gateway — hangs forever with zero output when <code>gateway.remote.token</code> is not set in <code>/home/{slug}/.openclaw/openclaw.json</code>. There is no error message, no timeout, no log entry. It just hangs.</p>
+
+        <p><strong>The fix:</strong> The deployment script must inject the gateway auth token into the remote agent's config:</p>
+
+        <pre><code># ~/.openclaw/openclaw.json
+{
+  "gateway": {
+    "remote": {
+      "token": "THE_GATEWAY_AUTH_TOKEN"
+    }
+  }
+}</code></pre>
+
+        <p>Without this, every <code>openclaw devices</code> command blocks indefinitely. The only hint something is wrong is that the command never returns. Always set this token during the config bootstrap phase, before any pairing attempts.</p>
+
+        <h3>Bug #3: OTP HTML Template — <code>{variable}</code> Syntax in Regular Python Strings</h3>
+
+        <p>When rendering OTP (one-time password) emails, the template used <code>{variable}</code> placeholder syntax inside a regular Python string — not an f-string. Python treats <code>{variable}</code> in a regular string as <strong>literal text</strong>, so the email displays something like:</p>
+
+        <pre><code>Your verification code is: {otp_code}
+Expires in: {OTP_EXPIRY_SECONDS} seconds</code></pre>
+
+        <p>Rather than the actual values. Three separate issues compound this bug:</p>
+
+        <ul>
+            <li><strong>Issue A:</strong> Use <code>__PLACEHOLDER__</code> + <code>.replace()</code> instead of <code>{variable}</code> syntax in non-f-string templates. F-strings aren't safe for user-supplied or deployment-time text because they evaluate eagerly.</li>
+            <li><strong>Issue B:</strong> The OTP expiry text must match the <code>OTP_EXPIRY_SECONDS</code> constant in the Python code. If the template says "expires in 300 seconds" but the constant is 600, users see a contradictory message.</li>
+            <li><strong>Issue C:</strong> Never assume <code>.format()</code> will be called on the template — always verify the actual rendering path. A template that looks correct in static analysis can display literal braces at runtime.</li>
+        </ul>
+
+        <p><strong>The fix pattern:</strong></p>
+
+        <pre><code># ❌ WRONG — {variable} in a regular string is literal text
+TEMPLATE = "Your code is: {code}"   # Shows literal "{code}"
+
+# ✅ CORRECT — use __PLACEHOLDER__ + .replace()
+TEMPLATE = "Your code is: __CODE__"
+rendered = TEMPLATE.replace("__CODE__", actual_code)</code></pre>
+
+        <p>This pattern is safe regardless of how the template is processed — systemd template files, email templates, and config file generation all benefit from this approach.</p>
+
+        <hr>
+
+        <h2 id="post-deploy">✅ Post-Deployment Checklist</h2>
+
+        <p>After the automated deployment script finishes, two manual steps remain. Everything else — workspace files, utility scripts, rules, tasks, backups, health checks — is deployed automatically.</p>
+
+        <h3>Manual Step 1: Device Pairing</h3>
+
+        <p>Each new agent must be paired with the main OpenClaw gateway before it can receive commands. This is a one-time approval step:</p>
+
+        <pre><code># On the main agent (pang-mini or the primary gateway machine)
+DEPLOY_SLUG=kobi bash approve-device.sh &lt;request_id&gt;</code></pre>
+
+        <p>The <code>&lt;request_id&gt;</code> is generated by the new agent when it first starts up. Check the gateway logs for the pairing request, then run the approval script. Once approved, the agent is permanently trusted.</p>
+
+        <p>If you skip this step, the agent will start but remain in an unpaired state — it won't accept any commands or respond to messages.</p>
+
+        <h3>Manual Step 2: GitHub SSH Key</h3>
+
+        <p>Each agent needs its own SSH key to interact with GitHub repositories (clone, push, deploy). The deployment script generates the key during provisioning, but you must:</p>
+
+        <ol>
+            <li><strong>Get the public key</strong> from the new VPS: <code>cat ~/.ssh/id_ed25519.pub</code></li>
+            <li><strong>Add it as a deploy key</strong> on the relevant GitHub repository (Settings → Deploy Keys → Add Deploy Key)</li>
+            <li><strong>Configure git identity</strong> on the new VPS:
+                <pre><code>git config --global user.name "{Slug} Agent"
+git config --global user.email "agent-{slug}@your-domain.com"</code></pre>
+            </li>
+        </ol>
+
+        <p>Without a GitHub SSH key, the agent cannot pull repository updates, deploy code, or push changes back. All other operations work — but any Git-dependent features will fail with a permission error.</p>
+
+        <h3>Fully Automated (No Manual Step Needed)</h3>
+
+        <p>Everything else is handled by the deployment script and the auto-configuration run at first boot:</p>
+
+        <ul>
+            <li><strong>Workspace files:</strong> SOUL.md, AGENTS.md, MEMORY.md, IDENTITY.md, USER.md, TOOLS.md — deployed from the template system with <code>__SLUG__</code>, <code>__TITLE__</code>, <code>__IP__</code>, <code>__DOMAIN__</code> placeholders auto-replaced</li>
+            <li><strong>Utility scripts:</strong> <code>send_email.py</code> (SendGrid email sending), <code>update-openclaw.sh</code> (OpenClaw self-update), <code>disk-check.sh</code> (alerts if disk > 85%), <code>maintenance-report.sh</code> (one-page status report email)</li>
+            <li><strong>Rules:</strong> T-Learning rules from the central repository, pulled at agent startup</li>
+            <li><strong>Tasks:</strong> Project-specific task lists, lessons learned database</li>
+            <li><strong>Backups:</strong> Daily cron, GFS retention, off-server pull to pang-mini</li>
+            <li><strong>Health checks:</strong> Service monitors, disk usage alerts, SSL certificate expiry checks</li>
+            <li><strong>Cron jobs:</strong> All scheduled tasks are deployed and enabled</li>
+        </ul>
+
+        <p>The agent template system on pang-mini stores canonical versions of all workspace files with placeholder variables (<code>__SLUG__</code>, <code>__TITLE__</code>, <code>__IP__</code>, <code>__DOMAIN__</code>). During deployment, these get replaced with the actual agent's values, giving each agent a personalised workspace while maintaining a single source of truth.</p>
 
         <hr>
 
