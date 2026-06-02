@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoring Home Appliances with Arlec Grid Connect Plugs + Tuya API + OpenClaw - Straya Co Blog</title>
+    <meta name="description" content="How to turn cheap Arlec smart plugs from Bunnings into a fully automated energy audit system using the Tuya API and OpenClaw. Complete guide with Python scripts, cron automation, and real results.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+    <style>
+        :root { --dark:#1a1a2e; --gold:#c9a96e; --gold-dark:#b8945a; --cream:#f8f6f1; --white:#fff; --gray:#6b7280; --gray-light:#e8e4dd; --radius:4px; --radius-lg:12px; --shadow:0 4px 20px rgba(0,0,0,0.08); --shadow-lg:0 20px 60px rgba(0,0,0,0.15); --transition:all 0.35s cubic-bezier(0.4,0,0.2,1); }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Inter',sans-serif;color:var(--dark);background:var(--white);line-height:1.7;overflow-x:hidden;}
+        h1,h2,h3,h4{font-family:'Playfair Display',serif;font-weight:600;line-height:1.2;}
+        .container{max-width:800px;margin:0 auto;padding:0 32px;}
+        a{text-decoration:none;color:inherit;}
+        img{max-width:100%;height:auto;}
+        code{font-family:monospace;background:var(--cream);padding:2px 6px;border-radius:3px;font-size:0.9em;}
+        pre{background:var(--dark);color:#e2e8f0;padding:1.25rem;border-radius:var(--radius-lg);overflow-x:auto;margin:1.5rem 0;font-size:0.85rem;line-height:1.6;}
+        pre code{background:transparent;padding:0;color:inherit;font-size:0.85rem;}
+        table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:0.9rem;}
+        th,td{padding:0.75rem 1rem;text-align:left;border-bottom:1px solid var(--gray-light);}
+        th{background:var(--dark);color:var(--white);font-weight:600;}
+        tr:last-child td{border-bottom:none;}
+        p{margin-bottom:1rem;}
+        ul,ol{margin:1rem 0 1rem 1.5rem;}
+        li{margin-bottom:0.4rem;}
+        hr{margin:2rem 0;border:none;border-top:1px solid var(--gray-light);}
+
+        #site-header{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(26,26,46,0.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,169,110,0.2);}
+        .header-inner{max-width:1200px;margin:0 auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:80px;}
+        .logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--white);letter-spacing:0.02em;}
+        .logo span{color:var(--gold);}
+        nav ul{display:flex;list-style:none;gap:2rem;}
+        nav a{color:rgba(255,255,255,0.85);font-size:0.85rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;transition:var(--transition);}
+        nav a:hover,nav a.active{color:var(--gold);}
+        .btn-cta{background:var(--gold);color:var(--dark);padding:0.6rem 1.5rem;border-radius:var(--radius);font-size:0.82rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;transition:var(--transition);}
+        .btn-cta:hover{background:var(--gold-dark);}
+        .nav-icon{display:flex;flex-direction:column;justify-content:space-between;width:26px;height:20px;cursor:pointer;z-index:1100;flex-shrink:0;}
+        .nav-icon span{display:block;height:2px;width:100%;background:#fff;border-radius:9px;transition:all 0.25s ease-in-out;transform-origin:left center;}
+
+        .page-hero{padding:140px 0 40px;background:var(--dark);color:var(--white);}
+        .page-hero h1{font-size:2.4rem;margin-bottom:0.5rem;}
+        .page-hero .meta{color:var(--gold);font-size:0.85rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;}
+        .post-content{padding:60px 0 80px;}
+        .post-content h2{margin:2.5rem 0 1rem;font-size:1.6rem;}
+        .post-content h3{margin:2rem 0 0.75rem;font-size:1.2rem;color:var(--gray);}
+        .post-content ul{margin:1rem 0;}
+        .post-content li{margin-bottom:0.4rem;}
+        .post-content table{margin:1.5rem 0;}
+        .post-content .tag{display:inline-block;background:var(--cream);color:var(--gray);padding:0.3rem 0.8rem;border-radius:20px;font-size:0.8rem;margin-right:0.5rem;margin-bottom:0.5rem;border:1px solid var(--gray-light);}
+
+        footer{background:var(--dark);color:rgba(255,255,255,0.7);padding:60px 0 30px;margin-top:60px;}
+        .footer-inner{max-width:1200px;margin:0 auto;padding:0 32px;}
+        .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;padding-bottom:2rem;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:2rem;}
+        .footer-brand{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--white);margin-bottom:0.75rem;}
+        .footer-brand span{color:var(--gold);}
+        .footer-col h4{color:var(--white);margin-bottom:1rem;font-size:1rem;}
+        .footer-col ul{list-style:none;}
+        .footer-col li{margin-bottom:0.5rem;}
+        .footer-col a:hover{color:var(--gold);}
+        .footer-bottom{text-align:center;font-size:0.85rem;}
+
+        .backdrop{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:900;opacity:0;visibility:hidden;transition:var(--transition);}
+        .backdrop.open{opacity:1;visibility:visible;}
+        .slide-navigation{position:fixed;top:0;right:0;bottom:0;width:320px;background:var(--dark);z-index:950;padding:2rem;transform:translateX(100%);transition:var(--transition);}
+        .slide-navigation.open{transform:translateX(0);}
+        .slide-nav-logo{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--white);margin:2rem 0;}
+        .slide-nav-logo span{color:var(--gold);}
+        .slide-nav-grid{display:grid;grid-template-columns:1fr;gap:2rem;}
+        .slide-nav-title{color:var(--gold);font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:1rem;}
+        .slide-nav-links{list-style:none;}
+        .slide-nav-links li{margin-bottom:0.75rem;}
+        .slide-nav-links a{color:rgba(255,255,255,0.75);font-size:0.95rem;transition:var(--transition);}
+        .slide-nav-links a:hover{color:var(--gold);}
+
+        @media(max-width:991px){nav ul{display:none;}}
+        @media(max-width:768px){.container{padding:0 20px;}.header-inner{padding:0 20px;}.footer-inner{padding:0 20px;}.footer-grid{grid-template-columns:1fr;}.page-hero h1{font-size:1.8rem;}.slide-navigation{width:100%;}}
+    </style>
+</head>
+<body>
+
+<header id="site-header">
+    <div class="header-inner">
+        <a href="../index.html" class="logo">Straya <span>Co</span></a>
+        <nav>
+            <ul>
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../services.html">Services</a></li>
+                <li><a href="../about.html">About</a></li>
+                <li><a href="../resources.html">Resources</a></li>
+                <li><a href="index.html" class="active">Blog</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </nav>
+        <a href="../contact.html" class="btn-cta">Get Started</a>
+        <div class="nav-icon" id="navIcon"><span></span><span></span><span></span></div>
+    </div>
+</header>
+
+<section class="page-hero">
+    <div class="container">
+        <p class="meta">2 June 2026 &mdash; Smart Home / Automation</p>
+        <h1>Monitoring Home Appliances with Arlec Grid Connect Plugs + Tuya API + OpenClaw</h1>
+        <div>
+            <span class="tag">Arlec</span>
+            <span class="tag">Tuya</span>
+            <span class="tag">Smart Plugs</span>
+            <span class="tag">Energy</span>
+            <span class="tag">Python</span>
+            <span class="tag">OpenClaw</span>
+            <span class="tag">Home Automation</span>
+        </div>
+    </div>
+</section>
+
+<section class="post-content">
+    <div class="container">
+
+<p><em>How to extract energy data from cheap smart plugs without the vendor app, using an AI agent to collect, store, and report on your power usage.</em></p>
+
+<hr>
+
+<h2>Why Bother?</h2>
+<p>I was looking at my electricity bill &mdash; <strong>$1,600+ a quarter</strong> &mdash; and had no idea which appliances were the culprits. Was the ducted heating? The old fridge? The dryer running twice a week? I needed data, not guesses.</p>
+<p>The <a href="https://www.bunnings.com.au/arlec-grid-connect-smart-plug-in-socket-with-energy-meter-4-pack_p0273368">Arlec Grid Connect smart plugs from Bunnings</a> ($55 for a 4-pack) are the cheapest energy-monitoring smart plugs you can buy in Australia. They measure real-time power consumption and cumulative energy usage. But the default "Grid Connect" app is limited &mdash; no API, no automation, no way to pull data into anything useful.</p>
+<p>Here's how I set them up to work with an AI agent (<a href="https://openclaw.ai">OpenClaw</a>) to automatically collect, store, and report on appliance energy usage.</p>
+
+<hr>
+
+<h2>What You'll Need</h2>
+
+<table>
+<tr><th>Item</th><th>Cost</th></tr>
+<tr><td>Arlec Grid Connect Smart Plug 4-Pack</td><td>$55</td></tr>
+<tr><td>Tuya IoT Platform account</td><td>Free</td></tr>
+<tr><td>AI agent or script runner (I use OpenClaw)</td><td>Free</td></tr>
+<tr><td>Python 3 with tinytuya library</td><td>Free</td></tr>
+</table>
+
+<hr>
+
+<h2>Step 1: Ditch the Grid Connect App</h2>
+<p>The Arlec plugs speak Tuya's protocol under the hood. The "Grid Connect" app is just a rebranded Tuya Smart Life app. Instead of using it, install <strong>Tuya Smart Life</strong> (or <strong>Smart Living</strong>) from the App Store.</p>
+<ol>
+<li>Download <strong>Tuya Smart Life</strong> from the App Store</li>
+<li>Create an account</li>
+<li>Plug in an Arlec plug, press and hold the button until the LED flashes rapidly</li>
+<li>The app will find it. Add each plug.</li>
+<li>Give them sensible names (Fridge, Coffee Machine, Dishwasher, etc.)</li>
+</ol>
+<p>This step is critical because the Tuya platform accounts are what give you API access. Grid Connect accounts won't let you create API keys.</p>
+
+<hr>
+
+<h2>Step 2: Set Up the Tuya IoT Platform</h2>
+<p>Now you need to give your AI agent API access to read the plug data.</p>
+<ol>
+<li>Go to <strong>iot.tuya.com</strong> and sign in with the same account you used in the app</li>
+<li>Click <strong>Cloud &rarr; Create Cloud Project</strong></li>
+<li>Name it whatever you like ("Home Energy Monitor")</li>
+<li>For <strong>Development Method</strong>, select <strong>Smart Home</strong></li>
+<li>For <strong>Data Center</strong>, pick the one that matches your region (typically <strong>Central Europe</strong> for Australia &mdash; the app auto-assigns this)</li>
+<li>Once created, you'll see your <strong>Access ID</strong> and <strong>Access Secret</strong> &mdash; save these</li>
+</ol>
+<p>Then link the plugs to the project:</p>
+<ol>
+<li>In the cloud project, go to <strong>Devices &rarr; Link Devices by App Account</strong></li>
+<li>Scan the QR code with the Tuya Smart Life app on your phone</li>
+<li>This authorises the project to access all devices in your Tuya account</li>
+</ol>
+<p>You should now see your 4 plugs listed under Devices with their <strong>Device IDs</strong>.</p>
+
+<hr>
+
+<h2>Step 3: The Local Key</h2>
+<p>Each plug has a <strong>local key</strong> that lets you query it directly on your local network without going through the cloud. This is faster and more reliable.</p>
+<p>The easiest way to get these keys is with the tinytuya scan tool:</p>
+
+<pre><code>pip3 install tinytuya
+python3 -m tinytuya.scan</code></pre>
+
+<p>This broadcasts UDP discovery and will list all Tuya devices on your network with their IPs, IDs, and local keys. Save them in a JSON file:</p>
+
+<pre><code>[
+  {
+    "name": "Plug 1 - Fridge",
+    "id": "abc123def456abc123def4",
+    "key": "abc123def456abc123def4",
+    "ip": "192.168.1.100"
+  },
+  {
+    "name": "Plug 2 - Coffee Machine",
+    "id": "789ghi012jkl345mno678p",
+    "key": "789ghi012jkl345mno678p",
+    "ip": "192.168.1.101"
+  }
+]</code></pre>
+
+<p>And your Tuya cloud credentials in a separate file:</p>
+
+<pre><code>{
+  "apiRegion": "eu",
+  "apiKey": "your_tuya_access_id_here",
+  "apiSecret": "your_tuya_access_secret_here"
+}</code></pre>
+
+<hr>
+
+<h2>Step 4: The Energy Collection Script</h2>
+<p>Here's the script that runs every 6 days and queries each plug. It tries the local network first (no cloud dependency), then falls back to the Tuya Cloud API if the plug is unreachable locally.</p>
+
+<pre><code>#!/usr/bin/env python3
+"""
+Energy Data Collector — Weekly cloud pull from Tuya.
+Query plugs for cumulative energy total, store snapshots, compute deltas.
+"""
+
+import os, sys, json, sqlite3
+from datetime import datetime, timedelta, timezone
+import tinytuya
+
+WORKSPACE = os.path.expanduser("~/.openclaw/workspace")
+DB_PATH = f"{WORKSPACE}/data/energy_monitor.db"
+CREDS_PATH = f"{WORKSPACE}/data/tuya_credentials.json"
+AEST = timezone(timedelta(hours=10))
+
+DEVICES = {
+    "abc123def456abc123def4": "Fridge",
+    "789ghi012jkl345mno678p": "Coffee Machine",
+    "345pqr678stu901vwx234y": "Dishwasher",
+    "567zab890cde123fgh456i": "Dryer",
+}
+
+
+def query_device_local(dev_id, ip, local_key):
+    """Poll device locally (no cloud). dps 25 = cumulative energy in Wh."""
+    d = tinytuya.Device(dev_id=dev_id, address=ip,
+                        local_key=local_key, version=3.5)
+    d.set_socketTimeout(5)
+    data = d.status()
+    if data and "dps" in data:
+        return data["dps"].get("25", 0)
+    return None
+
+
+def query_device_cloud(dev_id):
+    """Fallback: query via Tuya Cloud API."""
+    creds = json.load(open(CREDS_PATH))
+    c = tinytuya.Cloud(
+        apiRegion=creds["apiRegion"],
+        apiKey=creds["apiKey"],
+        apiSecret=creds["apiSecret"],
+    )
+    devices = c.getdevices()
+    for d in devices:
+        if d["id"] == dev_id:
+            return d.get("total_energy_wh", 0)
+    return None</code></pre>
+
+<p>The script then:</p>
+<ol>
+<li>Reads the device list from <code>grid_connect_devices.json</code></li>
+<li>For each plug, tries local query &rarr; falls back to cloud API</li>
+<li>Stores a weekly snapshot (cumulative Wh) in SQLite</li>
+<li>Computes the delta from the previous week (kWh consumed that week)</li>
+<li>Calculates cost at your current electricity rate</li>
+</ol>
+
+<hr>
+
+<h2>Step 5: Automate with OpenClaw</h2>
+<p>Rather than running the script manually, I have an AI agent (OpenClaw) running it on a cron schedule.</p>
+
+<h3>Active Cron Jobs</h3>
+
+<table>
+<tr><th>Job</th><th>Schedule</th><th>What it does</th></tr>
+<tr><td><strong>Energy &mdash; Data Collection</strong></td><td>Every 6 days</td><td>Runs <code>energy_collect.py --force</code> to pull cumulative energy from all 4 plugs</td></tr>
+<tr><td><strong>Energy &mdash; Monthly Report</strong></td><td>1st of each month</td><td>Generates an HTML report and emails it to my inbox</td></tr>
+</table>
+
+<p>The AI agent handles all the orchestration: spawns a lightweight isolated session, runs the Python script, checks the exit code, and reports errors if anything fails. This means I never have to SSH in or run commands &mdash; the agent just handles it.</p>
+
+<hr>
+
+<h2>What I Learned</h2>
+<p>After 6 months of data collection across 15+ appliances, here's what stood out:</p>
+
+<p><strong>The always-on base load is small.</strong> Fridge + modem + standby electronics = ~200W continuous. That's about $1.20/day.</p>
+
+<p><strong>The big swings are seasonal.</strong> My mild-weather baseline is 22-28 kWh/day. Winter with ducted heating? 40-57 kWh/day. Summer with AC? 39-43 kWh/day. The heating/cooling load adds $5-12/day in extreme weather.</p>
+
+<p><strong>The biggest appliance shocks:</strong></p>
+<ul>
+<li><strong>Electric hot water</strong> without an off-peak timer &rarr; 8-12 kWh/day ($3-4/day)</li>
+<li><strong>Oven vs air fryer</strong> &rarr; oven draws 3 kW for 45 min vs air fryer at 1.5 kW for 20 min. That's $0.50-0.80 saved every time you swap</li>
+<li><strong>Dryer</strong> &rarr; 2-3 kWh per cycle, costing $0.70-1.30 per load. Clothes rack = free.</li>
+</ul>
+
+<hr>
+
+<h2>Database Schema</h2>
+<p>The script creates a SQLite database with three tables:</p>
+
+<pre><code>-- Weekly cumulative snapshots from each plug
+CREATE TABLE weekly_snapshots (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    device_id TEXT,
+    week_start TEXT,
+    total_energy_wh INTEGER,
+    timestamp TEXT,
+    UNIQUE(device_id, week_start)
+);
+
+-- Computed consumption deltas (kWh per week)
+CREATE TABLE weekly_consumption (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    device_id TEXT,
+    device_name TEXT,
+    week_start TEXT,
+    week_end TEXT,
+    consumption_kwh REAL,
+    cost REAL,
+    UNIQUE(device_id, week_start)
+);
+
+-- Monthly aggregated report data
+CREATE TABLE monthly_reports (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    month TEXT,
+    generated_at TEXT,
+    total_kwh REAL,
+    total_cost REAL,
+    data_json TEXT
+);</code></pre>
+
+<hr>
+
+<h2>Improvements I'd Make</h2>
+<p><strong>Real-time monitoring.</strong> The current setup polls every 6 days. If you want to catch short-duration appliances (kettle, microwave, toaster), you need polling every 5-15 minutes. The local <code>tinytuya</code> protocol supports this, but you're trading off WiFi chatter for granularity.</p>
+
+<p><strong>PostgreSQL instead of SQLite.</strong> If you're running this at scale, SQLite handles concurrent writes poorly. The monthly report generation collides with the collection script. A proper PostgreSQL database would be more robust.</p>
+
+<p><strong>Zigbee instead of WiFi.</strong> Arlec also makes a Zigbee range that pairs with a hub. Zigbee plugs consume less power themselves and don't crowd your WiFi. The downside is you need a hub (like Home Assistant or a Tuya Zigbee gateway).</p>
+
+<p><strong>Tuya Cloud API limits.</strong> The free tier has rate limits. Weekly polling is fine, but if you scale to real-time, you'll hit them. Consider a local-only approach with <code>tinytuya</code> direct polling if you need higher frequency.</p>
+
+<hr>
+
+<h2>The Results</h2>
+<p>After 15 months of half-hourly Origin data cross-referenced with 6 months of smart plug audit data, I've identified <strong>~$1,000-1,200/year in savings opportunities</strong> &mdash; all behavioural, no capital expenditure required:</p>
+
+<table>
+<tr><th>Change</th><th>Saving</th></tr>
+<tr><td>Drop thermostat 2&deg;C + overnight setback</td><td>~$600/year</td></tr>
+<tr><td>Air fryer instead of oven (3x/week)</td><td>~$120/year</td></tr>
+<tr><td>Clothes rack instead of dryer (2x/week)</td><td>~$120/year</td></tr>
+<tr><td>Shorter showers</td><td>~$150/year</td></tr>
+<tr><td>Turn off standby electronics</td><td>~$70/year</td></tr>
+</table>
+
+<hr>
+
+<h2>What You Need to Run This</h2>
+<ol>
+<li><strong>Hardware:</strong> 4 &times; Arlec Grid Connect Smart Plugs &mdash; $55</li>
+<li><strong>App:</strong> Tuya Smart Life (not Grid Connect)</li>
+<li><strong>Platform:</strong> Tuya IoT &mdash; free account</li>
+<li><strong>Software:</strong> Python 3 + <code>pip install tinytuya</code></li>
+<li><strong>AI Agent:</strong> OpenClaw or any cron-triggered script runner</li>
+<li><strong>Total cost:</strong> $55 (the plugs) &mdash; everything else is free</li>
+</ol>
+
+<hr>
+
+<p><em>Have you set up something similar? Found other ways to monitor home energy usage without breaking the bank? I'd love to hear about it.</em></p>
+
+<p style="margin-top:2rem;"><a href="index.html" style="color:var(--gold);font-weight:600;">&larr; Back to Blog</a></p>
+
+    </div>
+</section>
+
+<footer>
+    <div class="footer-inner">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <div class="footer-brand">Straya <span>Co</span></div>
+                <p>Sydney-based IT consulting helping Australian businesses secure, automate, and grow.</p>
+                <p style="margin-top:0.75rem;">ABN: 89 642 689 076</p>
+            </div>
+            <div class="footer-col">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="../services.html">Email Security & DMARC</a></li>
+                    <li><a href="../services.html">Office Automation</a></li>
+                    <li><a href="../services.html">IT Setup & Migration</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <ul>
+                    <li><a href="../about.html">About Us</a></li>
+                    <li><a href="../resources.html">Resources</a></li>
+                    <li><a href="../contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Contact</h4>
+                <ul>
+                    <li>Sydney, Australia</li>
+                    <li><a href="mailto:vincent@strayaco.com.au">vincent@strayaco.com.au</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Straya Co Pty Ltd — Sydney, Australia. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<div class="backdrop" id="backdrop"></div>
+<div class="slide-navigation" id="slideNav">
+    <div class="nav-icon" id="slideClose"><span></span><span></span><span></span></div>
+    <div class="slide-nav-logo">Straya <span>Co</span></div>
+    <div class="slide-nav-grid">
+        <div class="slide-nav-col">
+            <div class="slide-nav-title">Services</div>
+            <ul class="slide-nav-links">
+                <li><a href="../services.html">Email Security & DMARC</a></li>
+                <li><a href="../services.html">Office Automation</a></li>
+                <li><a href="../services.html">IT Setup & Migration</a></li>
+            </ul>
+        </div>
+        <div class="slide-nav-col">
+            <div class="slide-nav-title">Company</div>
+            <ul class="slide-nav-links">
+                <li><a href="../about.html">About Us</a></li>
+                <li><a href="../resources.html">Resources</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+(function(){
+    var n=document.getElementById('navIcon'),s=document.getElementById('slideNav'),c=document.getElementById('slideClose'),b=document.getElementById('backdrop');
+    function o(){n.classList.add('open');c.classList.add('open');s.classList.add('open');b.classList.add('open');document.body.style.overflow='hidden';}
+    function x(){n.classList.remove('open');c.classList.remove('open');s.classList.remove('open');b.classList.remove('open');document.body.style.overflow='';}
+    n.addEventListener('click',o);c.addEventListener('click',x);b.addEventListener('click',x);
+})();
+</script>
+</body>
+</html>
