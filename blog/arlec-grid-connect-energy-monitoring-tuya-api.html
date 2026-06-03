@@ -209,60 +209,38 @@ python3 -m tinytuya.scan</code></pre>
 <hr>
 
 <h2>Step 4: The Energy Collection Script</h2>
-<p>Here's the script that runs every 6 days and queries each plug. It tries the local network first (no cloud dependency), then falls back to the Tuya Cloud API if the plug is unreachable locally.</p>
+<p>Here's the script that runs every 6 days and queries each plug directly over your local network &mdash; no cloud dependency needed. The <code>tinytuya</code> library sends a UDP discovery broadcast to find each plug, then reads the cumulative energy counter (DPS 25) straight off the device over TCP.</p>
 
 <pre><code>#!/usr/bin/env python3
 """
-Energy Data Collector — Weekly cloud pull from Tuya.
-Query plugs for cumulative energy total, store snapshots, compute deltas.
+Energy Data Collector — Local Tuya polling.
+Query plugs for cumulative energy total (DPS 25), store snapshots, compute deltas.
 """
 
-import os, sys, json, sqlite3
+import os, json, sqlite3
 from datetime import datetime, timedelta, timezone
 import tinytuya
 
 WORKSPACE = os.path.expanduser("~/.openclaw/workspace")
+PLUGS_PATH = f"{WORKSPACE}/data/grid_connect_devices.json"
 DB_PATH = f"{WORKSPACE}/data/energy_monitor.db"
-CREDS_PATH = f"{WORKSPACE}/data/tuya_credentials.json"
 AEST = timezone(timedelta(hours=10))
 
-DEVICES = {
-    "abc123def456abc123def4": "Fridge",
-    "789ghi012jkl345mno678p": "Coffee Machine",
-    "345pqr678stu901vwx234y": "Dishwasher",
-    "567zab890cde123fgh456i": "Dryer",
-}
 
-
-def query_device_local(dev_id, ip, local_key):
-    """Poll device locally (no cloud). dps 25 = cumulative energy in Wh."""
+def query_device(dev_id, ip, local_key):
+    """Poll device locally via tinytuya. dps 25 = cumulative energy in Wh."""
     d = tinytuya.Device(dev_id=dev_id, address=ip,
                         local_key=local_key, version=3.5)
     d.set_socketTimeout(5)
     data = d.status()
     if data and "dps" in data:
         return data["dps"].get("25", 0)
-    return None
-
-
-def query_device_cloud(dev_id):
-    """Fallback: query via Tuya Cloud API."""
-    creds = json.load(open(CREDS_PATH))
-    c = tinytuya.Cloud(
-        apiRegion=creds["apiRegion"],
-        apiKey=creds["apiKey"],
-        apiSecret=creds["apiSecret"],
-    )
-    devices = c.getdevices()
-    for d in devices:
-        if d["id"] == dev_id:
-            return d.get("total_energy_wh", 0)
     return None</code></pre>
 
 <p>The script then:</p>
 <ol>
-<li>Reads the device list from <code>grid_connect_devices.json</code></li>
-<li>For each plug, tries local query &rarr; falls back to cloud API</li>
+<li>Reads the device list from <code>grid_connect_devices.json</code> (the file we saved in Step 3)</li>
+<li>For each plug, queries it directly over the local network</li>
 <li>Stores a weekly snapshot (cumulative Wh) in SQLite</li>
 <li>Computes the delta from the previous week (kWh consumed that week)</li>
 <li>Calculates cost at your current electricity rate</li>
@@ -286,13 +264,13 @@ def query_device_cloud(dev_id):
 <hr>
 
 <h2>What I Learned</h2>
-<p>After 6 months of data collection across 15+ appliances, here's what stood out:</p>
+<p>I combined two data sources for this: the smart plugs gave me per-appliance breakdowns, while 15 months of half-hourly data from my Origin Energy bill showed the whole-house picture. Here's what stood out:</p>
 
-<p><strong>The always-on base load is small.</strong> Fridge + modem + standby electronics = ~200W continuous. That's about $1.20/day.</p>
+<p><strong>The always-on base load is small.</strong> Fridge + modem + standby electronics = ~200W continuous. That's about $1.20/day. <em>(From the smart plugs.)</em></p>
 
-<p><strong>The big swings are seasonal.</strong> My mild-weather baseline is 22-28 kWh/day. Winter with ducted heating? 40-57 kWh/day. Summer with AC? 39-43 kWh/day. The heating/cooling load adds $5-12/day in extreme weather.</p>
+<p><strong>The big swings are seasonal.</strong> My mild-weather baseline is 22-28 kWh/day. Winter with ducted heating? 40-57 kWh/day. Summer with AC? 39-43 kWh/day. The heating/cooling load adds $5-12/day in extreme weather. <em>(From Origin whole-house data &mdash; the plugs only monitor individual appliances, not the ducted system.)</em></p>
 
-<p><strong>The biggest appliance shocks:</strong></p>
+<p><strong>The biggest appliance shocks</strong> <em>(all from the smart plugs):</em></p>
 <ul>
 <li><strong>Electric hot water</strong> without an off-peak timer &rarr; 8-12 kWh/day ($3-4/day)</li>
 <li><strong>Oven vs air fryer</strong> &rarr; oven draws 3 kW for 45 min vs air fryer at 1.5 kW for 20 min. That's $0.50-0.80 saved every time you swap</li>
@@ -353,12 +331,12 @@ CREATE TABLE monthly_reports (
 <p>After 15 months of half-hourly Origin data cross-referenced with 6 months of smart plug audit data, I've identified <strong>~$1,000-1,200/year in savings opportunities</strong> &mdash; all behavioural, no capital expenditure required:</p>
 
 <table>
-<tr><th>Change</th><th>Saving</th></tr>
-<tr><td>Drop thermostat 2&deg;C + overnight setback</td><td>~$600/year</td></tr>
-<tr><td>Air fryer instead of oven (3x/week)</td><td>~$120/year</td></tr>
-<tr><td>Clothes rack instead of dryer (2x/week)</td><td>~$120/year</td></tr>
-<tr><td>Shorter showers</td><td>~$150/year</td></tr>
-<tr><td>Turn off standby electronics</td><td>~$70/year</td></tr>
+<tr><th>Change</th><th>Saving</th><th>Data Source</th></tr>
+<tr><td>Drop thermostat 2&deg;C + overnight setback</td><td>~$600/year</td><td>Origin whole-house data</td></tr>
+<tr><td>Air fryer instead of oven (3x/week)</td><td>~$120/year</td><td>Smart plugs</td></tr>
+<tr><td>Clothes rack instead of dryer (2x/week)</td><td>~$120/year</td><td>Smart plugs</td></tr>
+<tr><td>Shorter showers</td><td>~$150/year</td><td>Origin whole-house data</td></tr>
+<tr><td>Turn off standby electronics</td><td>~$70/year</td><td>Smart plugs</td></tr>
 </table>
 
 <hr>
