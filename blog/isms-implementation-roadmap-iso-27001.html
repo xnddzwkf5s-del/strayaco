@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISO 27001 ISMS Implementation Roadmap — Straya Co Blog</title>
+    <meta name="description" content="A complete 48-step ISMS implementation roadmap mapped to ISO/IEC 27001:2022 clauses. Practical guidance for Australian businesses seeking certification.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+    <style>
+        :root { --dark:#1a1a2e; --gold:#c9a96e; --gold-dark:#b8945a; --cream:#f8f6f1; --white:#fff; --gray:#6b7280; --gray-light:#e8e4dd; --radius:4px; --radius-lg:12px; --shadow:0 4px 20px rgba(0,0,0,0.08); --shadow-lg:0 20px 60px rgba(0,0,0,0.15); --transition:all 0.35s cubic-bezier(0.4,0,0.2,1); }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Inter',sans-serif;color:var(--dark);background:var(--white);line-height:1.7;overflow-x:hidden;}
+        h1,h2,h3,h4{font-family:'Playfair Display',serif;font-weight:600;line-height:1.2;}
+        .container{max-width:800px;margin:0 auto;padding:0 32px;}
+        a{text-decoration:none;color:inherit;}
+        img{max-width:100%;height:auto;}
+        code{font-family:monospace;background:var(--cream);padding:2px 6px;border-radius:3px;font-size:0.9em;}
+        pre{background:var(--dark);color:#e2e8f0;padding:1.25rem;border-radius:var(--radius-lg);overflow-x:auto;margin:1.5rem 0;font-size:0.85rem;line-height:1.6;}
+        pre code{background:transparent;padding:0;color:inherit;font-size:0.85rem;}
+        table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:0.9rem;}
+        th,td{padding:0.75rem 1rem;text-align:left;border-bottom:1px solid var(--gray-light);}
+        th{background:var(--dark);color:var(--white);font-weight:600;}
+        tr:last-child td{border-bottom:none;}
+        p{margin-bottom:1rem;}
+        ul,ol{margin:1rem 0 1rem 1.5rem;}
+        li{margin-bottom:0.4rem;}
+        hr{margin:2rem 0;border:none;border-top:1px solid var(--gray-light);}
+
+        #site-header{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(26,26,46,0.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,169,110,0.2);}
+        .header-inner{max-width:1200px;margin:0 auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:80px;}
+        .logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--white);letter-spacing:0.02em;}
+        .logo span{color:var(--gold);}
+        nav ul{display:flex;list-style:none;gap:2rem;}
+        nav a{color:rgba(255,255,255,0.85);font-size:0.85rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;transition:var(--transition);}
+        nav a:hover,nav a.active{color:var(--gold);}
+        .btn-cta{background:var(--gold);color:var(--dark);padding:0.6rem 1.5rem;border-radius:var(--radius);font-size:0.82rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;transition:var(--transition);}
+        .btn-cta:hover{background:var(--gold-dark);}
+        .nav-icon{display:flex;flex-direction:column;justify-content:space-between;width:26px;height:20px;cursor:pointer;z-index:1100;flex-shrink:0;}
+        .nav-icon span{display:block;height:2px;width:100%;background:#fff;border-radius:9px;transition:all 0.25s ease-in-out;transform-origin:left center;}
+
+        .page-hero{padding:140px 0 40px;background:var(--dark);color:var(--white);}
+        .page-hero h1{font-size:2.4rem;margin-bottom:0.5rem;}
+        .page-hero .meta{color:var(--gold);font-size:0.85rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;}
+        .page-hero .subhead{color:rgba(255,255,255,0.7);font-size:1.05rem;margin-top:0.75rem;font-style:italic;}
+        .post-content{padding:60px 0 80px;}
+        .post-content h2{margin:2.5rem 0 1rem;font-size:1.6rem;}
+        .post-content h3{margin:2rem 0 0.75rem;font-size:1.2rem;color:var(--gray);}
+        .post-content ul{margin:1rem 0;}
+        .post-content li{margin-bottom:0.4rem;}
+        .post-content table{margin:1.5rem 0;}
+        .post-content .tag{display:inline-block;background:var(--cream);color:var(--gray);padding:0.3rem 0.8rem;border-radius:20px;font-size:0.8rem;margin-right:0.5rem;margin-bottom:0.5rem;border:1px solid var(--gray-light);}
+        .post-content .lesson{background:var(--cream);border-left:4px solid var(--gold);padding:1.5rem;border-radius:0 var(--radius-lg) var(--radius-lg) 0;margin:2rem 0;}
+        .post-content blockquote{border-left:3px solid var(--gold);padding:1rem 1.5rem;margin:1.5rem 0;background:var(--cream);border-radius:0 var(--radius-lg) var(--radius-lg) 0;font-style:italic;color:var(--gray);}
+        .post-content .straya-cta{background:var(--dark);color:var(--white);padding:2rem;border-radius:var(--radius-lg);margin:2.5rem 0;text-align:center;}
+        .post-content .straya-cta p{color:rgba(255,255,255,0.85);font-size:1.05rem;}
+        .post-content .straya-cta .btn-cta{display:inline-block;margin-top:1rem;}
+        .post-content strong{color:var(--dark);}
+
+        footer{background:var(--dark);color:rgba(255,255,255,0.7);padding:60px 0 30px;margin-top:60px;}
+        .footer-inner{max-width:1200px;margin:0 auto;padding:0 32px;}
+        .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;padding-bottom:2rem;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:2rem;}
+        .footer-brand{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--white);margin-bottom:0.75rem;}
+        .footer-brand span{color:var(--gold);}
+        .footer-col h4{color:var(--white);margin-bottom:1rem;font-size:1rem;}
+        .footer-col ul{list-style:none;}
+        .footer-col li{margin-bottom:0.5rem;}
+        .footer-col a:hover{color:var(--gold);}
+        .footer-bottom{text-align:center;font-size:0.85rem;}
+
+        .backdrop{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:900;opacity:0;visibility:hidden;transition:var(--transition);}
+        .backdrop.open{opacity:1;visibility:visible;}
+        .slide-navigation{position:fixed;top:0;right:0;bottom:0;width:320px;background:var(--dark);z-index:950;padding:2rem;transform:translateX(100%);transition:var(--transition);}
+        .slide-navigation.open{transform:translateX(0);}
+        .slide-nav-logo{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--white);margin:2rem 0;}
+        .slide-nav-logo span{color:var(--gold);}
+        .slide-nav-grid{display:grid;grid-template-columns:1fr;gap:2rem;}
+        .slide-nav-title{color:var(--gold);font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:1rem;}
+        .slide-nav-links{list-style:none;}
+        .slide-nav-links li{margin-bottom:0.75rem;}
+        .slide-nav-links a{color:rgba(255,255,255,0.75);font-size:0.95rem;transition:var(--transition);}
+        .slide-nav-links a:hover{color:var(--gold);}
+
+        @media(max-width:991px){nav ul{display:none;}}
+        @media(max-width:768px){.container{padding:0 20px;}.header-inner{padding:0 20px;}.footer-inner{padding:0 20px;}.footer-grid{grid-template-columns:1fr;}.page-hero h1{font-size:1.8rem;}.slide-navigation{width:100%;}}
+    </style>
+</head>
+<body>
+
+<header id="site-header">
+    <div class="header-inner">
+        <a href="../index.html" class="logo">Straya <span>Co</span></a>
+        <nav>
+            <ul>
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../services.html">Services</a></li>
+                <li><a href="../about.html">About</a></li>
+                <li><a href="../resources.html">Resources</a></li>
+                <li><a href="index.html" class="active">Blog</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </nav>
+        <a href="../contact.html" class="btn-cta">Get Started</a>
+        <div class="nav-icon" id="navIcon"><span></span><span></span><span></span></div>
+    </div>
+</header>
+
+<section class="page-hero">
+    <div class="container">
+        <p class="meta">14 July 2026 &mdash; Compliance &amp; Security</p>
+        <h1>A Practical ISO 27001 ISMS Implementation Roadmap: 48 Steps from Context to Certification</h1>
+        <p class="subhead">A complete, phased roadmap for Australian businesses implementing an Information Security Management System aligned with ISO/IEC 27001:2022.</p>
+        <div style="margin-top:1rem;">
+            <span class="tag">ISO 27001</span>
+            <span class="tag">ISMS</span>
+            <span class="tag">Compliance</span>
+            <span class="tag">Cybersecurity</span>
+            <span class="tag">Risk Management</span>
+        </div>
+    </div>
+</section>
+
+<section class="post-content">
+    <div class="container">
+
+<p>ISO/IEC 27001 certification is fast becoming a non-negotiable requirement for Australian businesses that deal with government, finance, or enterprise clients. Whether you're a 20-person SaaS company bidding for a Commonwealth contract or a professional services firm handling sensitive client data, the standard is increasingly written into procurement and compliance frameworks.</p>
+
+<p>Yet the standard can feel overwhelming at first. Forty-eight steps spread across seven clauses, mapped to the Plan-Do-Check-Act (PDCA) cycle, with Annex A's 93 controls looming in the background. The organisations that succeed are the ones that break it down into manageable phases, assign ownership early, and treat it as an incremental process rather than a one-off project.</p>
+
+<p>This roadmap walks through every step &mdash; from context analysis through to certification and continual improvement &mdash; with practical guidance for the Australian small-to-medium business.</p>
+
+<hr>
+
+<h2>Understanding the PDCA Framework</h2>
+
+<p>ISO 27001 is built on the Plan-Do-Check-Act (PDCA) cycle, the same continuous improvement model that underpins ISO 9001, ISO 14001, and most modern management system standards. The 48 implementation steps map across all seven Clauses of the standard, distributed as follows:</p>
+
+<ul>
+<li><strong>Plan (Clauses 4&ndash;6):</strong> Context, Leadership, Planning &mdash; 28 steps (Phases 1&ndash;3)</li>
+<li><strong>Do (Clauses 7&ndash;8):</strong> Support, Operation &mdash; 14 steps (Phases 4&ndash;5)</li>
+<li><strong>Check (Clause 9):</strong> Performance Evaluation &mdash; 5 steps (Phase 6)</li>
+<li><strong>Act (Clause 10):</strong> Improvement &mdash; 2 steps (Phase 7)</li>
+</ul>
+
+<p>Each phase builds on the one before it. Skipping steps in the early phases &mdash; particularly Context (Clause 4) and Risk Management (Clause 6) &mdash; almost always leads to rework when the certification auditor arrives.</p>
+
+<hr>
+
+<h2>Phase 1 &mdash; Initiation &amp; Context (Clause 4) &mdash; PLAN</h2>
+
+<p>Before you can design an ISMS, you need to understand the environment in which it will operate. Clause 4 is about defining the playing field: who's involved, what matters, where the boundaries lie.</p>
+
+<table>
+<tr><th>#</th><th>Clause</th><th>Activity</th><th>Step</th></tr>
+<tr><td>1</td><td>4.1</td><td>Environmental Scan</td><td>Conduct PESTLE/SWOT analysis to identify external &amp; internal issues affecting ISMS</td></tr>
+<tr><td>2</td><td>4.1</td><td>Issue Register</td><td>Document and maintain a register of external (legal, tech, market) and internal issues (culture, structure, capability)</td></tr>
+<tr><td>3</td><td>4.2</td><td>Interested Party Mapping</td><td>Identify all relevant interested parties (regulators, customers, suppliers, employees, shareholders)</td></tr>
+<tr><td>4</td><td>4.2</td><td>Requirements Register</td><td>Capture each party's requirements &mdash; legal, regulatory, contractual, and implicit expectations</td></tr>
+<tr><td>5</td><td>4.3</td><td>Scope Definition Workshop</td><td>Define ISMS boundaries considering issues (4.1), requirements (4.2), and external dependencies</td></tr>
+<tr><td>6</td><td>4.3</td><td>Scope Document</td><td>Draft formal scope statement; obtain approval; publish as documented information</td></tr>
+<tr><td>7</td><td>4.4</td><td>ISMS Framework Design</td><td>Establish the ISMS &mdash; define processes, interactions, and interfaces across the organization</td></tr>
+<tr><td>8</td><td>4.4</td><td>Process Map</td><td>Create a process interaction diagram showing how ISMS processes relate to each other</td></tr>
+</table>
+
+<hr>
+
+<h2>Phase 2 &mdash; Leadership &amp; Governance (Clause 5) &mdash; PLAN</h2>
+
+<p>An ISMS without leadership commitment is a paper exercise that won't survive first contact with reality. Clause 5 requires top management to demonstrate genuine ownership &mdash; not just sign a policy and walk away.</p>
+
+<table>
+<tr><th>#</th><th>Clause</th><th>Activity</th><th>Step</th></tr>
+<tr><td>9</td><td>5.1</td><td>Management Briefing</td><td>Present ISMS business case to top management; secure explicit leadership commitment</td></tr>
+<tr><td>10</td><td>5.1</td><td>Strategic Alignment</td><td>Ensure ISMS objectives are compatible with the organization's strategic direction</td></tr>
+<tr><td>11</td><td>5.1</td><td>Resource Commitment</td><td>Obtain budget, personnel, and infrastructure commitment from top management</td></tr>
+<tr><td>12</td><td>5.2</td><td>Policy Drafting</td><td>Draft information security policy &mdash; appropriate to purpose, includes objectives framework, commitment to compliance and continual improvement</td></tr>
+<tr><td>13</td><td>5.2</td><td>Policy Approval &amp; Communication</td><td>Top management approves policy; publish, communicate internally, make available to interested parties</td></tr>
+<tr><td>14</td><td>5.3</td><td>RACI Matrix</td><td>Define and assign roles, responsibilities, and authorities for all ISMS functions</td></tr>
+<tr><td>15</td><td>5.3</td><td>ISMS Owner Appointment</td><td>Designate someone responsible for reporting ISMS performance to top management</td></tr>
+<tr><td>16</td><td>5.3</td><td>Steering Committee</td><td>Establish ISMS steering committee / governance board with cross-functional representation</td></tr>
+</table>
+
+<hr>
+
+<h2>Phase 3 &mdash; Planning &amp; Risk Management (Clause 6) &mdash; PLAN</h2>
+
+<p>This is the engine room of the ISMS. Risk management isn't something you do once and file away &mdash; it's the mechanism that drives every control decision. If your risk assessment is wrong, everything built on top of it is wrong too.</p>
+
+<table>
+<tr><th>#</th><th>Clause</th><th>Activity</th><th>Step</th></tr>
+<tr><td>17</td><td>6.1.1</td><td>Risk Framework Setup</td><td>Establish risk management methodology aligned with ISO 31000 principles</td></tr>
+<tr><td>18</td><td>6.1.2</td><td>Risk Criteria Definition</td><td>Define risk acceptance criteria and risk assessment criteria (consequence + likelihood scales)</td></tr>
+<tr><td>19</td><td>6.1.2</td><td>Risk Identification Workshop</td><td>Facilitate sessions to identify risks to CIA of information within scope; assign risk owners</td></tr>
+<tr><td>20</td><td>6.1.2</td><td>Risk Analysis</td><td>Assess consequences and likelihood for each identified risk; calculate inherent risk levels</td></tr>
+<tr><td>21</td><td>6.1.2</td><td>Risk Evaluation</td><td>Compare risk levels against criteria; prioritize risks requiring treatment</td></tr>
+<tr><td>22</td><td>6.1.3</td><td>Treatment Option Selection</td><td>Select risk treatment options (modify, retain, avoid, share) based on evaluation results</td></tr>
+<tr><td>23</td><td>6.1.3</td><td>Control Identification</td><td>Determine necessary controls; cross-reference against Annex A to verify nothing omitted</td></tr>
+<tr><td>24</td><td>6.1.3</td><td>Statement of Applicability</td><td>Draft SoA &mdash; list all controls, inclusion justification, implementation status, exclusion justifications</td></tr>
+<tr><td>25</td><td>6.1.3</td><td>Risk Treatment Plan</td><td>Formulate plan with timelines, responsibilities, and resources; obtain risk owner approval</td></tr>
+<tr><td>26</td><td>6.2</td><td>Objective Setting</td><td>Establish measurable ISMS objectives at relevant functions and levels; align with policy</td></tr>
+<tr><td>27</td><td>6.2</td><td>Objective Planning</td><td>For each objective determine: what, resources, who, when, and how results will be evaluated</td></tr>
+<tr><td>28</td><td>6.3</td><td>Change Management Planning</td><td>Establish process for planning and controlling ISMS changes (new tech, restructures, regulatory shifts)</td></tr>
+</table>
+
+<hr>
+
+<h2>Phase 4 &mdash; Support &amp; Resources (Clause 7) &mdash; DO</h2>
+
+<p>Planning is meaningless without the resources to execute. Clause 7 covers the people, skills, awareness, and documentation infrastructure that turn policy into practice.</p>
+
+<table>
+<tr><th>#</th><th>Clause</th><th>Activity</th><th>Step</th></tr>
+<tr><td>29</td><td>7.1</td><td>Resource Planning</td><td>Determine and allocate resources (people, budget, tools, infrastructure) needed for ISMS</td></tr>
+<tr><td>30</td><td>7.2</td><td>Competency Matrix</td><td>Define required competencies for each ISMS role; assess current vs. required capability gaps</td></tr>
+<tr><td>31</td><td>7.2</td><td>Training &amp; Development</td><td>Deliver training, mentoring, or hiring to close competency gaps; evaluate effectiveness</td></tr>
+<tr><td>32</td><td>7.3</td><td>Awareness Programme</td><td>Deliver org-wide awareness: security policy, individual contribution, consequences of nonconformity</td></tr>
+<tr><td>33</td><td>7.4</td><td>Communication Plan</td><td>Define internal &amp; external communications: what, when, who, how, and frequency</td></tr>
+<tr><td>34</td><td>7.5.1</td><td>Documentation Framework</td><td>Establish documented information architecture (policy tier, procedure tier, record tier)</td></tr>
+<tr><td>35</td><td>7.5.2</td><td>Document Lifecycle</td><td>Define creation/update rules: identification, format, media, review, and approval for suitability</td></tr>
+<tr><td>36</td><td>7.5.3</td><td>Document Control</td><td>Implement controls: distribution, access, retrieval, storage, version control, retention, and disposition</td></tr>
+</table>
+
+<hr>
+
+<h2>Phase 5 &mdash; Operational Execution (Clause 8) &mdash; DO</h2>
+
+<p>This is where the ISMS becomes real. The processes planned in Clause 6 and resourced in Clause 7 are now implemented, executed, and controlled.</p>
+
+<table>
+<tr><th>#</th><th>Clause</th><th>Activity</th><th>Step</th></tr>
+<tr><td>37</td><td>8.1</td><td>Process Implementation</td><td>Implement planned processes with established criteria; ensure documented information as evidence</td></tr>
+<tr><td>38</td><td>8.1</td><td>External Provider Control</td><td>Identify and control externally provided processes, products, or services relevant to ISMS</td></tr>
+<tr><td>39</td><td>8.1</td><td>Change Monitoring</td><td>Control planned changes; monitor for unintended changes and mitigate adverse effects</td></tr>
+<tr><td>40</td><td>8.2</td><td>Operational Risk Assessment</td><td>Perform risk assessments at planned intervals or when significant changes occur</td></tr>
+<tr><td>41</td><td>8.3</td><td>Treatment Plan Execution</td><td>Implement the risk treatment plan; deploy selected Annex A controls; retain documented results</td></tr>
+</table>
+
+<hr>
+
+<h2>Phase 6 &mdash; Performance Evaluation (Clause 9) &mdash; CHECK</h2>
+
+<p>How do you know the ISMS is working? Clause 9 provides the measurement, analysis, and review mechanisms that separate a living management system from a filing cabinet of documents.</p>
+
+<table>
+<tr><th>#</th><th>Clause</th><th>Activity</th><th>Step</th></tr>
+<tr><td>42</td><td>9.1</td><td>Monitoring Framework</td><td>Define what to monitor, methods (producing comparable/reproducible results), frequency, responsibilities</td></tr>
+<tr><td>43</td><td>9.1</td><td>Performance Analysis</td><td>Collect monitoring data; evaluate ISMS performance and effectiveness; retain documented evidence</td></tr>
+<tr><td>44</td><td>9.2</td><td>Audit Programme Design</td><td>Plan internal audit programme: frequency, methods, criteria, scope, impartial auditor selection</td></tr>
+<tr><td>45</td><td>9.2</td><td>Audit Execution</td><td>Conduct audits against org requirements and ISO 27001; report results to relevant management</td></tr>
+<tr><td>46</td><td>9.3</td><td>Management Review</td><td>Top management reviews ISMS considering inputs (9.3.2) and produces decisions/outputs (9.3.3)</td></tr>
+</table>
+
+<hr>
+
+<h2>Phase 7 &mdash; Improvement (Clause 10) &mdash; ACT</h2>
+
+<p>The PDCA cycle closes with corrective action and continual improvement. An ISMS that doesn't improve is an ISMS that's already degrading.</p>
+
+<table>
+<tr><th>#</th><th>Clause</th><th>Activity</th><th>Step</th></tr>
+<tr><td>47</td><td>10.1</td><td>Continual Improvement Programme</td><td>Drive ongoing suitability, adequacy, and effectiveness of the ISMS through the PDCA cycle</td></tr>
+<tr><td>48</td><td>10.2</td><td>Nonconformity &amp; Corrective Action</td><td>React to NCs, conduct root cause analysis, implement corrective actions, verify effectiveness</td></tr>
+</table>
+
+<hr>
+
+<h2>Why This Matters for Australian Business</h2>
+
+<p>Implementing an ISMS isn't just about passing a certification audit. The real value is in building a security-conscious culture &mdash; one where every employee understands their role in protecting information, where risk is managed systematically rather than reactively, and where security decisions are driven by data rather than guesswork.</p>
+
+<p>For Australian businesses, the commercial benefits are clear. ISO 27001 certification is increasingly a prerequisite for government contracts (particularly at the Commonwealth level), financial services engagements, and enterprise supplier panels. It provides a defensible posture for complying with the Privacy Act 1988, the Notifiable Data Breaches scheme, and sector-specific obligations like APRA CPS 234.</p>
+
+<p>But beyond compliance, an effective ISMS reduces the pain of security incidents. It means you have documented processes to follow when something goes wrong, a clear chain of accountability, and evidence that you took reasonable steps to prevent the breach in the first place.</p>
+
+<p>Whether you're at step one or step forty-eight, Straya Co can help. We work with Australian businesses at every stage of their ISO 27001 journey &mdash; from initial gap analysis through to certification audit support and ongoing ISMS maintenance.</p>
+
+<div class="straya-cta">
+    <p style="font-size:1.1rem;font-weight:600;color:var(--gold);margin-bottom:0.75rem;">Need help with your ISO 27001 journey?</p>
+    <p>Whether you're starting from scratch or preparing for certification, we can guide you through every phase. Gap analysis, policy drafting, risk assessment facilitation, and audit prep &mdash; tailored for Australian businesses.</p>
+    <a href="../contact.html" class="btn-cta">Get in touch &rarr;</a>
+</div>
+
+<p style="margin-top:2rem;"><a href="index.html" style="color:var(--gold);font-weight:600;">&larr; Back to Blog</a></p>
+
+    </div>
+</section>
+
+<footer>
+    <div class="footer-inner">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <div class="footer-brand">Straya <span>Co</span></div>
+                <p>Sydney-based IT consulting helping Australian businesses secure, automate, and grow.</p>
+                <p style="margin-top:0.75rem;">ABN: 89 642 689 076</p>
+            </div>
+            <div class="footer-col">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="../services.html">Email Security & DMARC</a></li>
+                    <li><a href="../services.html">Office Automation</a></li>
+                    <li><a href="../services.html">IT Setup & Migration</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <ul>
+                    <li><a href="../about.html">About Us</a></li>
+                    <li><a href="../resources.html">Resources</a></li>
+                    <li><a href="../contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Contact</h4>
+                <ul>
+                    <li>Sydney, Australia</li>
+                    <li><a href="mailto:vincent@strayaco.com.au">vincent@strayaco.com.au</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Straya Co Pty Ltd &mdash; Sydney, Australia. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<div class="backdrop" id="backdrop"></div>
+<div class="slide-navigation" id="slideNav">
+    <div class="nav-icon" id="slideClose"><span></span><span></span><span></span></div>
+    <div class="slide-nav-logo">Straya <span>Co</span></div>
+    <div class="slide-nav-grid">
+        <div class="slide-nav-col">
+            <div class="slide-nav-title">Services</div>
+            <ul class="slide-nav-links">
+                <li><a href="../services.html">Email Security & DMARC</a></li>
+                <li><a href="../services.html">Office Automation</a></li>
+                <li><a href="../services.html">IT Setup & Migration</a></li>
+            </ul>
+        </div>
+        <div class="slide-nav-col">
+            <div class="slide-nav-title">Company</div>
+            <ul class="slide-nav-links">
+                <li><a href="../about.html">About Us</a></li>
+                <li><a href="../resources.html">Resources</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+(function(){
+    var n=document.getElementById('navIcon'),s=document.getElementById('slideNav'),c=document.getElementById('slideClose'),b=document.getElementById('backdrop');
+    function o(){n.classList.add('open');c.classList.add('open');s.classList.add('open');b.classList.add('open');document.body.style.overflow='hidden';}
+    function x(){n.classList.remove('open');c.classList.remove('open');s.classList.remove('open');b.classList.remove('open');document.body.style.overflow='';}
+    n.addEventListener('click',o);c.addEventListener('click',x);b.addEventListener('click',x);
+})();
+</script>
+</body>
+</html>
