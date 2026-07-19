@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenClaw on DigitalOcean with Tailscale Serve — Lessons Learned - Straya Co Blog</title>
+    <meta name="description" content="A practical guide to deploying OpenClaw on DigitalOcean with Tailscale Serve, including every gotcha we hit and the automated fix script that resolves them all.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --dark:#1a1a2e; --gold:#c9a96e; --gold-dark:#b8945a; --cream:#f8f6f1; --white:#fff; --gray:#6b7280; --gray-light:#e8e4dd; --radius:4px; --radius-lg:12px; --shadow:0 4px 20px rgba(0,0,0,0.08); --shadow-lg:0 20px 60px rgba(0,0,0,0.15); --transition:all 0.35s cubic-bezier(0.4,0,0.2,1); }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Inter',sans-serif;color:var(--dark);background:var(--white);line-height:1.7;overflow-x:hidden;}
+        h1,h2,h3,h4{font-family:'Playfair Display',serif;font-weight:600;line-height:1.2;}
+        .container{max-width:800px;margin:0 auto;padding:0 32px;}
+        a{text-decoration:none;color:var(--gold);}
+        a:hover{color:var(--gold-dark);}
+        img{max-width:100%;height:auto;}
+        code{font-family:monospace;background:var(--cream);padding:2px 6px;border-radius:3px;font-size:0.9em;}
+        pre{background:var(--dark);color:#e2e8f0;padding:1.25rem;border-radius:var(--radius-lg);overflow-x:auto;margin:1.5rem 0;font-size:0.85rem;line-height:1.6;}
+        pre code{background:transparent;padding:0;color:inherit;font-size:0.85rem;}
+        table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:0.9rem;}
+        th,td{padding:0.75rem 1rem;text-align:left;border-bottom:1px solid var(--gray-light);}
+        th{background:var(--dark);color:var(--white);font-weight:600;}
+        tr:last-child td{border-bottom:none;}
+        p{margin-bottom:1rem;}
+        ul,ol{margin:1rem 0 1rem 1.5rem;}
+        li{margin-bottom:0.4rem;}
+        hr{margin:2rem 0;border:none;border-top:1px solid var(--gray-light);}
+        .meta{color:var(--gray);font-size:0.9rem;margin-bottom:2rem;}
+        .meta span{color:var(--gold);font-weight:600;}
+        .toc{background:var(--cream);padding:1.5rem 2rem;border-radius:var(--radius-lg);margin:2rem 0;}
+        .toc h3{margin-bottom:0.75rem;}
+        .toc ol{margin:0;padding-left:1.25rem;}
+        .toc li{margin-bottom:0.3rem;font-size:0.9rem;}
+        .toc a{color:var(--dark);}
+        .toc a:hover{color:var(--gold);}
+        .callout{background:#fef9e7;border-left:4px solid var(--gold);padding:1rem 1.5rem;margin:1.5rem 0;border-radius:0 var(--radius) var(--radius) 0;font-size:0.95rem;}
+        .callout.warn{background:#fdecea;border-color:#e74c3c;}
+        .callout.ok{background:#e8f5e9;border-color:#27ae60;}
+        .back-link{display:inline-block;margin:2rem 0 0;color:var(--gray);font-size:0.9rem;}
+        .back-link:hover{color:var(--gold);}
+    </style>
+</head>
+<body>
+<div class="container" style="padding-top:60px;padding-bottom:60px;">
+
+<p><a href="index.html" class="back-link">&larr; Back to Blog</a></p>
+
+<h1>OpenClaw on DigitalOcean with Tailscale Serve</h1>
+<p class="meta"><span>19 July 2026</span> &mdash; AI / Infrastructure / DevOps</p>
+
+<p>This week I set up OpenClaw on a DigitalOcean droplet with Tailscale Serve for secure remote access. It should have been straightforward. It wasn't — but every dead end taught us something. This post captures the complete working setup, every gotcha we hit, and a one-command fix script you can use yourself.</p>
+
+<div class="toc">
+    <h3>Contents</h3>
+    <ol>
+        <li><a href="#the-stack">The Stack</a></li>
+        <li><a href="#one-command">The One-Command Setup</a></li>
+        <li><a href="#gotchas">Every Gotcha We Hit</a></li>
+        <li><a href="#how-it-works">How the Fix Script Works</a></li>
+        <li><a href="#faq">FAQ &amp; Troubleshooting</a></li>
+    </ol>
+</div>
+
+<h2 id="the-stack">1. The Stack</h2>
+
+<ul>
+    <li><strong>Host:</strong> DigitalOcean Basic Droplet (1 vCPU, 1 GB RAM, 25 GB SSD, ~$6/mo)</li>
+    <li><strong>OS:</strong> Ubuntu 24.04 LTS</li>
+    <li><strong>AI Agent:</strong> OpenClaw 2026.7.x</li>
+    <li><strong>Model:</strong> DeepSeek V4 Flash (via API)</li>
+    <li><strong>Network:</strong> Tailscale + Tailscale Serve (tailnet-only HTTPS)</li>
+</ul>
+
+<h2 id="one-command">2. The One-Command Setup</h2>
+
+<p>Assuming you've already created a DO droplet (SSH key, Ubuntu 24.04) and SSH'd in as root:</p>
+
+<pre><code># Step 1: Bootstrap the droplet
+apt update && apt upgrade -y
+curl -fsSL https://deb.nodesource.com/setup_24.x | bash -
+apt install -y nodejs
+curl -fsSL https://openclaw.ai/install.sh | bash
+
+# Step 2: Create the openclaw user + swap
+adduser openclaw
+usermod -aG sudo openclaw
+loginctl enable-linger openclaw
+fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
+echo '/swapfile none swap sw 0 0' >> /etc/fstab</code></pre>
+
+<p>Then run the fix script (it handles everything from here):</p>
+
+<pre><code>curl -fsSL https://realform.com.au/fix-openclaw-access.sh | bash</code></pre>
+
+<div class="callout">
+    <strong>Important:</strong> Tailscale must also be installed on your <em>laptop</em> — download from <a href="https://tailscale.com/download">tailscale.com/download</a>. Log in with the same account on both devices.
+</div>
+
+<p>Once the script completes, open the URL it prints (something like <code>https://yourhostname.ts.net/</code>) in your browser. With Tailscale identity headers, it should authenticate you automatically — no token needed.</p>
+
+<h2 id="gotchas">3. Every Gotcha We Hit</h2>
+
+<h3>🔥 Gotcha #1: Tailscale must be on BOTH machines</h3>
+<p>This sounds obvious in hindsight, but we spent the longest time debugging the droplet when the issue was simply that the laptop didn't have Tailscale installed. The error messages from the Gateway are generic — "could not connect" could mean anything from a wrong port to a missing client.</p>
+<div class="callout ok"><strong>Fix:</strong> Install Tailscale on your laptop too. Same account, same tailnet.</div>
+
+<h3>🔥 Gotcha #2: Browser needs HTTPS for WebSocket</h3>
+<p>When you access the Gateway over plain HTTP (not localhost), the browser's WebSocket connection fails with: <code>control ui requires device identity (use HTTPS or localhost secure context)</code>. This is a browser security requirement — WebSocket connections from insecure contexts are restricted.</p>
+<div class="callout ok"><strong>Fix:</strong> Use Tailscale Serve (provides HTTPS via <code>https://hostname.ts.net/</code>) or SSH tunnel (<code>http://localhost:18789</code>). Do not bind the gateway directly to the public internet.</div>
+
+<h3>🔥 Gotcha #3: tailscale serve needs operator permissions</h3>
+<p>When OpenClaw starts with <code>gateway.tailscale.mode = serve</code>, it tries to run <code>tailscale serve</code> to set up the HTTPS proxy. By default, the <code>openclaw</code> user doesn't have permission to do this. The gateway logs an error: <code>Access denied: serve config denied</code>.</p>
+<div class="callout ok"><strong>Fix:</strong> <code>tailscale set --operator=openclaw</code> grants the openclaw user permission to manage Serve/Funnel.</div>
+
+<h3>🔥 Gotcha #4: gateway.bind and tailscale.mode are a PAIR</h3>
+<p>Tailscale Serve requires <code>gateway.bind = loopback</code>. If you set <code>gateway.bind = lan</code> or <code>gateway.bind = tailnet</code> while <code>tailscale.mode = serve</code>, the gateway will refuse to start with a validation error. They must be set together.</p>
+<div class="callout ok"><strong>Fix:</strong> Always set both: <code>openclaw config set gateway.bind loopback</code> and <code>openclaw config set gateway.tailscale.mode serve</code>.</div>
+
+<h3>🔥 Gotcha #5: Don't set controlUi.allowedOrigins manually</h3>
+<p>With Tailscale Serve, the gateway auto-seeds <code>controlUi.allowedOrigins</code> with <code>["http://localhost:18789", "http://127.0.0.1:18789"]</code>. If you manually set it to your public IP (as we did during troubleshooting), the gateway will reject the Tailscale MagicDNS origin. Tailscale identity headers handle origin verification automatically.</p>
+<div class="callout ok"><strong>Fix:</strong> Leave <code>controlUi.allowedOrigins</code> unset when using Tailscale Serve. The gateway handles it.</div>
+
+<h3>🔥 Gotcha #6: gateway.auth.allowTailscale skips the token prompt</h3>
+<p>When <code>gateway.auth.allowTailscale</code> is <code>true</code>, Tailscale identity headers authenticate you automatically — no need to paste the gateway token. This only works for the Control UI WebSocket path, not API calls.</p>
+<div class="callout ok"><strong>Fix:</strong> Enable it: <code>openclaw config set gateway.auth.allowTailscale true</code>.</div>
+
+<h3>🔥 Gotcha #7: systemctl --user via SSH needs DBUS</h3>
+<p>Running <code>systemctl --user restart openclaw-gateway.service</code> as root over SSH fails with <code>Failed to connect to bus: No medium found</code>. The systemd user bus isn't available in that context.</p>
+<div class="callout ok"><strong>Fix:</strong> Use <code>systemctl --machine=openclaw@.host --user restart openclaw-gateway.service</code> or set <code>DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u openclaw)/bus</code>.</div>
+
+<h3>🔥 Gotcha #8: The URL has NO port</h3>
+<p>Tailscale Serve proxies port 443 (HTTPS) to localhost:18789 on the droplet. The browser URL is <code>https://hostname.ts.net/</code> — no port number. Adding <code>:18789</code> to the end won't work because Tailscale Serve doesn't expose that port.</p>
+
+<h2 id="how-it-works">4. How the Fix Script Works</h2>
+
+<p>The script at <a href="https://realform.com.au/fix-openclaw-access.sh">realform.com.au/fix-openclaw-access.sh</a> automates all of the above. Here's what it does, step by step:</p>
+
+<ol>
+    <li><strong>Detect the user.</strong> Checks <code>/root/.openclaw/</code>, <code>/home/openclaw/.openclaw/</code>, and current user to find the right config.</li>
+    <li><strong>Install &amp; connect Tailscale.</strong> Installs via apt, runs <code>tailscale up</code>, captures the MagicDNS hostname.</li>
+    <li><strong>Enable HTTPS on the tailnet.</strong> Checks <code>tailscale serve status</code> and enables HTTPS if not already done.</li>
+    <li><strong>Set tailscale operator.</strong> Runs <code>tailscale set --operator=openclaw</code> so the gateway can manage Serve.</li>
+    <li><strong>Read or generate a gateway token.</strong> Parses the JSON config directly with python3, falling back to <code>openclaw doctor --generate-gateway-token</code>.</li>
+    <li><strong>Clear stale allowedOrigins.</strong> Removes any manually set <code>controlUi.allowedOrigins</code> (Tailscale Serve handles this).</li>
+    <li><strong>Enable allowTailscale.</strong> Sets <code>gateway.auth.allowTailscale = true</code> for auto-login.</li>
+    <li><strong>Configure Serve mode.</strong> Sets <code>gateway.bind = loopback</code> paired with <code>gateway.tailscale.mode = serve</code>.</li>
+    <li><strong>Restart the gateway.</strong> Uses the DBUS-safe <code>--machine</code> flag or manual fallback.</li>
+    <li><strong>Verify.</strong> Checks the gateway responds on port 18789 and Tailscale Serve is mapped.</li>
+    <li><strong>Print a health report.</strong> PASS/WARN/FAIL per check, the access URL, and the token.</li>
+</ol>
+
+<p>The script is idempotent — safe to re-run if something goes wrong.</p>
+
+<h2 id="faq">5. FAQ &amp; Troubleshooting</h2>
+
+<h3>Q: The script says "Tailscale NOT connected"</h3>
+<p>Run <code>sudo tailscale up</code> — it will print a URL to authenticate in your browser. Then re-run the script.</p>
+
+<h3>Q: I can reach the URL but get an auth prompt</h3>
+<p>If <code>allowTailscale</code> isn't working (unlikely), enter the gateway token from the script output. If you see "rate limited", wait 30 seconds and try again.</p>
+
+<h3>Q: Can I use this without Tailscale?</h3>
+<p>Yes — use an SSH tunnel: <code>ssh -L 18789:localhost:18789 root@&lt;droplet-ip&gt;</code>, then open <code>http://localhost:18789/</code>. This works on any machine with SSH access, no Tailscale needed.</p>
+
+<h3>Q: What if the gateway doesn't restart?</h3>
+<p>SSH into the droplet and run: <code>systemctl --machine=openclaw@.host --user restart openclaw-gateway.service</code>. Check logs with: <code>journalctl --machine=openclaw@.host --user -u openclaw-gateway.service -n 50</code>.</p>
+
+<h3>Q: What about reboots?</h3>
+<p>Tailscale auto-starts via systemd. The OpenClaw gateway auto-starts via systemd user service + <code>loginctl enable-linger openclaw</code>. A droplet reboot should result in everything coming back up. The script verifies both.</p>
+
+<hr>
+
+<p><a href="index.html" class="back-link">&larr; Back to Blog</a></p>
+
+</div>
+</body>
+</html>
