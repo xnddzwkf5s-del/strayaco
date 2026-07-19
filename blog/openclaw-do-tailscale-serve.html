@@ -93,7 +93,9 @@ echo '/swapfile none swap sw 0 0' >> /etc/fstab</code></pre>
 
 <p>Then run the fix script (it handles everything from here):</p>
 
-<pre><code>curl -fsSL https://realform.com.au/fix-openclaw-access.sh | bash</code></pre>
+<pre><code>curl -fsSL https://strayaco.com.au/fix-openclaw-access.sh | bash</code></pre>
+
+<div class="callout">This script is also mirrored at <a href="https://realform.com.au/fix-openclaw-access.sh">realform.com.au/fix-openclaw-access.sh</a>.</div>
 
 <div class="callout">
     <strong>Important:</strong> Tailscale must also be installed on your <em>laptop</em> — download from <a href="https://tailscale.com/download">tailscale.com/download</a>. Log in with the same account on both devices.
@@ -138,7 +140,7 @@ echo '/swapfile none swap sw 0 0' >> /etc/fstab</code></pre>
 
 <h2 id="how-it-works">4. How the Fix Script Works</h2>
 
-<p>The script at <a href="https://realform.com.au/fix-openclaw-access.sh">realform.com.au/fix-openclaw-access.sh</a> automates all of the above. Here's what it does, step by step:</p>
+<p>The script at <a href="https://strayaco.com.au/fix-openclaw-access.sh">strayaco.com.au/fix-openclaw-access.sh</a> (mirrored at <a href="https://realform.com.au/fix-openclaw-access.sh">realform.com.au</a>) automates all of the above. Here's what it does, step by step:</p>
 
 <ol>
     <li><strong>Detect the user.</strong> Checks <code>/root/.openclaw/</code>, <code>/home/openclaw/.openclaw/</code>, and current user to find the right config.</li>
