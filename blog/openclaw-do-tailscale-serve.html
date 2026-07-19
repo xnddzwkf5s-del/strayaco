@@ -116,8 +116,8 @@ echo '/swapfile none swap sw 0 0' >> /etc/fstab</code></pre>
 <div class="callout ok"><strong>Fix:</strong> <code>tailscale set --operator=openclaw</code> grants the openclaw user permission to manage Serve/Funnel.</div>
 
 <h3>🔥 Gotcha #4: gateway.bind and tailscale.mode are a PAIR</h3>
-<p>Tailscale Serve requires <code>gateway.bind = loopback</code>. If you set <code>gateway.bind = lan</code> or <code>gateway.bind = tailnet</code> while <code>tailscale.mode = serve</code>, the gateway will refuse to start with a validation error. They must be set together.</p>
-<div class="callout ok"><strong>Fix:</strong> Always set both: <code>openclaw config set gateway.bind loopback</code> and <code>openclaw config set gateway.tailscale.mode serve</code>.</div>
+<p>Tailscale Serve requires <code>gateway.bind = loopback</code>. If <code>gateway.bind</code> is explicitly set to <code>lan</code> or <code>tailnet</code> while <code>tailscale.mode = serve</code>, the gateway will refuse to start with a validation error. But if <code>gateway.bind</code> is simply <strong>unset</strong> (the default), the gateway starts silently and binds to the Tailscale IP instead of loopback — it works, but Tailscale Serve is proxying to the wrong interface.</p>
+<div class="callout ok"><strong>Fix:</strong> Always set both together, even if you think the default is fine: <code>openclaw config set gateway.bind loopback</code> and <code>openclaw config set gateway.tailscale.mode serve</code>.</div>
 
 <h3>🔥 Gotcha #5: Don't set controlUi.allowedOrigins manually</h3>
 <p>With Tailscale Serve, the gateway auto-seeds <code>controlUi.allowedOrigins</code> with <code>["http://localhost:18789", "http://127.0.0.1:18789"]</code>. If you manually set it to your public IP (as we did during troubleshooting), the gateway will reject the Tailscale MagicDNS origin. Tailscale identity headers handle origin verification automatically.</p>
@@ -129,7 +129,9 @@ echo '/swapfile none swap sw 0 0' >> /etc/fstab</code></pre>
 
 <h3>🔥 Gotcha #7: systemctl --user via SSH needs DBUS</h3>
 <p>Running <code>systemctl --user restart openclaw-gateway.service</code> as root over SSH fails with <code>Failed to connect to bus: No medium found</code>. The systemd user bus isn't available in that context.</p>
-<div class="callout ok"><strong>Fix:</strong> Use <code>systemctl --machine=openclaw@.host --user restart openclaw-gateway.service</code> or set <code>DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u openclaw)/bus</code>.</div>
+<p><strong>Bonus gotcha:</strong> <code>systemctl --machine=openclaw@.host</code> works for restarting services, but <code>journalctl --machine=openclaw@.host</code> does <strong>not</strong> work on a default DO Ubuntu droplet — it needs <code>systemd-container</code> to be installed. You'll get: <code>Failed to open root directory of machine 'openclaw@.host': The name org.freedesktop.machine1 was not provided by any .service files</code>.</p>
+<div class="callout ok"><strong>Fix (restart):</strong> Use <code>systemctl --machine=openclaw@.host --user restart openclaw-gateway.service</code> or set <code>DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u openclaw)/bus</code>.
+<strong>Fix (logs):</strong> Use the DBUS approach: <code>DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u openclaw)/bus journalctl --user -u openclaw-gateway.service -n 50</code>.</div>
 
 <h3>🔥 Gotcha #8: The URL has NO port</h3>
 <p>Tailscale Serve proxies port 443 (HTTPS) to localhost:18789 on the droplet. The browser URL is <code>https://hostname.ts.net/</code> — no port number. Adding <code>:18789</code> to the end won't work because Tailscale Serve doesn't expose that port.</p>
@@ -166,7 +168,7 @@ echo '/swapfile none swap sw 0 0' >> /etc/fstab</code></pre>
 <p>Yes — use an SSH tunnel: <code>ssh -L 18789:localhost:18789 root@&lt;droplet-ip&gt;</code>, then open <code>http://localhost:18789/</code>. This works on any machine with SSH access, no Tailscale needed.</p>
 
 <h3>Q: What if the gateway doesn't restart?</h3>
-<p>SSH into the droplet and run: <code>systemctl --machine=openclaw@.host --user restart openclaw-gateway.service</code>. Check logs with: <code>journalctl --machine=openclaw@.host --user -u openclaw-gateway.service -n 50</code>.</p>
+<p>SSH into the droplet and run: <code>systemctl --machine=openclaw@.host --user restart openclaw-gateway.service</code>. Check logs with: <code>DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/$(id -u openclaw)/bus journalctl --user -u openclaw-gateway.service -n 50</code> (the <code>--machine</code> flag for journalctl requires <code>systemd-container</code> which isn't installed by default on DO).</p>
 
 <h3>Q: What about reboots?</h3>
 <p>Tailscale auto-starts via systemd. The OpenClaw gateway auto-starts via systemd user service + <code>loginctl enable-linger openclaw</code>. A droplet reboot should result in everything coming back up. The script verifies both.</p>
