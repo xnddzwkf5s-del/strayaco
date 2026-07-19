@@ -48,3 +48,9 @@ vendor/
 # ── Legacy ─────────────────────────────────────────────────────────────
 omlx/
 node_modules/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+!.env.example
