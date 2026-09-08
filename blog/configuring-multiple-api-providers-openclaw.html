@@ -51,6 +51,9 @@
         .post-content table{margin:1.5rem 0;}
         .post-content .tag{display:inline-block;background:var(--cream);color:var(--gray);padding:0.3rem 0.8rem;border-radius:20px;font-size:0.8rem;margin-right:0.5rem;margin-bottom:0.5rem;border:1px solid var(--gray-light);}
         .post-content .lesson{background:var(--cream);border-left:4px solid var(--gold);padding:1.5rem;border-radius:0 var(--radius-lg) var(--radius-lg) 0;margin:2rem 0;}
+        .callout{background:var(--cream);border-left:4px solid var(--gold);padding:1rem 1.25rem;margin:1.5rem 0;border-radius:0 var(--radius) var(--radius) 0;font-size:0.95rem;}
+        .callout strong{color:var(--dark);}
+        .callout.warn{background:#fdecea;border-left-color:#e74c3c;}
 
         footer{background:var(--dark);color:rgba(255,255,255,0.7);padding:60px 0 30px;margin-top:60px;}
         .footer-inner{max-width:1200px;margin:0 auto;padding:0 32px;}
@@ -102,7 +105,7 @@
 
 <section class="page-hero">
     <div class="container">
-        <p class="meta">23 April 2026 &mdash; Configuration &amp; Set Up</p>
+        <p class="meta">23 April 2026 &mdash; <strong>Updated 8 September 2026</strong> &mdash; Configuration &amp; Set Up</p>
         <h1>Configuring Multiple API Providers in OpenClaw</h1>
         <div>
             <span class="tag">OpenClaw</span>
@@ -502,19 +505,22 @@ openclaw.json</code></pre>
 
 <h3>6. Trusted Proxies for Network Security</h3>
 
-<p>If your agent is accessible over a local network, specify which IPs are trusted:</p>
+<p><code>gateway.trustedProxies</code> tells the gateway which upstream proxies are allowed to supply forwarded identity headers. It should list real reverse proxies only &mdash; on a typical single-machine install, that means loopback:</p>
 
 <pre><code>{
   "gateway": {
     "trustedProxies": [
       "127.0.0.1",
-      "::1",
-      "192.168.1.0/24"
+      "::1"
     ]
   }
 }</code></pre>
 
-<p>This prevents external hosts from spoofing trusted IP headers.</p>
+<div class="callout warn">
+<strong>Warning: do not put LAN ranges in trustedProxies.</strong> Since OpenClaw 2026.8.1, ingress attribution treats any peer inside <code>trustedProxies</code> as a proxy that must supply forwarded headers. A broad range like <code>192.168.1.0/24</code> silently blocks direct access from inside your own LAN with <code>proxy_attribution_required</code> errors. Only actual proxies belong in this list &mdash; for most home setups, loopback only.
+</div>
+
+<p>With loopback-only trusted proxies, direct LAN clients connect normally, and external hosts can't spoof trusted IP headers through your real proxy.</p>
 
 <hr>
 
@@ -563,4 +569,80 @@ ollama serve</code></pre>
 <tr><td>Config permissions</td><td><code>chmod 600 openclaw.json</code>, <code>chmod 700 ~/.openclaw</code></td></tr>
 </table>
 
-<p style="margin-top:2rem;"><a href="index.html" style="
+<p style="margin-top:2rem;"><a href="index.html" style="color:var(--gold);font-weight:600;">&larr; Back to Blog</a></p>
+
+    </div>
+</section>
+
+<footer>
+    <div class="footer-inner">
+        <div class="footer-grid">
+            <div class="footer-col">
+                <div class="footer-brand">Straya <span>Co</span></div>
+                <p>Sydney-based IT consulting helping Australian businesses secure, automate, and grow.</p>
+                <p style="margin-top:0.75rem;">ABN: 89 642 689 076</p>
+            </div>
+            <div class="footer-col">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="../services.html">Email Security & DMARC</a></li>
+                    <li><a href="../services.html">Office Automation</a></li>
+                    <li><a href="../services.html">IT Setup & Migration</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <ul>
+                    <li><a href="../about.html">About Us</a></li>
+                    <li><a href="../resources.html">Resources</a></li>
+                    <li><a href="../contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Contact</h4>
+                <ul>
+                    <li>Sydney, Australia</li>
+                    <li><a href="mailto:vincent@strayaco.com.au">vincent@strayaco.com.au</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 Straya Co Pty Ltd &mdash; Sydney, Australia. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<div class="backdrop" id="backdrop"></div>
+<div class="slide-navigation" id="slideNav">
+    <div class="nav-icon" id="slideClose"><span></span><span></span><span></span></div>
+    <div class="slide-nav-logo">Straya <span>Co</span></div>
+    <div class="slide-nav-grid">
+        <div class="slide-nav-col">
+            <div class="slide-nav-title">Services</div>
+            <ul class="slide-nav-links">
+                <li><a href="../services.html">Email Security & DMARC</a></li>
+                <li><a href="../services.html">Office Automation</a></li>
+                <li><a href="../services.html">IT Setup & Migration</a></li>
+            </ul>
+        </div>
+        <div class="slide-nav-col">
+            <div class="slide-nav-title">Company</div>
+            <ul class="slide-nav-links">
+                <li><a href="../about.html">About Us</a></li>
+                <li><a href="../resources.html">Resources</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+(function(){
+    var n=document.getElementById('navIcon'),s=document.getElementById('slideNav'),c=document.getElementById('slideClose'),b=document.getElementById('backdrop');
+    function o(){n.classList.add('open');c.classList.add('open');s.classList.add('open');b.classList.add('open');document.body.style.overflow='hidden';}
+    function x(){n.classList.remove('open');c.classList.remove('open');s.classList.remove('open');b.classList.remove('open');document.body.style.overflow='';}
+    n.addEventListener('click',o);c.addEventListener('click',x);b.addEventListener('click',x);
+})();
+</script>
+</body>
+</html>

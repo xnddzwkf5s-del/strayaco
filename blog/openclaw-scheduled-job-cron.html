@@ -102,7 +102,7 @@
 
 <section class="page-hero">
     <div class="container">
-        <p class="meta">13 April 2026 &mdash; Automation &amp; Workflow</p>
+        <p class="meta">13 April 2026 &mdash; <strong>Updated 8 September 2026</strong> &mdash; Automation &amp; Workflow</p>
         <h1>AI-Powered Cron Jobs: Automating Your Life with OpenClaw</h1>
         <div>
             <span class="tag">OpenClaw</span>
@@ -149,28 +149,15 @@
 <tr><td>Daily Config Backup</td><td>Every day 5 PM</td><td>Backs up OpenClaw configuration</td></tr>
 </table>
 
+<p><strong>Note:</strong> Since OpenClaw 2026.9.2, jobs are created with <code>openclaw cron add</code> and flags. The legacy JSON job schema (<code>--job</code> with <code>name</code>/<code>schedule</code>/<code>payload</code>/<code>delivery</code> fields) was replaced and is no longer accepted. All examples below use the current flag syntax, verified against OpenClaw 2026.9.2.</p>
+
 <hr>
 
 <h2>Job 1: The Intelligent Weather Alert</h2>
 
 <p><strong>Schedule:</strong> Every Friday at 6 PM</p>
 
-<pre><code>{
-  "name": "Friday Weather Check",
-  "schedule": {
-    "kind": "cron",
-    "expr": "0 18 * * 5",
-    "tz": "Australia/Melbourne"
-  },
-  "sessionTarget": "isolated",
-  "payload": {
-    "kind": "agentTurn",
-    "message": "Check weather for our location for tomorrow (Saturday). Use Open-Meteo API to get forecast data. If rain is predicted (>1mm), send a brief alert. Otherwise, do nothing."
-  },
-  "delivery": {
-    "mode": "none"
-  }
-}</code></pre>
+<pre><code>openclaw cron add --name "Friday Weather Check" --cron "0 18 * * 5" --tz Australia/Melbourne --session isolated --message "Check weather for our location for tomorrow (Saturday). Use Open-Meteo API to get forecast data. If rain is predicted (&gt;1mm), send a brief alert. Otherwise, do nothing." --no-deliver</code></pre>
 
 <p>This is a perfect example of the "intelligent" cron pattern. Instead of sending a weather report every Friday whether you need it or not, the agent:</p>
 
@@ -181,7 +168,7 @@
 <li>Otherwise silently does nothing</li>
 </ol>
 
-<p><strong>Delivery mode <code>"none"</code></strong> means the job runs in an isolated session &mdash; no messages are sent to your chat unless the agent explicitly decides to send one.</p>
+<p><strong>The <code>--no-deliver</code> flag</strong> means the job runs without fallback delivery &mdash; combined with <code>--session isolated</code>, no messages are sent to your chat unless the agent explicitly decides to send one.</p>
 
 <hr>
 
@@ -189,22 +176,7 @@
 
 <p><strong>Schedule:</strong> Every Monday at 8 AM</p>
 
-<pre><code>{
-  "name": "AgentMail Weekly Processing",
-  "schedule": {
-    "kind": "cron",
-    "expr": "0 8 * * 1",
-    "tz": "Australia/Melbourne"
-  },
-  "sessionTarget": "isolated",
-  "payload": {
-    "kind": "agentTurn",
-    "message": "Check and process new emails from AgentMail inbox."
-  },
-  "delivery": {
-    "mode": "none"
-  }
-}</code></pre>
+<pre><code>openclaw cron add --name "AgentMail Weekly Processing" --cron "0 8 * * 1" --tz Australia/Melbourne --session isolated --message "Check and process new emails from AgentMail inbox." --no-deliver</code></pre>
 
 <p>This job triggers the email processing script. The key design decisions:</p>
 
@@ -220,24 +192,9 @@
 
 <p><strong>Schedule:</strong> Every day at 5 PM</p>
 
-<pre><code>{
-  "name": "Daily OpenClaw Config Backup",
-  "schedule": {
-    "kind": "cron",
-    "expr": "0 17 * * *",
-    "tz": "Australia/Melbourne"
-  },
-  "sessionTarget": "isolated",
-  "payload": {
-    "kind": "agentTurn",
-    "message": "Run the OpenClaw configuration backup script."
-  },
-  "delivery": {
-    "mode": "announce"
-  }
-}</code></pre>
+<pre><code>openclaw cron add --name "Daily OpenClaw Config Backup" --cron "0 17 * * *" --tz Australia/Melbourne --session isolated --message "Run the OpenClaw configuration backup script."</code></pre>
 
-<p>This job runs a shell script that backs up the OpenClaw config files. It uses <code>delivery.mode: "announce"</code>, meaning the agent announces the result. If the backup fails, you know immediately.</p>
+<p>This job runs a shell script that backs up the OpenClaw config files. It leaves delivery at the default (announce), so the agent's result is delivered to your chat. If the backup fails, you know immediately.</p>
 
 <p><strong>Why not add this to the website backup?</strong> The OpenClaw config contains API keys and tokens &mdash; it's backed up separately and stored with tighter permissions (600/700). The website backup covers the public-facing content.</p>
 
@@ -249,9 +206,9 @@
 
 <h3>Pattern 1: Recurring Cron</h3>
 
-<pre><code>{ "kind": "cron", "expr": "0 18 * * 5" }</code></pre>
+<pre><code>--cron "0 18 * * 5"</code></pre>
 
-<p>Standard cron expression. Use this for anything that repeats on a regular schedule.</p>
+<p>Standard cron expression, passed to <code>openclaw cron add</code>. Use this for anything that repeats on a regular schedule.</p>
 
 <h3>Pattern 2: Conditional ("Only if needed")</h3>
 
@@ -262,12 +219,12 @@
 <h2>Delivery Modes</h2>
 
 <table>
-<tr><th>Mode</th><th>Behaviour</th><th>Use Case</th></tr>
-<tr><td><code>"announce"</code></td><td>Sends agent's response to default channel</td><td>Backup failures, important notifications</td></tr>
-<tr><td><code>"none"</code></td><td>Runs silently, no notification</td><td>Weather check (conditional), email processing</td></tr>
+<tr><th>Delivery</th><th>Behaviour</th><th>Use Case</th></tr>
+<tr><td>Default (announce)</td><td>Sends agent's response to default channel</td><td>Backup failures, important notifications</td></tr>
+<tr><td><code>--no-deliver</code></td><td>Runs silently, no notification</td><td>Weather check (conditional), email processing</td></tr>
 </table>
 
-<p>Mode <code>"none"</code> is the most interesting for AI agents. It lets the agent decide independently whether to communicate &mdash; the cron job is just the trigger.</p>
+<p><code>--no-deliver</code> is the most interesting for AI agents. It lets the agent decide independently whether to communicate &mdash; the cron job is just the trigger.</p>
 
 <hr>
 
@@ -275,7 +232,7 @@
 
 <div class="lesson">
 <h3>Lesson 1: Timezone Matters</h3>
-<p>All cron expressions in OpenClaw use the server's timezone unless explicitly overridden with <code>"tz"</code>. For a personal agent, specifying <code>"Australia/Melbourne"</code> prevents confusion with UTC-based scheduling.</p>
+<p>All cron expressions in OpenClaw use the gateway's local timezone unless explicitly overridden with <code>--tz</code>. For a personal agent, specifying <code>--tz Australia/Melbourne</code> prevents confusion with UTC-based scheduling.</p>
 </div>
 
 <div class="lesson">
@@ -285,7 +242,7 @@
 
 <div class="lesson">
 <h3>Lesson 3: Test With Announce First</h3>
-<p>When setting up a new cron job, start with <code>delivery.mode: "announce"</code> so you can see the agent's output. Once you're confident the logic works, switch to <code>"none"</code> for silent conditional jobs. The weather check was initially set to announce every Friday &mdash; after two weeks of "no rain expected" messages, the conditional logic was added.</p>
+<p>When setting up a new cron job, start with the default delivery (announce) so you can see the agent's output. Once you're confident the logic works, add <code>--no-deliver</code> for silent conditional jobs. The weather check was initially set to announce every Friday &mdash; after two weeks of "no rain expected" messages, the conditional logic was added.</p>
 </div>
 
 <div class="lesson">
@@ -306,7 +263,7 @@
 <p>Currently, schedules are static. The agent can't say "remind me about this in 3 days" and have it create a new cron entry. Adding a tool that lets the agent schedule and manage jobs would unlock full autonomous scheduling.</p>
 
 <h3>Failure Notifications</h3>
-<p>Jobs with <code>mode: "none"</code> that fail silently are hard to debug. Adding a health-check that periodically verifies recent cron jobs executed successfully would improve reliability.</p>
+<p>Jobs created with <code>--no-deliver</code> that fail silently are hard to debug. Adding a health-check that periodically verifies recent cron jobs executed successfully would improve reliability.</p>
 
 <h3>Job Dependencies</h3>
 <p>Some workflows require job sequencing ("after email processing, send a summary"). Currently, each job is independent. A chaining mechanism would enable multi-stage automation.</p>
@@ -316,14 +273,14 @@
 <h2>Quick Reference</h2>
 
 <table>
-<tr><th>Concept</th><th>Config</th></tr>
-<tr><td>Weekly cron</td><td><code>{ "kind": "cron", "expr": "0 8 * * 1" }</code></td></tr>
-<tr><td>Daily cron</td><td><code>{ "kind": "cron", "expr": "0 17 * * *" }</code></td></tr>
-<tr><td>Timezone</td><td><code>"tz": "Australia/Melbourne"</code></td></tr>
-<tr><td>Silent run</td><td><code>"delivery": { "mode": "none" }</code></td></tr>
-<tr><td>Isolated target</td><td><code>"sessionTarget": "isolated"</code></td></tr>
-<tr><td>Announce result</td><td><code>"mode": "announce"</code></td></tr>
-<tr><td>Run shell script</td><td>Payload: <code>"Run script.sh"</code></td></tr>
+<tr><th>Concept</th><th>Flag</th></tr>
+<tr><td>Weekly cron</td><td><code>--cron "0 8 * * 1"</code></td></tr>
+<tr><td>Daily cron</td><td><code>--cron "0 17 * * *"</code></td></tr>
+<tr><td>Timezone</td><td><code>--tz Australia/Melbourne</code></td></tr>
+<tr><td>Silent run</td><td><code>--no-deliver</code></td></tr>
+<tr><td>Isolated target</td><td><code>--session isolated</code></td></tr>
+<tr><td>Announce result</td><td>Default (omit <code>--no-deliver</code>)</td></tr>
+<tr><td>Run shell script</td><td>Message: <code>"Run script.sh"</code></td></tr>
 </table>
 
 <hr>

@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Time Machine NFS Synology: Future-Proof Your Mac Backups - Straya Co Blog</title>
-    <meta name="description" content="Apple is phasing out SMB support for Time Machine. Here's how to move to NFS on your Synology NAS before it breaks.">
+    <title>Time Machine Backups on a Synology NAS: What's Actually Changing (AFP, Not SMB) - Straya Co Blog</title>
+    <meta name="description" content="Apple is deprecating AFP (not SMB), ending Time Machine support for Time Capsules and AFP-era backups. SMB remains the supported protocol — here's the correct setup on a Synology NAS.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
@@ -108,9 +108,9 @@
 
 <section class="page-hero">
     <div class="container">
-        <p class="meta">30 April 2026 &mdash; Backup &amp; Infrastructure</p>
-        <h1>Future-Proofing Your Mac Backups: Moving from SMB to NFS with Synology NAS</h1>
-        <p class="subhead">Apple is phasing out SMB support for Time Machine. Here's what that means and how to move to NFS before it breaks.</p>
+        <p class="meta">30 April 2026 &mdash; <strong>Updated 8 September 2026</strong> &mdash; Backup &amp; Infrastructure</p>
+        <h1>Time Machine Backups on a Synology NAS: What's Actually Changing (AFP, Not SMB)</h1>
+        <p class="subhead">Apple is deprecating AFP — the protocol behind Time Capsule-era backups. SMB remains fully supported. Here's what that means and how to set up Time Machine on your Synology NAS the supported way.</p>
         <div style="margin-top:1rem;">
             <span class="tag">Time Machine</span>
             <span class="tag">NFS</span>
@@ -129,17 +129,19 @@
 
 <h2>The Headlines</h2>
 
-<p>Apple has quietly signalled that SMB protocol support for Time Machine backups will be deprecated in future macOS versions. If you're backing your Macs up to a Synology NAS over SMB &mdash; and a lot of people are &mdash; that's a ticking clock.</p>
+<p>Apple deprecated the AFP (Apple Filing Protocol) client in macOS Sequoia 15.5, and plans to remove it entirely in a future macOS release (reported as macOS 27). That's what ends Time Machine support for AFP-based devices &mdash; most notably AirPort Time Capsules, and any old NAS shares still served over AFP.</p>
 
-<p>The fix is <strong>NFS</strong> (Network File System). It's more stable, better suited to network backups, and aligns with where Apple is heading. This guide walks through the migration, step by step.</p>
+<p>To be clear: <strong>SMB is not being deprecated.</strong> SMB remains Apple's supported protocol for network Time Machine backups. If your Synology already serves Time Machine over SMB, you're on the right path &mdash; no migration needed. This guide covers what's actually changing, how to set up the supported SMB configuration, and what to do if you're still on AFP-era hardware.</p>
+
+<blockquote><strong>Correction (8 September 2026):</strong> An earlier version of this article incorrectly claimed SMB support for Time Machine was going away and recommended migrating to NFS. That was inverted &mdash; AFP is the protocol being deprecated; SMB remains supported. The article has been rewritten accordingly.</blockquote>
 
 <hr>
 
-<h2>Why Apple Is Making This Change</h2>
+<h2>What's Actually Changing: AFP, Not SMB</h2>
 
-<p>SMB was never really designed for Time Machine. It's a file-sharing protocol, not a backup protocol. Over the years, Apple has had to add workarounds and patches to make SMB work reliably with Time Machine's sparse bundle format &mdash; and those patches have been brittle.</p>
+<p>AFP is Apple's own legacy file-sharing protocol &mdash; it powered AirPort Time Capsules and early NAS-based Time Machine setups. Apple discontinued the Time Capsule hardware years ago, and with macOS Sequoia 15.5 the AFP client itself was formally deprecated, with removal planned for a future macOS (reported as macOS 27). Once that lands, Time Machine backups to AFP destinations simply stop working.</p>
 
-<p>NFS handles the locking, the large files, and the network overhead more naturally. Moving to NFS means fewer corrupted backups, fewer "backup disk not available" errors, and less friction when macOS updates break something downstream.</p>
+<p>SMB is a different story. Apple moved network Time Machine to SMB years ago and continues to support it &mdash; including the server-side capabilities Time Machine relies on, which Synology's DSM implements. SMB is where Apple is staying, not where Apple is leaving.</p>
 
 <hr>
 
@@ -149,7 +151,11 @@
 
 <blockquote>Mac &rarr; network &rarr; Synology NAS &rarr; SMB share &rarr; Time Machine</blockquote>
 
-<p>Then you have a choice: migrate proactively, or wait until an macOS update forces your hand. Proactive is better. The migration isn't difficult, and once it's done, it just works.</p>
+<p>You're already on the supported path &mdash; nothing to do. But if it looks like this:</p>
+
+<blockquote>Mac &rarr; network &rarr; AirPort Time Capsule (or AFP share) &rarr; Time Machine</blockquote>
+
+<p>Then you have a ticking clock. The fix is to move those backups to an SMB share on a NAS &mdash; before a macOS update forces your hand. The migration isn't difficult, and once it's done, it just works.</p>
 
 <hr>
 
@@ -164,38 +170,40 @@
 
 <hr>
 
-<h2>Step 1 &mdash; Enable NFS on Your Synology</h2>
+<h2>Step 1 &mdash; Enable SMB on Your Synology</h2>
 
-<p><strong>1.</strong> Open <strong>Control Panel &rarr; File Services &rarr; NFS</strong></p>
-<p><strong>2.</strong> Tick <strong>Enable NFS</strong> and click Apply</p>
-<p><strong>3.</strong> Under <strong>NFS Permissions</strong>, set:</p>
-<ul>
-<li>NFSv4 support: enabled (fallback to v3 if needed)</li>
-<li>Transport: TCP (default)</li>
-</ul>
-
-<blockquote><strong>Note:</strong> DSM 7.2+ defaults to NFSv4 with NFSv3 fallback. That's fine &mdash; macOS handles both. If you're on an older DSM, just make sure NFS is on.</blockquote>
+<p><strong>1.</strong> Open <strong>Control Panel &rarr; File Services &rarr; SMB</strong></p>
+<p><strong>2.</strong> Tick <strong>Enable SMB service</strong> and click Apply</p>
 
 <h2>Step 2 &mdash; Create a Dedicated Time Machine Share</h2>
 
 <p><strong>1.</strong> Open <strong>Control Panel &rarr; Shared Folder &rarr; Create</strong></p>
 <p><strong>2.</strong> Name it something obvious like <code>timemachine</code></p>
-<p><strong>3.</strong> Click <strong>Next</strong> through the defaults, but on the <strong>NFS Permissions</strong> screen:</p>
-<ul>
-<li><strong>Hostname/IP:</strong> Enter your Mac's IP, or a subnet like <code>192.168.86.0/24</code> if you have multiple Macs</li>
-<li><strong>Privilege:</strong> Read/Write</li>
-<li><strong>Squash:</strong> No mapping</li>
-<li><strong>Security:</strong> sys</li>
-<li><strong>Async:</strong> Enable</li>
-</ul>
+<p><strong>3.</strong> Click <strong>Next</strong> through the defaults and finish creation</p>
 
-<p><strong>4.</strong> Finish creation.</p>
+<h2>Step 3 &mdash; Enable Time Machine on the Share</h2>
 
-<blockquote><strong>Pro tip:</strong> Use a subnet range rather than a single IP. That way you don't have to reconfigure when your Mac gets a new DHCP lease. Better yet, set a DHCP reservation on your router for each Mac's MAC address.</blockquote>
+<p><strong>1.</strong> Back in <strong>Control Panel &rarr; File Services &rarr; SMB</strong>, find the <strong>Time Machine</strong> section</p>
+<p><strong>2.</strong> Tick <strong>Enable Time Machine</strong> and select your <code>timemachine</code> shared folder</p>
+<p><strong>3.</strong> Set a quota &mdash; a good rule of thumb is 2&ndash;3&times; the size of your Mac's internal drive &mdash; and Apply</p>
 
-<h2>Step 3 &mdash; Mount the NFS Share on Your Mac</h2>
+<blockquote><strong>Why the quota matters:</strong> Without one, Time Machine will keep growing its backup until the volume is full. The quota caps it.</blockquote>
 
-<p>Open <strong>Terminal</strong> and run:</p>
+<h2>Step 4 &mdash; Point Time Machine at the Share</h2>
+
+<p><strong>1.</strong> Open <strong>System Settings &rarr; General &rarr; Time Machine</strong></p>
+<p><strong>2.</strong> Click <strong>Add Backup Disk</strong> (or the + button)</p>
+<p><strong>3.</strong> Select the Synology share &mdash; it appears automatically once Time Machine is enabled on it in DSM</p>
+<p><strong>4.</strong> Enter your Synology user credentials when prompted</p>
+<p><strong>5.</strong> Done. Time Machine will start its first backup within a couple of minutes.</p>
+
+<hr>
+
+<h2>Appendix: NFS as an UNSUPPORTED Community Workaround</h2>
+
+<blockquote><strong>Unsupported:</strong> macOS does not offer NFS mounts as Time Machine destinations &mdash; the System Settings disk picker only lists supported volumes (local disks and SMB shares). The steps below are a community workaround, not an Apple-endorsed path. They rely on undocumented behaviour that can break with any macOS update, and earlier versions of this article incorrectly presented NFS as the recommended migration. Use the supported SMB setup above unless you know exactly why you need NFS.</blockquote>
+
+<p>Some users still prefer NFS for technical reasons. If that's you, the broad strokes are: enable NFS in <strong>Control Panel &rarr; File Services &rarr; NFS</strong>, create a shared folder with NFS permissions covering your Mac's IP (Read/Write, no squash mapping), then mount it manually:</p>
 
 <pre><code># Create a mount point
 sudo mkdir -p /Volumes/timemachine
@@ -203,58 +211,29 @@ sudo mkdir -p /Volumes/timemachine
 # Mount the NFS share (replace nas_ip with your Synology's IP)
 sudo mount -t nfs -o resvport,locallocks nas_ip:/volume1/timemachine /Volumes/timemachine</code></pre>
 
-<p>If that works, you'll see the share in Finder under <strong>Locations</strong>. If it fails, double-check:</p>
-<ul>
-<li>NFS is enabled on the Synology</li>
-<li>The NFS permission rule covers your Mac's IP</li>
-<li>Your Mac can reach the NAS (try <code>ping nas_ip</code>)</li>
-</ul>
-
-<h2>Step 4 &mdash; Point Time Machine at the NFS Volume</h2>
-
-<p><strong>1.</strong> Open <strong>System Settings &rarr; General &rarr; Time Machine Backup</strong></p>
-<p><strong>2.</strong> Click <strong>Add Backup Disk</strong> (or the + button)</p>
-<p><strong>3.</strong> Select the mounted NFS volume</p>
-<p><strong>4.</strong> Time Machine will ask if you want to erase it or use it as-is (if it's brand new, let it format it)</p>
-<p><strong>5.</strong> Done. Time Machine will start its first backup within 120 seconds.</p>
-
-<blockquote><strong>One quirk:</strong> Time Machine may ask for authentication briefly during the first few backups. This is normal &mdash; it's establishing a secure connection to the NFS mount.</blockquote>
-
-<hr>
-
-<h2>Making It Permanent</h2>
-
-<p>That <code>mount</code> command won't survive a reboot. To make it stick:</p>
-
-<p><strong>1.</strong> Open <strong>System Settings &rarr; General &rarr; Login Items</strong></p>
-<p><strong>2.</strong> Click the <strong>+</strong> under <strong>Allow in the Background</strong></p>
-<p><strong>3.</strong> Add <strong>Terminal</strong> (or create a small launch script)</p>
-
-<p>Alternatively, add an entry to <code>/etc/fstab</code>:</p>
+<p>That <code>mount</code> command won't survive a reboot &mdash; making it stick requires a Login Item, an <code>/etc/fstab</code> entry, or a LaunchDaemon:</p>
 
 <pre><code>echo "nas_ip:/volume1/timemachine /Volumes/timemachine nfs rw,resvport,locallocks,noatime 0 0" | sudo tee -a /etc/fstab</code></pre>
 
-<p>Or for a cleaner approach, create a LaunchDaemon that mounts it automatically. If this sounds fiddly, Straya Co can set it up for you in a few minutes.</p>
+<p>And because the Time Machine disk picker won't list NFS volumes, getting Time Machine to actually use one takes further undocumented tweaks &mdash; one more reason to treat this as an experiment, not a strategy.</p>
 
-<hr>
+<h2>What About Existing AFP / Time Capsule Backups?</h2>
 
-<h2>What About Existing SMB Backups?</h2>
-
-<p>If you have old SMB-based Time Machine backups you want to keep, here's the pragmatic route:</p>
+<p>If you have old AFP-based Time Machine backups (e.g. on a Time Capsule) you want to keep, here's the pragmatic route:</p>
 
 <ol>
-<li>Start fresh with NFS for ongoing backups</li>
-<li>Keep the old SMB volume around as an archive (but unmounted)</li>
-<li>Once you're confident the NFS backups are working, you can delete the old sparse bundle</li>
+<li>Start fresh with SMB for ongoing backups</li>
+<li>Keep the old AFP volume around as an archive while it still mounts</li>
+<li>Once you're confident the SMB backups are working, you can retire the old backup</li>
 </ol>
 
-<p>Time Machine will do a full initial backup to the new NFS volume, so you won't lose coverage.</p>
+<p>Time Machine will do a full initial backup to the new SMB share, so you won't lose coverage. And if your existing backups are already on SMB? Nothing changes &mdash; they keep working.</p>
 
 <hr>
 
 <h2>A Note on Performance</h2>
 
-<p>NFS over a wired Gigabit connection is noticeably more reliable than SMB for Time Machine. Wireless will work, but expect slower initial backups (especially the first one, which is always the biggest).</p>
+<p>SMB over a wired Gigabit connection is solid for Time Machine. Wireless will work, but expect slower initial backups (especially the first one, which is always the biggest).</p>
 
 <p>If you're on Wi-Fi, consider:</p>
 <ul>
@@ -267,7 +246,7 @@ sudo mount -t nfs -o resvport,locallocks nas_ip:/volume1/timemachine /Volumes/ti
 
 <h2>The Bottom Line</h2>
 
-<p>Apple deprecating SMB for Time Machine isn't a crisis. It's an opportunity to move to a better protocol. NFS is more stable, more performant, and more aligned with where macOS is going. The migration takes about 15 minutes of hands-on work, and once it's done, you can forget about it.</p>
+<p>Apple deprecating AFP isn't a crisis &mdash; but it is a deadline if you're still running a Time Capsule or an AFP share. The move to SMB on a Synology NAS takes about 15 minutes of hands-on work, lands you on the protocol Apple actually supports, and once it's done, you can forget about it.</p>
 
 <p>Straya Co helps Australian businesses and professionals get their backup infrastructure right. If you'd like us to handle the migration &mdash; or audit your current setup &mdash; get in touch.</p>
 
