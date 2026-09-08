@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OpenClaw Auto-Update Script — Fail-Safe, Self-Healing, Production-Ready - Straya Co Blog</title>
-    <meta name="description" content="A complete, battle-tested bash script for updating OpenClaw on macOS with pre-update backups, graceful service stop, automatic rollback, and verified startup. Full source code included and explained.">
+    <meta name="description" content="A complete, battle-tested bash script for updating OpenClaw on macOS — pre-update backups, SQLite state snapshots, HTTPS-aware verified startup, and a rollback that restores npm package + state, not just config. Full source code included and explained.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -108,7 +108,7 @@
 
 <section class="page-hero">
     <div class="container">
-        <p class="meta">19 July 2026 — Open Source / AI Infrastructure</p>
+        <p class="meta">19 July 2026 — <strong>Updated 8 September 2026</strong> — Open Source / AI Infrastructure</p>
         <h1>OpenClaw Auto-Update Script</h1>
         <p style="color:rgba(255,255,255,0.7);margin-top:1rem;font-size:1.05rem;">A fail-safe, self-healing, production-ready bash script for updating OpenClaw on macOS. Full source code included.</p>
         <div>
@@ -132,6 +132,7 @@
                 <li><a href="#what-it-does">What it does</a></li>
                 <li><a href="#script">Full script</a></li>
                 <li><a href="#walkthrough">Walkthrough of key design decisions</a></li>
+                <li><a href="#incidents">Production incidents that shaped the script</a></li>
                 <li><a href="#usage">Usage</a></li>
             </ul>
         </div>
@@ -139,19 +140,20 @@
         <h2 id="why">Why an update script?</h2>
         <p>OpenClaw bundles an agent runtime (Gateway) distributed via Homebrew cask and a CLI tool distributed via npm. Updates arrive regularly. If the gateway goes down mid-update and doesn't come back — you lose scheduled jobs, email processing, and agent responsiveness until you fix it manually.</p>
         <p>This script makes updates a fire-and-forget operation. It backs up your state, stops the gateway cleanly, upgrades both the cask and CLI runtime, starts the gateway with verification, and rolls back automatically if anything goes wrong.</p>
-        <p>It's been in daily use for months on a production Mac mini running 24/7. No update has ever left the gateway offline longer than 30 seconds.</p>
+        <p>It's been in daily production use for months on a Mac mini running 24/7 — and that production history is the point. Two real incidents (the 2026.8.1 and 2026.9.2 upgrades) exposed failure modes no amount of theorising would have uncovered: a plain-HTTP readiness probe pointed at an HTTPS gateway, and a binary-only rollback that left the old version unable to boot against already-migrated SQLite. Both are fixed in the version below, with each incident documented in the script's header changelog.</p>
 
         <h2 id="what-it-does">What it does</h2>
         <ol>
             <li><strong>Pre-update backup</strong> — Calls the companion backup script before touching anything</li>
-            <li><strong>Graceful gateway stop</strong> — Launchctl bootout, then graceful SIGTERM, then SIGKILL only as last resort. Waits up to 30s.</li>
-            <li><strong>Brew cask upgrade</strong> — Retries twice if the first attempt fails (network hiccups happen)</li>
-            <li><strong>npm CLI upgrade</strong> — Updates the global openclaw npm package</li>
-            <li><strong>Gateway restart</strong> — Tries launchctl bootstrap, then load, then kickstart</li>
-            <li><strong>Verified startup</strong> — Probes the gateway port with up to 5 retries. Requires 2 consecutive stable probes before declaring success.</li>
-            <li><strong>Post-update safety check</strong> — Schedules a 5-minute-delayed cron check for the "started then crashed" edge case</li>
-            <li><strong>Rollback on failure</strong> — Restores the pre-update backup and starts the old version</li>
-            <li><strong>Notification</strong> — Sends an email on success or failure</li>
+            <li><strong>Graceful gateway stop</strong> — <code>launchctl bootout</code>, then SIGTERM, then SIGKILL only as last resort (30&nbsp;s budget). Also unloads a crash-looping service found "loaded but not running" so it cannot respawn mid-update.</li>
+            <li><strong>SQLite state snapshot</strong> — While the gateway is stopped, the per-agent and shared-state SQLite stores are WAL-checkpointed and copied into the backup so a failed upgrade can be rolled back atomically.</li>
+            <li><strong>Brew cask + npm CLI upgrade</strong> — Both components checked and upgraded independently, each retried twice on failure.</li>
+            <li><strong>Pre-start validation &amp; migration</strong> — Checks <code>gateway.trustedProxies</code> (2026.8.1+ ingress attribution), imports any legacy <code>exec-approvals.json</code>, and runs session-store migration + <code>doctor</code> repairs against the <em>stopped</em> gateway so the new code can boot.</li>
+            <li><strong>Gateway restart</strong> — Tries <code>launchctl bootstrap</code>, then <code>load</code>, then <code>kickstart</code>.</li>
+            <li><strong>Scheme-aware verified startup</strong> — Probes with the correct scheme (<code>https</code> + <code>curl -k</code> when <code>gateway.tls.enabled</code>), up to 5 retries, requiring 2 consecutive stable probes.</li>
+            <li><strong>Post-update safety check</strong> — Schedules a 5-minute-delayed cron check for the "started then crashed" edge case (new CLI syntax, legacy fallback, heartbeat marker as last resort).</li>
+            <li><strong>Real rollback</strong> — Stops lingering processes, restores the SQLite state snapshot, reinstalls the previous npm package, restores config, then verifies with a real probe before declaring success.</li>
+            <li><strong>Notification</strong> — Sends an email on success, on rollback, or on critical failure, with versions and the log path.</li>
         </ol>
 
         <div class="callout">
@@ -159,13 +161,90 @@
         </div>
 
         <h2 id="script">Full script</h2>
-        <p>Save as <code>~/.openclaw/scripts/update-openclaw.sh</code> and make executable with <code>chmod +x</code>. Update the <code>ALERT_EMAIL</code> variable at the top with your email address.</p>
+        <p>This is the current production version (8 September 2026) — the header comment doubles as a changelog and documents both incidents below. Save it as <code>~/.openclaw/scripts/update-openclaw.sh</code> and make it executable with <code>chmod +x</code>. Set the <code>ALERT_EMAIL</code> variable at the top (placeholder shown) and, if you use the companion scripts, keep <code>pre-update-backup.sh</code> and <code>post-update-restore.sh</code> in the same directory.</p>
 
 <pre>#!/bin/bash
-# OpenClaw auto-update script
-# Fire-and-forget: backs up, upgrades, verifies, rolls back on failure.
+# =============================================================================
+# update-openclaw.sh — Canonical, resilient OpenClaw update process
+# =============================================================================
+#
+# Run with: bash ~/.openclaw/scripts/update-openclaw.sh
+# You'll be asked for your Mac password ONCE at the start (for brew + npm).
+#
+# This script:
+#   1. Backs up current state (calls pre-update-backup.sh)
+#   2. Gracefully stops the gateway with verification
+#   3. Snapshots the SQLite stores (agent + shared state) while stopped
+#   4. Upgrades the cask (brew) and CLI runtime (npm)
+#   5. Validates gateway.trustedProxies (2026.8.1+ ingress attribution)
+#   6. Runs legacy-state migrations/repairs while the gateway is stopped
+#   7. Starts the gateway directly via launchctl bootstrap/load/kickstart
+#   8. Verifies the gateway is running with a scheme-aware probe (https when
+#      gateway.tls.enabled=true) plus process-stability checks
+#   9. Rolls back (SQLite state + config + npm package) if startup fails
+#  10. Writes a timestamp file for the heartbeat safety net
+#  11. Sends a notification email on success or failure
+#
+# Usage: bash update-openclaw.sh [--force]
+#   --force  Skip prompts (auto-accept the trustedProxies narrowing fix)
+#
+# Exit codes:
+#   0  — Update successful, gateway verified running
+#   1  — Pre-flight failure (backup, stop, or connectivity)
+#   2  — Upgrade failure (brew/npm)
+#   3  — Gateway failed to start after update (and rollback attempted)
+#   4  — Lock contention (another update in progress)
+#   5  — Execution interrupted / timeout
+#
+# =============================================================================
+# Changelog / incident notes (newest first — append new dated entries above)
+# =============================================================================
+# 2026-09-08 11:29 +1000 — 2026.9.2 update: false FAILURE + unsafe rollback
+#   Symptoms: the 11:14 run upgraded npm to 2026.9.2 but reported FAILED and
+#   rolled back, even though the new gateway had booted and served traffic
+#   (file log: "gateway ready", "http server listening", live webchat
+#   clients). Post-rollback the gateway was DOWN and crash-looping, while the
+#   script claimed "Rollback successful".
+#   Root cause 1 — probe assumed plain HTTP, gateway serves HTTPS:
+#     gateway.tls.enabled=true since 2026-09-02 (certs ~/.openclaw/tls/), so
+#     `curl http://127.0.0.1:18789/` can never succeed against the TLS
+#     listener → a healthy upgrade looked "down" for all 5 probe attempts.
+#   Root cause 2 — binary rollback without state rollback:
+#     rollback downgraded the npm package to 2026.8.1 AFTER 2026.9.2 doctor/
+#     startup had migrated the SQLite stores. 2026.8.1 then refused to boot
+#     ("startup migrations did not complete cleanly ... column definitions
+#     differ for session_pending_inputs") → launchd crash loop. The SQLite
+#     stores were never backed up, so the downgrade could not work.
+#   Root cause 3 — false "rollback successful":
+#     post-update-restore.sh always exited 0 (openclaw gateway status exits 0
+#     even when the service is stopped), so success was declared while the
+#     gateway was down.
+#   Fixes shipped in this version:
+#     - scheme-aware readiness probe: reads gateway.tls.enabled from
+#       openclaw.json and probes https with curl -k when TLS is on
+#     - SQLite state snapshot (agents/*/agent/openclaw-agent.sqlite +
+#       state/openclaw.sqlite, WAL-checkpointed) into &lt;backup&gt;/sqlite-state/
+#       while the gateway is STOPPED, before any new-version code runs
+#     - rollback: stops lingering gateway processes first, restores the SQLite
+#       state snapshot, then the npm package, then verifies with a real probe
+#       + stability check before declaring success
+#     - stop step now unloads a crash-looping launchd service that is between
+#       respawns ("loaded but not running")
+#     - cron add --job JSON syntax replaced by the 2026.9.2 flag syntax, with
+#       the legacy form kept as a fallback for older versions
+#   Outcome: rerun of this script (--force) completed 2026.8.1 → 2026.9.2 with
+#     the gateway verified over HTTPS (probe OK on attempt 1) and plugins
+#     deepseek/moonshot/sms updated to 2026.9.2.
+#   Recovery note: if a failed run ever leaves the OLD npm package unable to
+#     boot against migrated SQLite and there is no sqlite-state snapshot, the
+#     consistent fix is to complete the upgrade (npm update -g openclaw, then
+#     launchctl kickstart -k gui/$(id -u)/ai.openclaw.gateway) — do NOT fight
+#     the downgrade.
+
 set -euo pipefail
-# ── Configuration ──────────────────────────────────────────────────────────
+
+# === Configuration ==========================================================
+
 OPENCLAW_HOME="${HOME}/.openclaw"
 SCRIPTS_DIR="${OPENCLAW_HOME}/scripts"
 BACKUPS_DIR="${OPENCLAW_HOME}/backups"
@@ -175,177 +254,737 @@ HEARTBEAT_STATE_DIR="${OPENCLAW_HOME}/.heartbeat"
 LOG_DIR="${OPENCLAW_HOME}/logs"
 LOG_FILE="${LOG_DIR}/update-$(date +%Y%m%d_%H%M%S).log"
 RESTORE_SCRIPT="${SCRIPTS_DIR}/post-update-restore.sh"
-ALERT_EMAIL="you@example.com"            # ← Change this!
+ALERT_EMAIL="you@example.com"  # ← Change this to your address!
+
+# Load secrets (POSTMARK_SERVER_TOKEN etc.). The gateway loads ~/.openclaw/.env
+# at startup, but this script runs from a terminal where they aren't exported.
+if [ -f "${OPENCLAW_HOME}/.env" ]; then
+    set -a
+    # shellcheck disable=SC1091
+    source "${OPENCLAW_HOME}/.env"
+    set +a
+fi
+
+# --force skips interactive prompts (trustedProxies narrowing)
+FORCE=0
+[ "${1:-}" = "--force" ] &amp;&amp; FORCE=1
+
 GATEWAY_PORT=18789
 GATEWAY_HOST="127.0.0.1"
 GATEWAY_URL="http://${GATEWAY_HOST}:${GATEWAY_PORT}"
 GATEWAY_LABEL="ai.openclaw.gateway"
 GATEWAY_PLIST="${HOME}/Library/LaunchAgents/${GATEWAY_LABEL}.plist"
+
+# Retry settings
 START_RETRIES=5
-START_RETRY_DELAY=5
-STOP_TIMEOUT=30
-STOP_POLL_INTERVAL=2
-PROBE_TIMEOUT=5
-STABILITY_CHECKS=2
-# ── Helpers ────────────────────────────────────────────────────────────────
+START_RETRY_DELAY=5   # seconds between retries
+STOP_TIMEOUT=30       # seconds to wait for graceful stop
+STOP_POLL_INTERVAL=2  # seconds between stop checks
+PROBE_TIMEOUT=5       # curl max-time per probe
+STABILITY_CHECKS=2    # consecutive successful probes to confirm stability
+
+# Email subject template
+SUCCESS_SUBJECT="✅ OpenClaw Update Succeeded"
+FAILURE_SUBJECT="❌ OpenClaw Update FAILED"
+
+# === Helpers ================================================================
+
 log()  { echo "[$(date '+%H:%M:%S')] $*"; }
 info() { log "INFO: $*"; }
 warn() { log "WARN: $*"; }
 error(){ log "ERROR: $*"; }
-cleanup() { local rc=$?; rm -f "${LOCK_FILE}"; [ $rc -ne 0 ] && [ $rc -ne 130 ] && \
-    error "Script exited with code ${rc} — see ${LOG_FILE}"; info "Lock released"; }
+
+cleanup() {
+    local rc=$?
+    rm -f "${LOCK_FILE}"
+    if [ $rc -ne 0 ] &amp;&amp; [ $rc -ne 130 ]; then
+        error "Script exited with code ${rc} — see ${LOG_FILE}"
+    fi
+    info "Lock released"
+    exec &gt;&amp;2  # Restore default fd handling
+}
+
 send_email() {
-    python3 "${SCRIPTS_DIR}/send_email.py" "${1}" "${2}" "${3}" 2>&1 | \
-        while read line; do info "email: ${line}"; done || warn "Email failed"
+    local subject="$1"
+    local body="$2"
+    python3 "${SCRIPTS_DIR}/send_email.py" \
+        "${ALERT_EMAIL}" \
+        "${subject}" \
+        "${body}" 2&gt;&amp;1 | while read line; do info "email: ${line}"; done || \
+        warn "Failed to send notification email"
 }
+
+gateway_scheme() {
+    # Returns the URL scheme the gateway actually serves. The gateway may run
+    # TLS (gateway.tls.enabled=true, ~/.openclaw/tls) — a plain-http probe to a
+    # TLS port never succeeds, which made healthy gateways look "down" and
+    # caused false rollbacks (2026-09-08). Defaults to http.
+    python3 - "${OPENCLAW_HOME}/openclaw.json" &lt;&lt;'PYEOF' 2&gt;/dev/null || echo "http"
+import json, sys
+try:
+    with open(sys.argv[1]) as f:
+        cfg = json.load(f)
+    if (cfg.get("gateway", {}) or {}).get("tls", {}).get("enabled"):
+        print("https")
+    else:
+        print("http")
+except Exception:
+    print("http")
+PYEOF
+}
+
+gateway_probe_url() {
+    local scheme
+    scheme=$(gateway_scheme)
+    echo "${scheme}://${GATEWAY_HOST}:${GATEWAY_PORT}/"
+}
+
+gateway_http_responds() {
+    # Returns 0 if the gateway answers an HTTP(S) request at all — i.e. curl
+    # got any real 3-digit status. Transport failures (connection refused,
+    # TLS handshake to a non-TLS port, timeout) return non-zero.
+    local url code
+    local curl_args=(-s -o /dev/null -w "%{http_code}")
+    url=$(gateway_probe_url)
+    case "${url}" in
+        https://*) curl_args+=(-k) ;;
+    esac
+    code=$(curl "${curl_args[@]}" --max-time "${PROBE_TIMEOUT}" "${url}" 2&gt;/dev/null) || return 1
+    [[ "${code}" =~ ^[0-9]{3}$ ]]
+}
+
 gateway_running_probe() {
-    curl -s -o /dev/null -w "%{http_code}" --max-time "${PROBE_TIMEOUT}" \
-        "${GATEWAY_URL}/" 2>/dev/null | grep -qE '^(200|302|401)$'
+    # Returns 0 if the gateway responds on its port
+    gateway_http_responds
 }
+
 gateway_process_running() {
-    pgrep -f "node.*openclaw.*gateway.*${GATEWAY_PORT}" >/dev/null 2>&1
+    # Returns 0 if a gateway process exists (even if not listening yet)
+    pgrep -f "node.*openclaw.*gateway.*${GATEWAY_PORT}" &gt;/dev/null 2&gt;&amp;1
 }
+
 gateway_stable() {
-    local c=0; for ((i=0; i&lt;STABILITY_CHECKS; i++)); do
-        gateway_running_probe && c=$((c+1)) || return 1; sleep 1
-    done; [ "$c" -ge "${STABILITY_CHECKS}" ]
+    # Returns 0 if the gateway is running and has been stable for N checks
+    local consecutive=0
+    for ((i=0; i&lt;STABILITY_CHECKS; i++)); do
+        if gateway_running_probe; then
+            consecutive=$((consecutive + 1))
+        else
+            return 1
+        fi
+        sleep 1
+    done
+    [ "$consecutive" -ge "${STABILITY_CHECKS}" ]
 }
+
 write_timestamp() {
-    cat > "${TIMESTAMP_FILE}" &lt;&lt;-EOF
-STATUS=${1:-unknown}
-VERSION=${2:-unknown}
+    local status="$1"  # "in-progress", "success", "failed", "rolled-back"
+    local version="${2:-unknown}"
+    local message="${3:-}"
+    cat &gt; "${TIMESTAMP_FILE}" &lt;&lt;-TIMESTAMPEOF
+STATUS=${status}
+VERSION=${version}
 TIMESTAMP=$(date +%s)
 DATE=$(date '+%Y-%m-%d %H:%M:%S %z')
-EOF
+MESSAGE=${message}
+TIMESTAMPEOF
 }
-get_version() { openclaw --version 2>/dev/null || echo "unknown"; }
-# ── Pre-flight ─────────────────────────────────────────────────────────────
+
+get_version() {
+    openclaw --version 2&gt;/dev/null || echo "unknown"
+}
+
+# --- trustedProxies validation --------------------------------------------
+# OpenClaw 2026.8.1+ enforces ingress attribution: any peer inside
+# gateway.trustedProxies is treated as a proxy hop that must supply forwarded
+# headers. A broad entry (LAN subnet like 192.168.86.0/24, or 0.0.0.0/0)
+# silently breaks direct access from devices inside that range
+# (HTTP proxy_attribution_required). Only actual proxy addresses belong
+# here — for this host, the DSH web server on loopback: 127.0.0.1 and ::1.
+
+trusted_proxies_suspicious() {
+    # Prints non-loopback / range entries from gateway.trustedProxies.
+    python3 - "$1" &lt;&lt;'PYEOF'
+import ipaddress, json, sys
+cfg_path = sys.argv[1]
+try:
+    with open(cfg_path) as f:
+        cfg = json.load(f)
+except Exception:
+    sys.exit(1)
+proxies = (cfg.get("gateway", {}) or {}).get("trustedProxies") or []
+bad = []
+for p in proxies:
+    if p in ("127.0.0.1", "::1", "localhost"):
+        continue
+    try:
+        net = ipaddress.ip_network(p, strict=False)
+        if net.num_addresses == 1 and net.is_loopback:
+            continue
+        bad.append(p)  # range (LAN subnet, /0) or non-loopback host
+    except ValueError:
+        bad.append(p)  # unparseable literal — flag for review
+print("\n".join(bad))
+sys.exit(0 if bad else 1)
+PYEOF
+}
+
+validate_trusted_proxies() {
+    local cfg="${OPENCLAW_HOME}/openclaw.json"
+    [ -f "${cfg}" ] || return 0
+    local bad
+    bad=$(trusted_proxies_suspicious "${cfg}") || true
+    if [ -z "${bad}" ]; then
+        info "gateway.trustedProxies OK (loopback only)"
+        return 0
+    fi
+    warn "gateway.trustedProxies contains non-loopback entries:"
+    warn "${bad}"
+    warn "With ingress attribution (2026.8.1+), broad ranges block direct access"
+    warn "from inside them (proxy_attribution_required). Only actual proxies"
+    warn "belong here; this host's proxy is the DSH web server on loopback."
+    local answer="n"
+    if [ "${FORCE}" = "1" ]; then
+        answer="y"
+        warn "--force: narrowing gateway.trustedProxies automatically"
+    else
+        read -r -p "Narrow gateway.trustedProxies to [\"127.0.0.1\", \"::1\"]? [y/N] " answer
+    fi
+    if [ "${answer}" = "y" ] || [ "${answer}" = "Y" ]; then
+        cp "${cfg}" "${cfg}.trustedproxies.bak-$(date +%Y%m%d_%H%M%S)"
+        python3 - "${cfg}" &lt;&lt;'PYEOF'
+import json, sys
+p = sys.argv[1]
+with open(p) as f:
+    cfg = json.load(f)
+gw = cfg.setdefault("gateway", {})
+gw["trustedProxies"] = ["127.0.0.1", "::1"]
+with open(p, "w") as f:
+    json.dump(cfg, f, indent=2)
+    f.write("\n")
+PYEOF
+        info "trustedProxies narrowed to [\"127.0.0.1\", \"::1\"] (backup kept)"
+    else
+        warn "Leaving trustedProxies unchanged — direct LAN access may be blocked"
+        warn "after this update. Fix later in ${cfg}."
+    fi
+}
+
+# --- npm package rollback ---------------------------------------------------
+# Config-only rollback is insufficient: new package code against unmigrated
+# state refuses to boot (crash loop, seen 2026-08-31). Revert the CLI package.
+
+restore_npm_package() {
+    local old_npm new_npm
+    old_npm=$(echo "${OLD_VERSION:-}" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1 || true)
+    new_npm=$(echo "${NEW_VERSION:-}" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+' | head -1 || true)
+    if [ -z "${old_npm}" ] || [ "${old_npm}" = "${new_npm}" ]; then
+        info "No npm package rollback needed (${old_npm:-unknown})"
+        return 0
+    fi
+    info "Restoring npm CLI package to ${old_npm}..."
+    if npm install -g "openclaw@${old_npm}" 2&gt;&amp;1; then
+        info "npm package restored to ${old_npm}"
+    else
+        warn "npm package restore failed — gateway may run the new version"
+    fi
+}
+
+# --- SQLite state snapshot / restore ---------------------------------------
+# New OpenClaw versions run doctor + startup migrations that rewrite the
+# SQLite stores (per-agent stores and the shared state). Once a new version
+# has touched them, the OLD npm package refuses to boot ("startup migrations
+# did not complete cleanly ... column definitions differ ..." — seen 2026-09-08
+# when 2026.9.2 migrated the stores and the rollback restored 2026.8.1).
+# Rolling back binaries is only safe if the SQLite state is rolled back too,
+# so snapshot the persistent stores while the gateway is STOPPED and restore
+# them before the old version boots again.
+
+STATE_SNAPSHOT_DIR=""   # set once the backup dir is known
+
+snapshot_sqlite_state() {
+    # Call AFTER the gateway is stopped and BEFORE any new-version code runs.
+    if [ -z "${LATEST_BACKUP}" ] || [ ! -d "${LATEST_BACKUP}" ]; then
+        warn "No backup dir to hold SQLite state snapshot — rollback may be unsafe"
+        return 0
+    fi
+    STATE_SNAPSHOT_DIR="${LATEST_BACKUP}sqlite-state"
+    mkdir -p "${STATE_SNAPSHOT_DIR}"
+    local count=0 db rel
+    while IFS= read -r -d '' db; do
+        rel=${db#${OPENCLAW_HOME}/}
+        mkdir -p "${STATE_SNAPSHOT_DIR}/$(dirname "${rel}")"
+        if command -v sqlite3 &gt;/dev/null 2&gt;&amp;1; then
+            # Merge any hot WAL into the main file so the copy is self-consistent
+            sqlite3 "${db}" "PRAGMA wal_checkpoint(TRUNCATE);" &gt;/dev/null 2&gt;&amp;1 || true
+        fi
+        if cp -p "${db}" "${STATE_SNAPSHOT_DIR}/${rel}" 2&gt;/dev/null; then
+            count=$((count + 1))
+        else
+            warn "Failed to snapshot ${rel}"
+        fi
+    done &lt; &lt;(find "${OPENCLAW_HOME}" \
+        \( -path "${OPENCLAW_HOME}/agents/*/agent/openclaw-agent.sqlite" \
+           -o -path "${OPENCLAW_HOME}/state/openclaw.sqlite" \) -type f -print0)
+    info "SQLite state snapshot complete (${count} file(s)) → ${STATE_SNAPSHOT_DIR}"
+}
+
+restore_sqlite_state() {
+    # Restore the pre-update SQLite snapshot over the live stores. Only safe
+    # while no OpenClaw process is running (caller must stop the gateway first).
+    if [ -z "${STATE_SNAPSHOT_DIR}" ] &amp;&amp; [ -n "${LATEST_BACKUP}" ] \
+        &amp;&amp; [ -d "${LATEST_BACKUP}sqlite-state" ]; then
+        STATE_SNAPSHOT_DIR="${LATEST_BACKUP}sqlite-state"
+    fi
+    if [ -z "${STATE_SNAPSHOT_DIR}" ] || [ ! -d "${STATE_SNAPSHOT_DIR}" ]; then
+        warn "No SQLite state snapshot found — skipping state rollback (may be unsafe)"
+        return 0
+    fi
+    info "Restoring SQLite state from ${STATE_SNAPSHOT_DIR}..."
+    local count=0 f rel dest
+    while IFS= read -r -d '' f; do
+        rel=${f#${STATE_SNAPSHOT_DIR}/}
+        dest="${OPENCLAW_HOME}/${rel}"
+        mkdir -p "$(dirname "${dest}")"
+        if cp -p "${f}" "${dest}" 2&gt;/dev/null; then
+            count=$((count + 1))
+        else
+            warn "Failed to restore ${rel}"
+        fi
+    done &lt; &lt;(find "${STATE_SNAPSHOT_DIR}" -type f -print0)
+    # Drop leftover WAL/SHM journal files for the restored stores — replaying a
+    # journal from the new version against the old schema would corrupt it.
+    find "${OPENCLAW_HOME}/state" "${OPENCLAW_HOME}/agents" \
+        \( -name 'openclaw.sqlite-wal' -o -name 'openclaw.sqlite-shm' \
+           -o -name 'openclaw-agent.sqlite-wal' -o -name 'openclaw-agent.sqlite-shm' \) \
+        -type f -delete 2&gt;/dev/null || true
+    info "SQLite state restored (${count} file(s))"
+}
+
+# === Pre-flight =============================================================
+
+# Redirect all output to log file (preserve terminal echo)
 mkdir -p "${LOG_DIR}"
-exec > >(tee -a "${LOG_FILE}") 2>&1; trap cleanup EXIT INT TERM
-echo "=== OpenClaw Update — $(date) ==="
+exec &gt; &gt;(tee -a "${LOG_FILE}") 2&gt;&amp;1
+
+trap cleanup EXIT INT TERM
+
+echo ""
+echo "=============================================="
+echo "  OpenClaw Update — $(date '+%Y-%m-%d %H:%M:%S')"
+echo "=============================================="
+echo ""
+
+# Lock check
 if [ -f "${LOCK_FILE}" ]; then
     lock_age=$(($(date +%s) - $(stat -f %m "${LOCK_FILE}")))
-    lock_pid=$(cat "${LOCK_FILE}" 2>/dev/null)
-    if kill -0 "${lock_pid}" 2>/dev/null; then
-        error "Another update is running (PID ${lock_pid}, ${lock_age}s)"; exit 4
-    else warn "Stale lock — removing"; fi
+    lock_pid=$(cat "${LOCK_FILE}" 2&gt;/dev/null)
+    if kill -0 "${lock_pid}" 2&gt;/dev/null; then
+        error "Another update is already running (PID ${lock_pid}, running for ${lock_age}s)"
+        exit 4
+    else
+        warn "Stale lock file found (PID ${lock_pid}, ${lock_age}s old) — removing"
+    fi
 fi
-echo $$ > "${LOCK_FILE}"; info "Lock acquired (PID $$)"
+echo $$ &gt; "${LOCK_FILE}"
+info "Lock acquired (PID $$)"
+
 write_timestamp "in-progress" "$(get_version)"
-curl -s --max-time 5 https://registry.npmjs.org/ >/dev/null 2>&1 || \
-    { error "No internet"; exit 1; }
-# ── Step 1: Backup ─────────────────────────────────────────────────────────
-info "Step 1/7: Pre-update backup..."
-[ -x "${RESTORE_SCRIPT}" ] && [ -x "$(dirname "${RESTORE_SCRIPT}")/pre-update-backup.sh" ] && \
-    bash "$(dirname "${RESTORE_SCRIPT}")/pre-update-backup.sh" || warn "Backup skipped"
-LATEST_BACKUP=$(ls -dt "${BACKUPS_DIR}"/*/ 2>/dev/null | head -1 || echo "none")
-info "Latest backup: ${LATEST_BACKUP}"
-# ── Step 2: Stop Gateway ───────────────────────────────────────────────────
-info "Step 2/7: Stopping gateway..."
-if gateway_running_probe || gateway_process_running; then
-    launchctl bootout gui/$(id -u)/"${GATEWAY_LABEL}" 2>&1 || \
-        warn "bootout did not succeed"
-    waited=0
-    while gateway_process_running && [ "${waited}" -lt "${STOP_TIMEOUT}" ]; do
-        sleep "${STOP_POLL_INTERVAL}"; waited=$((waited + STOP_POLL_INTERVAL))
-    done
-    if gateway_process_running; then
-        warn "Graceful stop timed out — sending SIGTERM"
-        pkill -f "node.*openclaw.*gateway.*${GATEWAY_PORT}" 2>/dev/null || true; sleep 3
-        gateway_process_running && { warn "SIGKILL"; pkill -9 -f \
-            "node.*openclaw.*gateway.*${GATEWAY_PORT}" 2>/dev/null || true; sleep 1; }
-    fi
-    gateway_process_running && { error "Cannot stop gateway"; exit 1; }
-    info "Gateway stopped (${waited}s)"
+
+# Pre-update connectivity check
+if ! curl -s --max-time 5 https://registry.npmjs.org/ &gt;/dev/null 2&gt;&amp;1; then
+    error "No internet connectivity — aborting update"
+    send_email "${FAILURE_SUBJECT}" \
+        "OpenClaw update aborted: no internet connectivity.\nDate: $(date)\nLog: ${LOG_FILE}"
+    exit 1
 fi
-curl -s --max-time 2 "${GATEWAY_URL}/" >/dev/null 2>&1 && \
-    { error "Port ${GATEWAY_PORT} still in use"; exit 1; }
-# ── Step 3: Brew Cask ──────────────────────────────────────────────────────
-info "Step 3/7: Brew cask upgrade..."
-OLD_VERSION=$(get_version); info "Current: ${OLD_VERSION}"
-brew outdated --cask openclaw >/dev/null 2>&1 && \
-    for a in 1 2; do brew upgrade openclaw 2>&1 && break || \
-        { warn "brew attempt ${a} failed"; [ ${a} -lt 2 ] && sleep 5; }; done || \
-    info "Brew cask up to date"
-# ── Step 4: npm CLI ────────────────────────────────────────────────────────
-info "Step 4/7: npm CLI upgrade..."
-npm outdated -g openclaw >/dev/null 2>&1 && info "npm up to date" || {
-    for a in 1 2; do npm update -g openclaw 2>&1 && break || \
-        { warn "npm attempt ${a} failed"; [ ${a} -lt 2 ] && sleep 5; }; done
-    get_version | grep -q "${OLD_VERSION}" || \
-        { error "npm update failed"; exit 2; }
-}
-NEW_VERSION=$(get_version); info "Version: ${OLD_VERSION} → ${NEW_VERSION}"
-# ── Step 5: Start Gateway ──────────────────────────────────────────────────
-info "Step 5/7: Starting gateway..."
-launchctl bootstrap gui/$(id -u) "${GATEWAY_PLIST}" 2>&1 || \
-launchctl load "${GATEWAY_PLIST}" 2>&1 || \
-launchctl kickstart -k gui/$(id -u)/"${GATEWAY_LABEL}" 2>&1 || \
-    warn "All start methods attempted"
-# ── Step 6: Verify ─────────────────────────────────────────────────────────
-info "Step 6/7: Verifying gateway..."
+
+# === Step 1: Backup ========================================================
+
+info "Step 1/8: Creating pre-update backup..."
+if [ -x "${RESTORE_SCRIPT}" ]; then
+    RESTORE_SCRIPT_DIR=$(dirname "${RESTORE_SCRIPT}")
+    RESTORE_SCRIPT_BACKUP="${RESTORE_SCRIPT_DIR}/pre-update-backup.sh"
+    if [ -x "${RESTORE_SCRIPT_BACKUP}" ]; then
+        bash "${RESTORE_SCRIPT_BACKUP}" || {
+            error "Backup failed — aborting update"
+            exit 1
+        }
+    else
+        warn "pre-update-backup.sh not found, skipping backup"
+    fi
+else
+    warn "post-update-restore.sh not executable — backups may not work"
+fi
+LATEST_BACKUP=$(ls -dt "${BACKUPS_DIR}"/*/ 2&gt;/dev/null | head -1 || true)
+info "Latest backup: ${LATEST_BACKUP:-none}"
+
+# === Step 2: Gracefully Stop Gateway =======================================
+
+info "Step 2/8: Stopping gateway..."
+if gateway_running_probe || gateway_process_running; then
+    info "Gateway is running — initiating graceful shutdown"
+
+    # Try launchctl bootout first (cleanest)
+    info "Attempting launchctl bootout..."
+    launchctl bootout gui/$(id -u)/"${GATEWAY_LABEL}" 2&gt;&amp;1 || \
+        warn "launchctl bootout did not succeed (may already be unloaded)"
+
+    # Wait for process to exit
+    waited=0
+    while gateway_process_running &amp;&amp; [ "${waited}" -lt "${STOP_TIMEOUT}" ]; do
+        sleep "${STOP_POLL_INTERVAL}"
+        waited=$((waited + STOP_POLL_INTERVAL))
+    done
+
+    # If still running after timeout, escalate to SIGTERM -&gt; SIGKILL
+    if gateway_process_running; then
+        warn "Graceful stop timed out after ${waited}s — sending SIGTERM to remaining processes"
+        pkill -f "node.*openclaw.*gateway.*${GATEWAY_PORT}" 2&gt;/dev/null || true
+        sleep 3
+        if gateway_process_running; then
+            warn "Process still alive — sending SIGKILL"
+            pkill -9 -f "node.*openclaw.*gateway.*${GATEWAY_PORT}" 2&gt;/dev/null || true
+            sleep 1
+        fi
+    fi
+
+    # Final verification
+    if gateway_process_running; then
+        error "Failed to stop gateway process"
+        send_email "${FAILURE_SUBJECT}" \
+            "OpenClaw update failed: could not stop running gateway.\nDate: $(date)\nLog: ${LOG_FILE}"
+        exit 1
+    fi
+    info "Gateway stopped successfully (${waited}s wait)"
+else
+    info "Gateway was not running — skipping stop"
+    # A crash-looping service can be "not running" at probe time yet still
+    # respawn between checks and hold the state lock mid-update — unload it.
+    if launchctl print gui/$(id -u)/"${GATEWAY_LABEL}" &gt;/dev/null 2&gt;&amp;1; then
+        info "Gateway service loaded but not running — unloading it"
+        launchctl bootout gui/$(id -u)/"${GATEWAY_LABEL}" 2&gt;&amp;1 || \
+            warn "launchctl bootout did not succeed (may already be unloaded)"
+    fi
+fi
+
+# Verify port is free (scheme-aware: a TLS gateway answers https, not http)
+if gateway_http_responds; then
+    error "Port ${GATEWAY_PORT} is still in use after stopping gateway"
+    exit 1
+fi
+info "Port ${GATEWAY_PORT} is free"
+
+# Snapshot SQLite state now that the gateway is stopped — required for a safe
+# binary rollback if the new version's migrations make the old code unable to
+# boot against the migrated stores.
+snapshot_sqlite_state
+
+# === Step 3: Check &amp; Upgrade Cask =======================================
+
+info "Step 3/8: Checking for OpenClaw cask update..."
+OLD_VERSION=$(get_version)
+info "Current version: ${OLD_VERSION}"
+
+if brew outdated --cask openclaw &gt;/dev/null 2&gt;&amp;1; then
+    info "Brew cask update available — upgrading..."
+    UPGRADE_OK=false
+    for attempt in 1 2; do
+        info "brew upgrade attempt ${attempt}/2..."
+        if brew upgrade openclaw 2&gt;&amp;1; then
+            UPGRADE_OK=true
+            break
+        else
+            warn "brew upgrade attempt ${attempt} failed"
+            if [ "${attempt}" -lt 2 ]; then
+                info "Retrying in 5 seconds..."
+                sleep 5
+            fi
+        fi
+    done
+    if [ "${UPGRADE_OK}" = false ]; then
+        warn "brew upgrade failed after 2 attempts — continuing"
+    fi
+else
+    info "Brew cask is up to date — skipping"
+fi
+
+# === Step 4: Check &amp; Update CLI Runtime ===============================
+
+info "Step 4/8: Checking for npm CLI package update..."
+
+if npm outdated -g openclaw &gt;/dev/null 2&gt;&amp;1; then
+    info "npm package is up to date — skipping"
+else
+    info "npm package update available — upgrading..."
+    NPM_OK=false
+    for attempt in 1 2; do
+        info "npm update -g openclaw attempt ${attempt}/2..."
+        if npm update -g openclaw 2&gt;&amp;1; then
+            NPM_OK=true
+            break
+        else
+            warn "npm update attempt ${attempt} failed"
+            if [ "${attempt}" -lt 2 ]; then
+                info "Retrying in 5 seconds..."
+                sleep 5
+            fi
+        fi
+    done
+    if [ "${NPM_OK}" = false ]; then
+        error "npm update -g openclaw failed after 2 attempts"
+        send_email "${FAILURE_SUBJECT}" \
+            "OpenClaw update failed at step 4 (npm update).\nOld version: ${OLD_VERSION}\nDate: $(date)\nLog: ${LOG_FILE}"
+        exit 2
+    fi
+fi
+
+NEW_VERSION=$(get_version)
+if [ "${OLD_VERSION}" != "${NEW_VERSION}" ]; then
+    info "Version: ${OLD_VERSION} → ${NEW_VERSION}"
+else
+    info "Version unchanged — still ${NEW_VERSION}"
+fi
+
+# === Step 5: Pre-start validation &amp; migration ==============================
+
+info "Step 5/8: Validating config and migrating state..."
+validate_trusted_proxies
+
+# OpenClaw 2026.8.1 refuses to boot against unmigrated legacy state
+# ("Legacy session store requires migration…"). Run migrations/repairs while
+# the gateway is STOPPED, before the first start with new code.
+
+# Known 2026.8.1 doctor bug: `doctor --fix` aborts with
+# ExecApprovalsMigrationRequiredError when a legacy exec-approvals.json exists
+# (the repair sequence touches the SQLite approvals store before the legacy
+# migration can import the file). Workaround: move it aside, then import via
+# `openclaw approvals set &lt;file&gt;`.
+LEGACY_APPROVALS="${OPENCLAW_HOME}/exec-approvals.json"
+if [ -f "${LEGACY_APPROVALS}" ]; then
+    APPROVALS_MOVED="${LEGACY_APPROVALS}.legacy-$(date +%Y%m%d_%H%M%S)"
+    warn "Legacy exec-approvals.json found — moving to ${APPROVALS_MOVED}"
+    mv "${LEGACY_APPROVALS}" "${APPROVALS_MOVED}"
+    if openclaw approvals set "${APPROVALS_MOVED}" 2&gt;&amp;1; then
+        info "Legacy exec approvals imported into SQLite store"
+    else
+        warn "approvals set failed — restoring original file"
+        mv "${APPROVALS_MOVED}" "${LEGACY_APPROVALS}"
+    fi
+fi
+
+# Session store migration (idempotent) across all agents
+if openclaw doctor --yes --session-sqlite import --session-sqlite-all-agents 2&gt;&amp;1; then
+    info "Session store migration check complete"
+else
+    warn "session-sqlite import reported issues (see log) — new code may refuse to boot"
+fi
+
+# Safe repairs (non-interactive, migrations only)
+if openclaw doctor --fix --non-interactive 2&gt;&amp;1; then
+    info "doctor repairs complete"
+else
+    warn "doctor --fix did not complete cleanly (see log) — will retry after start attempt"
+fi
+
+# === Step 6: Reinstall &amp; Start Gateway =====================================
+
+info "Step 6/8: Starting gateway service..."
+# Try bootstrap first (modern macOS), fall back to load/start/kickstart
+if launchctl bootstrap gui/$(id -u) "${GATEWAY_PLIST}" 2&gt;&amp;1; then
+    info "launchctl bootstrap succeeded"
+else
+    warn "launchctl bootstrap failed — trying launchctl load as fallback..."
+    if launchctl load "${GATEWAY_PLIST}" 2&gt;&amp;1; then
+        info "launchctl load succeeded"
+    else
+        warn "launchctl load also failed — trying launchctl start..."
+        launchctl kickstart -k gui/$(id -u)/"${GATEWAY_LABEL}" 2&gt;&amp;1 || \
+            warn "launchctl kickstart also failed (may already be loaded)"
+    fi
+fi
+
+# === Step 6: Verify Gateway Running ========================================
+
+info "Step 7/8: Verifying gateway is running..."
+START_TIME=$(date +%s)
 GATEWAY_STARTED=false
-for ((a=1; a&lt;=START_RETRIES; a++)); do
+LAST_ERROR=""
+
+for ((attempt=1; attempt&lt;=START_RETRIES; attempt++)); do
+    # Give the process time to boot
     sleep "${START_RETRY_DELAY}"
-    if gateway_running_probe && gateway_stable; then
-        GATEWAY_STARTED=true
-        info "Gateway stable after $(($(date +%s) - START_TIME))s"
-        break
+
+    if gateway_running_probe; then
+        info "Gateway responding on port ${GATEWAY_PORT} (attempt ${attempt})"
+        # Check stability
+        if gateway_stable; then
+            GATEWAY_STARTED=true
+            ELAPSED=$(($(date +%s) - START_TIME))
+            info "Gateway stable after ${ELAPSED}s (${STABILITY_CHECKS} consecutive checks)"
+            break
+        else
+            warn "Gateway responded but not yet stable (attempt ${attempt})"
+        fi
+    else
+        LAST_ERROR="No response from ${GATEWAY_URL} (attempt ${attempt}/${START_RETRIES})"
+        warn "${LAST_ERROR}"
+
+        # Check if process is at least running
+        if gateway_process_running; then
+            info "Gateway process exists but not listening yet"
+        fi
+
+        # On last retry, try kickstart as a last resort
+        if [ "${attempt}" -eq $((START_RETRIES - 1)) ]; then
+            info "Last-resort: launchctl kickstart..."
+            launchctl kickstart -k gui/$(id -u)/"${GATEWAY_LABEL}" 2&gt;&amp;1 || true
+        fi
     fi
-    [ "${a}" -eq $((START_RETRIES - 1)) ] && \
-        launchctl kickstart -k gui/$(id -u)/"${GATEWAY_LABEL}" 2>&1 || true
 done
-# ── Outcome ────────────────────────────────────────────────────────────────
+
+# === Outcome ===============================================================
+
 if [ "${GATEWAY_STARTED}" = true ]; then
-    info "✅ Update complete"; write_timestamp "success" "${NEW_VERSION}"
-    # Step 7: 5-min post-update safety check
-    info "Step 7/7: Post-update safety check (5 min)..."
-    POST_CHECK_TIME=$(date -v+5M '+%Y-%m-%dT%H:%M:%S%z' 2>/dev/null || \
-        date -d '+5 minutes' '+%Y-%m-%dT%H:%M:%S%z' 2>/dev/null || true)
+    info "✅ Update complete — gateway is running"
+    write_timestamp "success" "${NEW_VERSION}" "Auto-update successful"
+
+    # Step 7: Schedule a 5-minute post-update safety check (belt and suspenders)
+    # Catches the "started but crashed later" edge case
+    info "Step 8/8: Scheduling 5-min post-update safety check..."
+    POST_CHECK_TIME=$(date -v+5M '+%Y-%m-%dT%H:%M:%S%z' 2&gt;/dev/null || date -d '+5 minutes' '+%Y-%m-%dT%H:%M:%S%z' 2&gt;/dev/null || true)
     if [ -n "${POST_CHECK_TIME}" ]; then
-        openclaw cron add --job '{"name":"post-update-gateway-check",'\
-'"schedule":{"kind":"at","at":"'"${POST_CHECK_TIME}"'"},"payload":'\
-'{"kind":"agentTurn","message":"Verify gateway is still running. '\
-'Run: bash ~/.openclaw/scripts/gateway-heartbeat.sh --force",'\
-'"timeoutSeconds":60},"sessionTarget":"isolated","deleteAfterRun":true,'\
-'"delivery":{"mode":"none"}}' 2>/dev/null && \
-            info "Safety check scheduled" || { mkdir -p "${HEARTBEAT_STATE_DIR}"; \
-            echo "$(date +%s)" > "${HEARTBEAT_STATE_DIR}/post-update-pending"; }
+        # 2026.9.2+ CLI: positional/flag syntax. Legacy versions took --job JSON.
+        if openclaw cron add \
+            --name post-update-gateway-check \
+            --at "${POST_CHECK_TIME}" \
+            --message "Run: bash ~/.openclaw/scripts/gateway-heartbeat.sh --force. Then delete this cron job." \
+            --session isolated \
+            --delete-after-run \
+            --no-deliver 2&gt;/dev/null; then
+            info "Post-update check scheduled for ${POST_CHECK_TIME}"
+        elif openclaw cron add --job '{
+            "name": "post-update-gateway-check",
+            "schedule": { "kind": "at", "at": "'"${POST_CHECK_TIME}"'" },
+            "payload": {
+                "kind": "agentTurn",
+                "message": "Run: bash ~/.openclaw/scripts/gateway-heartbeat.sh --force. Then delete this cron job.",
+                "timeoutSeconds": 60
+            },
+            "sessionTarget": "isolated",
+            "deleteAfterRun": true,
+            "delivery": { "mode": "none" }
+        }' 2&gt;/dev/null; then
+            info "Post-update check scheduled for ${POST_CHECK_TIME} (legacy syntax)"
+        else
+            warn "Failed to schedule post-update check (cron add failed — gateway may not be ready yet)"
+            # Fallback: write a marker file so the boot heartbeat catches it next time
+            mkdir -p "${HEARTBEAT_STATE_DIR}"
+            echo "$(date +%s)" &gt; "${HEARTBEAT_STATE_DIR}/post-update-pending"
+            info "Wrote post-update-pending marker instead"
+        fi
+    else
+        warn "Could not calculate post-check time — skipping"
     fi
-    send_email "✅ OpenClaw Update Succeeded" \
-        "Update completed.\nOld: ${OLD_VERSION}\nNew: ${NEW_VERSION}"
+
+    send_email "${SUCCESS_SUBJECT}" \
+        "OpenClaw update completed successfully.\n\nOld version: ${OLD_VERSION}\nNew version: ${NEW_VERSION}\nDate: $(date)\nBackup: ${LATEST_BACKUP:-none}\nLog: ${LOG_FILE}"
     exit 0
 fi
-# ── Rollback ───────────────────────────────────────────────────────────────
-warn "UPDATE FAILED — attempting rollback..."
+
+# === Rollback ==============================================================
+
+warn "════════════════════════════════════════════════════════════════"
+warn "UPDATE FAILED — Gateway did not start. Attempting rollback..."
+warn "════════════════════════════════════════════════════════════════"
+
 ROLLBACK_OK=false
-[ -n "${LATEST_BACKUP}" ] && [ -d "${LATEST_BACKUP}" ] && {
-    [ -x "${RESTORE_SCRIPT}" ] && bash "${RESTORE_SCRIPT}" "${LATEST_BACKUP}" 2>&1 && \
-        ROLLBACK_OK=true
-    ${ROLLBACK_OK} || {
-        [ -f "${LATEST_BACKUP}/openclaw.json" ] && \
+
+# Stop any remaining gateway processes BEFORE touching state/binaries: a
+# lingering new-version gateway holds the state lock and makes every CLI
+# schema write fail ("another OpenClaw process owns gateway-lifecycle").
+info "Stopping any remaining gateway processes before rollback..."
+launchctl bootout gui/$(id -u)/"${GATEWAY_LABEL}" 2&gt;/dev/null || true
+for _ in 1 2 3 4 5 6 7 8 9 10; do
+    gateway_process_running || break
+    sleep 1
+done
+if gateway_process_running; then
+    pkill -9 -f "node.*openclaw.*gateway.*${GATEWAY_PORT}" 2&gt;/dev/null || true
+    sleep 2
+fi
+info "Remaining gateway processes stopped"
+
+# Roll the SQLite state back FIRST: once the new version has migrated the
+# stores, the old npm package refuses to boot against them (2026-09-08).
+restore_sqlite_state
+
+# Real rollback: restore the npm package too. Config-only rollback left
+# 2026.8.1 running against unmigrated state → crash loop (2026-08-31).
+restore_npm_package
+
+# Find the backup we created earlier
+if [ -n "${LATEST_BACKUP}" ] &amp;&amp; [ -d "${LATEST_BACKUP}" ]; then
+    info "Rolling back from: ${LATEST_BACKUP}"
+    if [ -x "${RESTORE_SCRIPT}" ]; then
+        bash "${RESTORE_SCRIPT}" "${LATEST_BACKUP}" 2&gt;&amp;1 || true
+        # post-update-restore.sh exits 0 even when the gateway is down, so
+        # confirm with a real probe before declaring rollback a success.
+        if ! gateway_running_probe; then
+            warn "Gateway not responding after restore script — retrying start"
+            launchctl bootstrap gui/$(id -u) "${GATEWAY_PLIST}" 2&gt;&amp;1 || \
+            launchctl load "${GATEWAY_PLIST}" 2&gt;&amp;1 || \
+            launchctl kickstart -k gui/$(id -u)/"${GATEWAY_LABEL}" 2&gt;&amp;1 || true
+            sleep 10
+        fi
+        if gateway_running_probe &amp;&amp; gateway_stable; then
+            ROLLBACK_OK=true
+        fi
+    else
+        # Manual rollback without restore script
+        info "Restore script not found — attempting manual rollback"
+        # Restore the config
+        if [ -f "${LATEST_BACKUP}/openclaw.json" ]; then
             cp "${LATEST_BACKUP}/openclaw.json" "${OPENCLAW_HOME}/openclaw.json"
-        launchctl bootstrap gui/$(id -u) "${GATEWAY_PLIST}" 2>&1 || \
-        launchctl load "${GATEWAY_PLIST}" 2>&1 || \
-        launchctl kickstart -k gui/$(id -u)/"${GATEWAY_LABEL}" 2>&1 || true
-        sleep 10; gateway_running_probe && ROLLBACK_OK=true
-    }
-}
-${ROLLBACK_OK} || {
-    warn "No backup — last resort kickstart..."
-    launchctl kickstart -k gui/$(id -u)/"${GATEWAY_LABEL}" 2>&1 || true
-    sleep 10; gateway_running_probe && ROLLBACK_OK=true
-}
-if ${ROLLBACK_OK}; then
-    info "✅ Rollback successful"
-    write_timestamp "rolled-back" "$(get_version)" "Update failed, rollback succeeded"
+            info "Config restored"
+        fi
+        # Start gateway directly
+        if launchctl bootstrap gui/$(id -u) "${GATEWAY_PLIST}" 2&gt;&amp;1; then
+            info "launchctl bootstrap succeeded (rollback)"
+        elif launchctl load "${GATEWAY_PLIST}" 2&gt;&amp;1; then
+            info "launchctl load succeeded (rollback)"
+        else
+            launchctl kickstart -k gui/$(id -u)/"${GATEWAY_LABEL}" 2&gt;&amp;1 || true
+        fi
+        sleep 10
+        if gateway_running_probe &amp;&amp; gateway_stable; then
+            ROLLBACK_OK=true
+        fi
+    fi
+else
+    warn "No backup directory found for rollback"
+    # Last-ditch: try starting gateway directly
+    info "Running launchctl kickstart as last resort..."
+    launchctl kickstart -k gui/$(id -u)/"${GATEWAY_LABEL}" 2&gt;&amp;1 || true
+    sleep 10
+    if gateway_running_probe &amp;&amp; gateway_stable; then
+        ROLLBACK_OK=true
+    fi
+fi
+
+if [ "${ROLLBACK_OK}" = true ]; then
+    info "✅ Rollback successful — original version restored and gateway running"
+    ROLLBACK_VERSION=$(get_version)
+    write_timestamp "rolled-back" "${ROLLBACK_VERSION}" "Update failed, rollback succeeded"
     send_email "⚠️ OpenClaw Update Rolled Back" \
-        "Update failed but rollback succeeded.\nRestored: $(get_version)"
+        "Update failed but rollback succeeded.\n\nOld version (restored): ${ROLLBACK_VERSION}\nFailed version: ${NEW_VERSION}\nDate: $(date)\nLog: ${LOG_FILE}"
     exit 3
 else
-    error "CRITICAL: Update AND rollback failed. Gateway is DOWN."
-    write_timestamp "failed" "${NEW_VERSION}" "Update and rollback failed"
-    send_email "❌ OpenClaw Update FAILED" "Gateway is DOWN."
+    error "⚠️ CRITICAL: Update failed AND rollback failed. Gateway is down."
+    error "Manual intervention required."
+    write_timestamp "failed" "${NEW_VERSION}" "Update failed, rollback also failed"
+    send_email "${FAILURE_SUBJECT}" \
+        "CRITICAL: OpenClaw update failed and rollback also failed.\nGateway is DOWN.\n\nOld version: ${OLD_VERSION}\nTarget version: ${NEW_VERSION}\nDate: $(date)\nBackup: ${LATEST_BACKUP:-none}\nLog: ${LOG_FILE}\n\nManual recovery: launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/ai.openclaw.gateway.plist"
     exit 5
 fi
 </pre>
@@ -362,29 +1001,82 @@ fi
             <strong>Why not just kill and restart?</strong> The gateway flushes scheduled job state on shutdown. Forcing a kill mid-write can corrupt the job queue. Always try graceful shutdown first and only escalate after a reasonable timeout.
         </div>
 
-        <h3>Two-stage upgrade</h3>
-        <p>OpenClaw ships two components — the <strong>runtime</strong> via Homebrew cask (the actual gateway binary) and the <strong>CLI</strong> via npm (the <code>openclaw</code> command-line tool). Both are checked and upgraded independently. The script retries each once if the first attempt fails, since registries occasionally hiccup.</p>
+        <p>One subtlety: a crash-looping service can look "not running" at probe time yet still be loaded by launchd and respawn between checks — and a mid-update respawn holds the state lock and breaks every schema write. So when the gateway isn't answering but the launchd service is still <em>loaded</em>, the script unloads it too.</p>
 
-        <h3>Verified startup with stability check</h3>
-        <p>After starting the gateway, the script probes the port every 5 seconds up to 5 times. But a single successful probe isn't enough — the gateway could crash immediately after serving one request. The script requires <strong>2 consecutive successful probes</strong> (2 seconds apart) before declaring the update successful.</p>
+        <h3>Two-stage upgrade</h3>
+        <p>OpenClaw ships two components — the <strong>runtime</strong> via Homebrew cask and the <strong>CLI</strong> via npm. Both are checked and upgraded independently, and each is retried twice if the first attempt fails, since registries occasionally hiccup.</p>
+
+        <h3>Scheme-aware verified startup</h3>
+        <p>After starting the gateway, the script probes it up to 5 times (5 seconds apart) and requires <strong>2 consecutive stable probes</strong> before declaring success. Two details matter here:</p>
+        <ul>
+            <li><strong>Any real HTTP status counts as "up".</strong> The gateway answers <code>200</code>, <code>302</code>, <code>401</code> and more depending on the path — requiring a specific code is brittle.</li>
+            <li><strong>The probe speaks the gateway's scheme.</strong> With <code>gateway.tls.enabled</code> set (HTTPS certs in <code>~/.openclaw/tls</code>), a plain <code>curl http://…</code> probe can <em>never</em> succeed. The script reads the scheme from <code>openclaw.json</code> and probes <code>https</code> with <code>curl -k</code> when TLS is on. This exact bug made the script declare a perfectly healthy 2026.9.2 upgrade "down" and roll it back (see below).</li>
+        </ul>
 
         <h3>Delayed safety net</h3>
-        <p>The most insidious failure mode is "starts fine, crashes 3 minutes later." The script schedules an isolated cron check 5 minutes in the future to verify the gateway is still running. If the cron job can't be created (because the gateway is still initialising), a marker file is written instead for the heartbeat health check to pick up.</p>
+        <p>The most insidious failure mode is "starts fine, crashes 3 minutes later." The script schedules an isolated cron check 5 minutes in the future to verify the gateway is still running. CLI drift note: 2026.9.2 replaced the <code>cron add --job &lt;json&gt;</code> syntax with flag-based syntax — the script tries the new form first, falls back to the legacy JSON form for older versions, and writes a heartbeat marker file if cron isn't ready yet.</p>
 
-        <h3>Automatic rollback</h3>
-        <p>If the gateway fails to start after all retries, the script restores the pre-update backup and tries to start the old version. If even the rollback fails, it exits with code 5 and sends a critical alert. In months of production use, this has never triggered — but the belt-and-suspenders approach means you can sleep through updates.</p>
+        <h3>SQLite state snapshots: why binary rollback alone is unsafe</h3>
+        <p>Modern OpenClaw versions run <code>doctor</code> plus startup migrations that rewrite the SQLite stores (one per agent, plus the shared state store) <em>before</em> the new gateway serves traffic. Once the new version has migrated those stores, the <em>old</em> npm package refuses to boot against them — in production the error was "startup migrations did not complete cleanly … column definitions differ for session_pending_inputs", followed by a launchd crash loop.</p>
+        <p>So a rollback that only downgrades binaries is not a rollback — it is how you brick the gateway. The fix in this script:</p>
+        <ul>
+            <li>While the gateway is <strong>stopped</strong> (and before any new-version code runs), the SQLite stores are WAL-checkpointed and copied into the backup as a <code>sqlite-state/</code> snapshot.</li>
+            <li>Rollback restores that snapshot first, deletes any stale <code>-wal</code>/<code>-shm</code> journals left by the new version (replaying them against the old schema would corrupt it), and only then reinstalls the previous npm package.</li>
+        </ul>
+
+        <h3>Rollback that actually rolls back — and proves it</h3>
+        <p>The original rollback restored config files, started the old version, and trusted the restore script's exit code. That was wrong on three counts: config-only rollback left new code running against unmigrated state (crash loop); the restore script exited <code>0</code> even when the gateway was down (it ran <code>openclaw gateway status</code>, which exits 0 for a stopped service); and downgrading the npm package without the state snapshot made the old version unbootable. The current sequence is:</p>
+        <ol>
+            <li>Unload the service and stop any lingering gateway processes (a surviving new-version process holds the state lock and makes every CLI write fail).</li>
+            <li>Restore the SQLite state snapshot.</li>
+            <li>Reinstall the previous npm package (<code>npm install -g openclaw@&lt;old&gt;</code>).</li>
+            <li>Restore config from the backup and start the service.</li>
+            <li>Verify with the same scheme-aware probe + stability checks before declaring "rollback successful".</li>
+        </ol>
+        <p>Recovery note worth knowing: if an older failed run ever leaves the old package unable to boot against already-migrated SQLite and there is <em>no</em> state snapshot, the consistent fix is to complete the upgrade (update the npm package, kickstart the service) — not to fight the downgrade.</p>
+
+        <h3>trustedProxies guard: the 2026.8.1 ingress-attribution change</h3>
+        <p>OpenClaw 2026.8.1 began enforcing ingress attribution: any peer listed in <code>gateway.trustedProxies</code> is treated as a proxy hop that must supply forwarded headers. If the config carried a broad entry (a LAN subnet like <code>192.168.86.0/24</code>), every direct device inside that range was misclassified as a proxy without <code>X-Forwarded-For</code> and rejected with <code>proxy_attribution_required</code>. The script now inspects <code>trustedProxies</code> after upgrading and offers to narrow broad ranges to the loopback entries actually needed (<code>["127.0.0.1", "::1"]</code>); <code>--force</code> accepts automatically.</p>
+
+        <h3>Migrate state before the first boot with new code</h3>
+        <p>New versions refuse to boot against unmigrated legacy state, so Step 5 runs — all while the gateway is stopped: any legacy <code>exec-approvals.json</code> is moved aside and imported via <code>openclaw approvals set</code> (dodging a known <code>doctor --fix</code> bug that aborts with <code>ExecApprovalsMigrationRequiredError</code>), then <code>doctor --session-sqlite import --session-sqlite-all-agents</code>, then <code>doctor --fix --non-interactive</code>.</p>
+
+        <h3>Exit codes</h3>
+        <p>The script exits <code>0</code> on success, <code>1</code> on pre-flight failure (backup, stop, or connectivity), <code>2</code> if the npm upgrade fails, <code>3</code> when the update failed but rollback succeeded, <code>4</code> on lock contention, and <code>5</code> when the update <em>and</em> rollback both failed (gateway down — manual intervention). Useful for scheduling and monitoring.</p>
+
+        <h2 id="incidents">Production incidents that shaped the script</h2>
+        <p>Both incidents below actually happened on the production Mac mini. Each is documented in the script's header changelog and drove a concrete fix in the version above.</p>
+
+        <h3>2026-08-31 → 2026.8.1: migration and rollback gaps</h3>
+        <p>The upgrade to 2026.8.1 failed (exit 3) and exposed three gaps, all since fixed:</p>
+        <ul>
+            <li><strong>Ingress attribution broke LAN access.</strong> A broad <code>trustedProxies</code> entry (the whole LAN subnet) made direct devices look like headerless proxies → <code>proxy_attribution_required</code>. Fixed by narrowing to loopback and adding the validation step.</li>
+            <li><strong>Migrations must run before the first start with new code.</strong> 2026.8.1 refused to boot against unmigrated legacy state. Fixed with the stopped-gateway migration step.</li>
+            <li><strong>Rollback must restore the package, not just config.</strong> Config-only rollback left the new package running against unmigrated state → crash loop. Fixed by reinstalling <code>openclaw@&lt;old&gt;</code>.</li>
+        </ul>
+
+        <h3>2026-09-08 → 2026.9.2: false failure, unsafe rollback</h3>
+        <p>On 8 September 2026 the script upgraded npm to 2026.9.2, then reported FAILED and rolled back — even though the new gateway had booted and was serving traffic (the file log showed "gateway ready", "http server listening", and live webchat clients). Three compounding bugs:</p>
+        <ul>
+            <li><strong>The readiness probe spoke plain HTTP to an HTTPS gateway.</strong> TLS had been enabled the week before (<code>gateway.tls.enabled=true</code>), so all 5 probes failed against a healthy listener.</li>
+            <li><strong>The rollback then downgraded the npm package after 2026.9.2 had migrated the SQLite stores</strong> — 2026.8.1 refused to boot against the new schema and launchd crash-looped. The stores had never been snapshotted, so the downgrade could not work.</li>
+            <li><strong>The restore script reported success while the gateway was down</strong> (exit 0 from a status command that succeeds for stopped services).</li>
+        </ul>
+        <p>The rerun (<code>--force</code>) completed 2026.8.1 → 2026.9.2 cleanly, with the HTTPS probe passing on attempt 1. All three bugs are fixed in the version above: scheme-aware probes, SQLite state snapshots taken while stopped, and a rollback that stops processes, restores state + package + config, and verifies with a real probe before declaring success.</p>
 
         <h2 id="usage">Usage</h2>
         <p>Run it manually or schedule it via launchd, crontab, or OpenClaw's own cron system:</p>
 
         <pre><code>bash ~/.openclaw/scripts/update-openclaw.sh</code></pre>
 
-        <p>To skip the confirmation prompt:</p>
+        <p>To skip the confirmation prompt and auto-accept the <code>trustedProxies</code> narrowing:</p>
 
         <pre><code>bash ~/.openclaw/scripts/update-openclaw.sh --force</code></pre>
 
+        <p>The script asks for your Mac password once at the start (brew and npm need it). On success it exits 0; the <a href="#walkthrough">exit-code list above</a> covers the failure cases for schedulers and monitoring.</p>
+
         <div class="callout">
-            <strong>Requirements:</strong> Homebrew, npm, the OpenClaw cask installed, and a send-email helper script at <code>~/.openclaw/scripts/send_email.py</code> (or update the <code>send_email()</code> function to use your preferred notification method). The companion backup scripts are optional but recommended.
+            <strong>Requirements:</strong> Homebrew, npm, the OpenClaw cask installed, and a send-email helper script at <code>~/.openclaw/scripts/send_email.py</code> (or update the <code>send_email()</code> function to use your preferred notification method). The companion backup scripts (<code>pre-update-backup.sh</code> / <code>post-update-restore.sh</code>) are optional but strongly recommended — the SQLite snapshot lives inside the backup they create.
         </div>
 
         <p>The script writes a detailed log to <code>~/.openclaw/logs/</code> with timestamps and all output. The timestamp file at <code>~/.openclaw/.update-timestamp</code> records status, version, and date — useful for other monitoring scripts to detect stale state.</p>
