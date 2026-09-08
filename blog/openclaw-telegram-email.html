@@ -101,7 +101,7 @@
 
 <section class="page-hero">
     <div class="container">
-        <p class="meta">14 January 2026 &mdash; AI Agent Setup</p>
+        <p class="meta">14 January 2026 &mdash; <strong>Updated 8 September 2026</strong> &mdash; AI Agent Setup</p>
         <h1>Connecting Telegram and Email to OpenClaw</h1>
         <div>
             <span class="tag">OpenClaw</span>
@@ -272,17 +272,13 @@ python3 check_inbox.py --inbox "your-assistant@agentmail.to" --monitor 30</code>
 <li>Summarises anything that needs attention</li>
 </ol>
 
-<pre><code>{
-  "schedule": {
-    "kind": "cron",
-    "expr": "0 8 * * 1",
-    "tz": "Australia/Melbourne"
-  },
-  "payload": {
-    "kind": "systemEvent",
-    "text": "Time for the weekly AgentMail check. Process the inbox."
-  }
-}</code></pre>
+<pre><code># Current flag syntax (OpenClaw 2026.9.2+; verify with: openclaw cron add --help).
+# The legacy --job JSON format has been replaced by these flags.
+openclaw cron add \
+  --name "Weekly AgentMail Check" \
+  --cron "0 8 * * 1" \
+  --tz "Australia/Melbourne" \
+  --message "Time for the weekly AgentMail check. Process the inbox."</code></pre>
 
 <h3>Pattern 2: Deduplication</h3>
 
@@ -335,7 +331,7 @@ Email: detailed, archival, can wait</code></pre>
 <li>The bot token is sensitive &mdash; if exposed, anyone can control your bot. Use env vars or a secrets manager.</li>
 <li>Pairing codes expire after 1 hour &mdash; complete the flow promptly.</li>
 <li>Group bots need <code>requireMention: false</code> or admin status to see all messages.</li>
-<li>Telegram has no delete/edit of sent messages via the API that users won&rsquo;t see.</li>
+<li>Telegram's Bot API <em>does</em> support editing and deleting messages your bot has sent: <code>editMessageText</code> (the message then shows an &ldquo;edited&rdquo; marker to users) and <code>deleteMessage</code> (removes the message for everyone in the chat). There is no silent edit &mdash; users always see the &ldquo;edited&rdquo; marker.</li>
 </ul>
 
 <p><strong>AgentMail:</strong></p>

@@ -101,7 +101,7 @@
 
 <section class="page-hero">
     <div class="container">
-        <p class="meta">15 December 2025 &mdash; Infrastructure</p>
+        <p class="meta">15 December 2025 &mdash; <strong>Updated 8 September 2026</strong> &mdash; Infrastructure</p>
         <h1>External OpenClaw Access Guide</h1>
         <div>
             <span class="tag">OpenClaw</span>
@@ -231,9 +231,7 @@ sudo launchctl bootstrap system /Library/LaunchDaemons/com.cloudflare.cloudflare
         "http://localhost:18789",
         "http://127.0.0.1:18789",
         "https://&lt;your-hostname&gt;.&lt;your-domain&gt;"
-      ],
-      "allowInsecureAuth": true,
-      "dangerouslyDisableDeviceAuth": true
+      ]
     },
     "auth": {
       "mode": "token",
@@ -244,6 +242,7 @@ sudo launchctl bootstrap system /Library/LaunchDaemons/com.cloudflare.cloudflare
 
 <p><strong>Important notes:</strong></p>
 <ul>
+<li><strong>Keep device authentication enabled.</strong> Older guides showed <code>allowInsecureAuth: true</code> and <code>dangerouslyDisableDeviceAuth: true</code> to make a tunnel work without HTTPS — those flags are <strong>not</strong> in the recommended config and must not be used over a public tunnel. Since 2026.8.1 the Control UI requires device identity over non-localhost HTTP, so disabling device auth is not a supported fix. Keep HTTPS end-to-end (Cloudflare edge TLS / gateway TLS) and gate access with Cloudflare Access email auth or Tailscale identity instead.</li>
 <li>Wildcards (e.g. <code>*.ngrok-free.dev</code>) do NOT work — use the exact origin URL</li>
 <li>If you forget to add the URL, the browser will show: <em>"origin not allowed"</em> — the HTML loads but WebSocket auth fails</li>
 <li>After editing config, run <code>openclaw gateway restart</code> or the old config remains in memory</li>

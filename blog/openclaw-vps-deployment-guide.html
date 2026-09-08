@@ -101,7 +101,7 @@
 
 <section class="page-hero">
     <div class="container">
-        <p class="meta">Updated 24 May 2026 — Infrastructure / AI — lessons from 4 live deployments</p>
+        <p class="meta">22 May 2026 — <strong>Updated 8 September 2026</strong> — Infrastructure / AI — lessons from 4 live deployments</p>
         <h1>OpenClaw AI Agent — Complete VPS Deployment Guide</h1>
         <p style="color:rgba(255,255,255,0.7);margin-top:1rem;font-size:1.05rem;">With battle-tested security, backup, email pipeline, and lessons from 3 months of production use</p>
         <div>
@@ -118,7 +118,7 @@
 
 <section class="post-content">
     <div class="container">
-        <h2>🧑 Human — VPS & Security Setup</h2>
+        <h2 id="vps-security">🧑 Human — VPS & Security Setup</h2>
 
         <p>You're about to create a tiny Linux server in the cloud that will run your AI agent 24/7. This section covers everything from clicking "Create Droplet" to locking down SSH so only you (and your recovery console) can get in. Follow every step in order — skipping ahead is how people get locked out.</p>
 
@@ -317,34 +317,9 @@ sudo fail2ban-client status sshd</code></pre>
             <li><a href="#multi-agent" style="color:var(--dark);">🤖 Multi-Agent Deployment</a></li>
             <li><a href="#deploy-bugs" style="color:var(--dark);">🐛 Lessons from Live Testing</a></li>
             <li><a href="#post-deploy" style="color:var(--dark);">✅ Post-Deployment Checklist</a></li>
-            <li><a href="#multi-agent" style="color:var(--dark);">🤖 Multi-Agent Deployment</a></li>
-            <li><a href="#deploy-bugs" style="color:var(--dark);">🐛 Lessons from Live Testing</a></li>
-            <li><a href="#post-deploy" style="color:var(--dark);">✅ Post-Deployment Checklist</a></li>
         </ol>
     </div>
 </section>
-
-
-
-<section class="post-content" style="background:var(--cream);padding:2rem 0;">
-    <div class="container">
-        <h2>📑 On This Page</h2>
-        <ol style="columns:2;column-gap:2rem;list-style-position:inside;">
-            <li><a href="#vps-security" style="color:var(--dark);">🧑 Human — VPS &amp; Security Setup</a></li>
-            <li><a href="#ai-verify" style="color:var(--dark);">🤖 AI — Execute After Human Setup</a></li>
-            <li><a href="#openclaw-install" style="color:var(--dark);">🧑 Human — OpenClaw Installation</a></li>
-            <li><a href="#openclaw-config" style="color:var(--dark);">🤖 AI — Configure &amp; Optimise</a></li>
-            <li><a href="#workspace" style="color:var(--dark);">🧑 Human — Workspace &amp; AI Soul</a></li>
-            <li><a href="#backup" style="color:var(--dark);">💾 Backup Strategy — The Three-Layer Approach</a></li>
-            <li><a href="#health-check" style="color:var(--dark);">🩺 Health Check Scripts</a></li>
-            <li><a href="#off-server" style="color:var(--dark);">📤 Off-Server Backup Pull</a></li>
-            <li><a href="#email" style="color:var(--dark);">🧑 Human — Email Setup</a></li>
-            <li><a href="#lessons" style="color:var(--dark);">📚 Complete Lessons Learned</a></li>
-        </ol>
-    </div>
-</section>
-
-
 
 <section class="post-content">
     <div class="container">
@@ -410,7 +385,9 @@ sudo apt upgrade -y
 # Install essential tools
 sudo apt install -y curl wget git ufw python3 python3-pip python3-venv
 
-# PostgreSQL (NOT SQLite — see the development principles)
+# PostgreSQL for the companion Flask/SaaS apps in these examples
+# (never SQLite for those — see the AGENTS.md development principles).
+# OpenClaw's own state is SQLite-based (~/.openclaw/state/) since ~2026.8.
 sudo apt install -y postgresql postgresql-contrib
 sudo systemctl start postgresql
 sudo systemctl enable postgresql</code></pre>
@@ -458,9 +435,13 @@ sudo nano /opt/openclaw/.env
 
 # At minimum you'll need:
 OPENCLAW_API_KEY=your-api-key-here
-DATABASE_URL=postgresql://openclaw:password@localhost:5432/openclaw
 OPENAI_API_KEY=sk-your-openai-key
-# ... plus any other secrets your agent needs</code></pre>
+# ... plus any other secrets your agent needs
+
+# DATABASE_URL is only required if a companion Flask/SaaS app in these
+# examples uses PostgreSQL. OpenClaw's own state is SQLite-based
+# (~/.openclaw/state/) since ~2026.8 — it needs no DATABASE_URL.
+# DATABASE_URL=postgresql://openclaw:password@localhost:5432/openclaw</code></pre>
 
         <h3>7. 🚨 Deployment Verification — Non-Negotiable</h3>
 
@@ -580,7 +561,7 @@ npm --version    # Should show 10.x.x</code></pre>
         <pre><code>sudo npm install -g openclaw
 
 # Verify installation
-openclaw --version   # e.g. 2026.5.19</code></pre>
+openclaw --version   # e.g. 2026.9.2 (current as of 8 September 2026)</code></pre>
 
         <p>The <code>-g</code> flag installs OpenClaw globally so the <code>openclaw</code> command is available in your PATH. On Ubuntu, global npm packages go to <code>/usr/lib/node_modules/</code>.</p>
 
@@ -858,7 +839,7 @@ GATEWAY_AUTH_TOKEN=your-gateway-token</code></pre>
 
         <hr>
 
-        <h2>🤖 AI — Configure & Optimise</h2>
+        <h2 id="openclaw-config">🤖 AI — Configure & Optimise</h2>
 
         <p>Once the Gateway is installed and running, your AI agent can self-configure via the config file. The following commands are for the AI to execute on the VPS.</p>
 
@@ -914,6 +895,10 @@ sudo systemctl restart openclaw-gateway
 
 # Backup the entire config and workspace
 cp -r ~/.openclaw ~/.openclaw-backup-$(date +%F)</code></pre>
+
+<div class="warning-box">
+<strong>Upgrade note (pre-2026.8 installs):</strong> Since ~2026.8, OpenClaw stores its state in SQLite (<code>~/.openclaw/state/</code>) rather than the older JSON/dotenv layout. If a freshly-updated gateway refuses to boot against unmigrated legacy state, <strong>stop</strong> it and run the doctor migrations against the stopped gateway: <code>openclaw doctor --session-sqlite import --session-sqlite-all-agents</code>, then <code>openclaw doctor --fix --non-interactive</code>, then start and verify with <code>openclaw gateway status</code>.
+</div>
     </div>
 </section>
 
@@ -922,7 +907,7 @@ cp -r ~/.openclaw ~/.openclaw-backup-$(date +%F)</code></pre>
 
 <section class="post-content">
     <div class="container">
-        <h2>3 Workspace & AI Soul Setup</h2>
+        <h2 id="workspace">3 Workspace & AI Soul Setup</h2>
         <p>Once OpenClaw is installed and the gateway is running, you need to set up the files that define <em>who your AI is</em> and <em>how it works</em>. This is the most important step — not because it's technically complex (it isn't), but because it determines whether your agent is genuinely helpful or just an expensive search engine.</p>
 
         <p>The OpenClaw workspace lives at <code>~/.openclaw/workspace/</code>. This is your agent's home. These are the files it reads at startup, references during conversations, and updates as it learns.</p>
@@ -1107,7 +1092,7 @@ in parallel to review:
 - **Minimal Impact:** Only touch what's necessary
 
 ## Development Principles
-- **Always PostgreSQL.** Never start with SQLite.
+- **Always PostgreSQL for the Flask/SaaS apps.** Never start one of those with SQLite.
 - **Rsync with explicit paths** and --checksum
   for rewrites.
 - **Post-deploy verification.** Never assume rsync
@@ -1401,7 +1386,7 @@ Before touching ANY file on a server:
 
         <h3>🤖 AI — Set Up PostgreSQL Backup (pg_dump Only)</h3>
 
-        <p>If your project uses PostgreSQL — and it should, don't use SQLite for anything real — never, ever copy the database files directly. PostgreSQL uses write-ahead logging and in-memory buffers. A <code>cp</code> of the data directory produces a corrupt backup more often than you'd think.</p>
+        <p>If one of the companion Flask/SaaS apps in these examples uses PostgreSQL — and it should, don't use SQLite for those apps — never, ever copy the database files directly. PostgreSQL uses write-ahead logging and in-memory buffers. A <code>cp</code> of the data directory produces a corrupt backup more often than you'd think. (OpenClaw's own state is a separate matter: since ~2026.8 it is SQLite-based, living under <code>~/.openclaw/state/</code> — see the upgrade note in the OpenClaw admin-commands section.)</p>
 
         <p>Always use <code>pg_dump</code>:</p>
 
@@ -1424,10 +1409,9 @@ DB_NAME=$(echo "$DB_URL" | sed 's/.*\/\([^?]*\).*/\1/')
 pg_dump "$DB_URL" --format=custom --file="$BACKUP_DIR/db_${DATE}.dump"
 
 # Verify the dump is valid
-pg_restore --list "$BACKUP_DIR/db_${DATE}.dump" > /dev/null 2>&1
-if [ $? -eq 0 ]; then
+if pg_restore --list "$BACKUP_DIR/db_${DATE}.dump" > /dev/null 2>&1; then
     echo "Integrity check passed"
-else:
+else
     # Send alert and abort
     echo "Backup integrity FAILED!" | mail -s "Backup FAILED" you@email.com
     exit 1
@@ -1552,7 +1536,7 @@ import subprocess, sys, json, datetime, urllib.request
 from typing import Optional, Tuple
 
 VPS_HOST = "YOUR_VPS_IP"
-VPS_USER = "root"
+VPS_USER = "pang"   # Non-root deploy user from the hardening section (root SSH is disabled)
 BACKUP_DIR = "/opt/yourproject/backups"
 LOG_FILE  = "/var/log/yourproject/backup.log"
 FROM_ADDR = "backup-monitor@yourproject.com"
@@ -1602,14 +1586,14 @@ if code != 0:
 
 # 3. Check backup integrity
 latest_path = out.split("FILE:")[1].split(" ")[0]
-code, out, _ = ssh(f"sqlite3 {latest_path} 'PRAGMA integrity_check;'")
+code, out, _ = ssh(f"sudo sqlite3 {latest_path} 'PRAGMA integrity_check;'")
 if "ok" not in out.lower():
     send_alert(sg_key, "ALERT: Backup Integrity FAILED",
                f"Integrity check failed on {latest_path}\n{out}")
     sys.exit(1)
 
 # 4. Check backup log for errors
-code, out, _ = ssh(f"grep '{TODAY}.*FATAL' {LOG_FILE} || echo none")
+code, out, _ = ssh(f"sudo grep '{TODAY}.*FATAL' {LOG_FILE} || echo none")
 if out and out != "none":
     send_alert(sg_key, "ALERT: Backup Log Shows Errors", out)
     sys.exit(1)
@@ -1679,7 +1663,7 @@ def check_vps(host, name, services):
 # Check each project
 check_http("Your Project", "https://your-project.net")
 check_http("Straya Co", "https://strayaco.com.au")
-check_vps("root@YOUR_SECOND_VPS_IP", "Your Project VPS",
+check_vps("pang@YOUR_SECOND_VPS_IP", "Your Project VPS",
           ["your-project", "nginx", "postfix"])
 
 if ISSUES:
@@ -1709,7 +1693,7 @@ if ISSUES:
 # Pulls backups from VPS, keeps 14 days locally.
 set -euo pipefail
 
-VPS="root@YOUR_SECOND_VPS_IP"
+VPS="pang@YOUR_SECOND_VPS_IP"
 VPS_BACKUP_DIR="/opt/your-project/backups"
 LOCAL_BACKUP_DIR="/Users/you/Your Project-Net/backups"
 LOG_FILE="$LOCAL_BACKUP_DIR/pull.log"
@@ -1721,16 +1705,18 @@ log() { echo "[$(date)] $*" | tee -a "$LOG_FILE"; }
 log "Starting pull from VPS..."
 
 # Pull new/changed files only (--ignore-existing skips duplicates)
-rsync -avz --ignore-existing \
+# Root SSH is disabled by the hardening section, so pulls that read
+# root-owned paths run via passwordless sudo on the remote (pang is a sudoer).
+rsync -avz --ignore-existing --rsync-path="sudo rsync" \
     -e "ssh -o ConnectTimeout=10" \
     "$VPS:$VPS_BACKUP_DIR/" "$LOCAL_BACKUP_DIR/" 2>&1 | tee -a "$LOG_FILE"
 
 # Also pull the live database and configs directly
-rsync -avz \
+rsync -avz --rsync-path="sudo rsync" \
     "$VPS:/opt/your-project/.env" \
     "$LOCAL_BACKUP_DIR/.env" 2>&1
 
-rsync -avz \
+rsync -avz --rsync-path="sudo rsync" \
     "$VPS:/etc/postfix/main.cf" \
     "$VPS:/etc/nginx/sites-available/your-project.net" \
     "$LOCAL_BACKUP_DIR/" 2>&1
@@ -1750,7 +1736,7 @@ ls -lht "$LOCAL_BACKUP_DIR"/*.sqlite 2>/dev/null | head -6 | tee -a "$LOG_FILE"
 
         <p>Scripts don't run themselves. Here's the cron schedule that makes everything automatic:</p>
 
-        <pre><code># ── On the VPS (as root) ──────────────────────────────
+        <pre><code># ── On the VPS (as the deploy user; use sudo crontab -e if a job needs root-only paths) ──
 
 # Backup: daily at 3am — creates SQLite dump, config tar, GFS snapshots
 0 3 * * * /opt/your-project/scripts/backup.sh
@@ -1817,7 +1803,7 @@ launchctl load ~/Library/LaunchAgents/com.yourproject.pull-backups.plist</code><
 set -euo pipefail
 
 BACKUP_DIR="/Users/you/Your SaaS Project/backups"
-VPS="root@YOUR_VPS_IP"
+VPS="pang@YOUR_VPS_IP"   # Non-root deploy user (root SSH disabled by hardening)
 INSTALL_DIR="/opt/realform"
 DATE="${1}"
 
@@ -1832,24 +1818,24 @@ fi
 
 # Step 2: Stop the service
 echo "Stopping service..."
-ssh "$VPS" "systemctl stop realform"
+ssh "$VPS" "sudo systemctl stop realform"
 
 # Step 3: Drop and recreate database
 echo "Restoring database..."
 scp "$DB_BACKUP" "$VPS:/tmp/restore.dump"
 ssh "$VPS" "
     # Kill existing connections
-    psql -U youruser -d postgres \\
+    sudo -u postgres psql -d postgres \\
         -c \"SELECT pg_terminate_backend(pid) FROM pg_stat_activity \\
              WHERE datname = 'yourdb' AND pid <> pg_backend_pid();\"
-    dropdb --if-exists yourdb
-    createdb yourdb
-    pg_restore -d yourdb /tmp/restore.dump
+    sudo -u postgres dropdb --if-exists yourdb
+    sudo -u postgres createdb yourdb
+    sudo -u postgres pg_restore -d yourdb /tmp/restore.dump
     rm /tmp/restore.dump
 "
 
 # Step 4: Start the service
-ssh "$VPS" "systemctl start realform"
+ssh "$VPS" "sudo systemctl start realform"
 sleep 2
 
 # Step 5: Verify
@@ -1913,7 +1899,9 @@ rsync -avz /var/lib/postgresql/14/main/wal_archive/ /backups/wal/</code></pre>
 
         <p>Restoring from WAL involves replaying the archive to the exact second you want:</p>
 
-        <pre><code># In recovery.conf (PostgreSQL 12+) or postgresql.conf:
+        <pre><code># PostgreSQL 12+: put these in postgresql.conf and create the signal file
+# (touch /var/lib/postgresql/14/main/recovery.signal) so the server starts
+# in recovery mode. recovery.conf only exists on PostgreSQL 11 and earlier.
 restore_command = 'cp /var/lib/postgresql/14/main/wal_archive/%f %p'
 recovery_target_time = '2026-05-20 15:47:00 AEST'</code></pre>
 
@@ -1943,7 +1931,7 @@ recovery_target_time = '2026-05-20 15:47:00 AEST'</code></pre>
 
 <section class="post-content">
     <div class="container">
-        <h2>&#x1F9D1; Human — Email: Start Simple</h2>
+        <h2 id="email">&#x1F9D1; Human — Email: Start Simple</h2>
 
         <p>Email doesn't have to be hard. For most AI agent setups, you only need two things: a way to <strong>receive email</strong> (so your AI can check for instructions) and a way to <strong>send email</strong> (so your AI can notify you). Here's the simple path.</p>
 
@@ -2236,7 +2224,7 @@ git config --global user.email "agent-{slug}@your-domain.com"</code></pre>
 
         <hr>
 
-        <h2>&#x1F4DA; Complete Lessons Learned</h2>
+        <h2 id="lessons">&#x1F4DA; Complete Lessons Learned</h2>
 
         <p>Every one of these was paid for in downtime, debugging, or rework.</p>
 
@@ -2245,7 +2233,7 @@ git config --global user.email "agent-{slug}@your-domain.com"</code></pre>
                 <tr><th>#</th><th>Lesson</th><th>What Happens If You Skip It</th></tr>
             </thead>
             <tbody>
-                <tr><td>1</td><td><strong>Always PostgreSQL, never SQLite for production</strong></td><td>SQLite deadlocks on concurrent writes. Missing SQL features (ALTER COLUMN, ROW_NUMBER OVER). Migration mid-project is painful. The 5-minute PostgreSQL setup saves hours of rework.</td></tr>
+                <tr><td>1</td><td><strong>Always PostgreSQL, never SQLite, for the Flask/SaaS apps</strong></td><td>SQLite deadlocks on concurrent writes. Missing SQL features (ALTER COLUMN, ROW_NUMBER OVER). Migration mid-project is painful. The 5-minute PostgreSQL setup saves hours of rework. (This rule is about the companion apps — OpenClaw's own state has been SQLite-based since ~2026.8.)</td></tr>
                 <tr><td>2</td><td><strong>Rsync with explicit full destination paths</strong></td><td>Rsync strips subdirectories when given individual file sources. <code>rsync file.html user@host:/opt/project/templates/</code> works; <code>rsync file.html user@host:/opt/project/</code> puts it in the wrong place silently.</td></tr>
                 <tr><td>3</td><td><strong>Add <code>--checksum</code> for rewritten files</strong></td><td>Rsync skips files with matching timestamps even if content changed. A rewritten file with the same mtime gets silently skipped.</td></tr>
                 <tr><td>4</td><td><strong>Verify every deploy</strong></td><td>Check line counts, grep for a unique marker, confirm HTTP codes. Never assume rsync succeeded.</td></tr>
@@ -2310,7 +2298,7 @@ git config --global user.email "agent-{slug}@your-domain.com"</code></pre>
                 <h4>Contact</h4>
                 <ul>
                     <li>Sydney, Australia</li>
-                    <li><a href="mailto:hello@example.com">hello@example.com</a></li>
+                    <li><a href="mailto:vincent@strayaco.com.au">vincent@strayaco.com.au</a></li>
                 </ul>
             </div>
         </div>

@@ -102,7 +102,7 @@
 
 <section class="page-hero">
     <div class="container">
-        <p class="meta">1 April 2026 &mdash; Automation &amp; AI Agent</p>
+        <p class="meta">1 April 2026 &mdash; <strong>Updated 8 September 2026</strong> &mdash; Automation &amp; AI Agent</p>
         <h1>Email Processing with an AI Agent: Automated Inbox Triage</h1>
         <div>
             <span class="tag">Email</span>
@@ -241,7 +241,11 @@ for msg in messages:
 
 <h3>Step 6: Send Summary Report</h3>
 
-<p>Finally, the script sends a summary email:</p>
+<p>Finally, the script sends the summary email. Outbound summaries go through <strong>Postmark</strong> via the shared helper (<code>~/.openclaw/scripts/send_email.py</code>, Postmark primary) — not the AgentMail <code>messages/send</code> endpoint, which is treated as inbound/backup only:</p>
+
+<pre><code>python3 ~/.openclaw/scripts/send_email.py "Weekly Email Summary" "$BODY"</code></pre>
+
+<p>Where <code>$BODY</code> is the report below. The AgentMail <em>inbound</em> pipeline (fetch, label, trash, read-state) is unchanged.</p>
 
 <pre><code>Subject: Weekly Email Summary
 
@@ -265,21 +269,17 @@ Processed: 3 new emails
 
 <p>The whole pipeline runs on a schedule &mdash; Monday morning at 8 AM, before the work week starts:</p>
 
-<pre><code>{
-  "name": "Weekly Email Processing",
-  "schedule": {
-    "kind": "cron",
-    "expr": "0 8 * * 1",
-    "tz": "Australia/Melbourne"
-  },
-  "payload": {
-    "kind": "agentTurn",
-    "message": "Check and process new emails from the inbox."
-  },
-  "delivery": { "mode": "none" }
-}</code></pre>
+<pre><code># Current flag syntax (OpenClaw 2026.9.2+; verify with: openclaw cron add --help).
+# The legacy --job JSON format has been replaced by these flags.
+openclaw cron add \
+  --name "Weekly Email Processing" \
+  --cron "0 8 * * 1" \
+  --tz "Australia/Melbourne" \
+  --session isolated \
+  --message "Check and process new emails from the inbox." \
+  --no-deliver</code></pre>
 
-<p>The agent runs the full pipeline and emails a summary. No other interaction needed.</p>
+<p>The agent runs the full pipeline and emails a summary. No other interaction needed &mdash; <code>--session isolated</code> runs the job in an isolated session (Defence Layer 1 below) and <code>--no-deliver</code> disables fallback delivery to a chat, since the summary email is the only output.</p>
 
 <hr>
 
@@ -365,7 +365,7 @@ Processed: 3 new emails
 <tr><td>Mark as read</td><td><code>PATCH /v0/inboxes/{id}/messages/{mid}</code> → labels + "read"</td></tr>
 <tr><td>Trash message</td><td><code>PATCH /v0/inboxes/{id}/messages/{mid}</code> → labels + "trash"</td></tr>
 <tr><td>List trashed</td><td><code>GET /v0/inboxes/{id}/messages?include_trash=true</code></td></tr>
-<tr><td>Send email</td><td><code>POST /v0/inboxes/{id}/messages/send</code></td></tr>
+<tr><td>Send email</td><td><code>POST /v0/inboxes/{id}/messages/send</code> (backup only &mdash; Postmark via <code>send_email.py</code> is primary outbound)</td></tr>
 <tr><td>Cron schedule</td><td><code>0 8 * * 1</code> (Mondays 8 AM)</td></tr>
 <tr><td>Retention</td><td>14 days (configurable)</td></tr>
 </table>

@@ -105,7 +105,7 @@
 
 <section class="page-hero">
     <div class="container">
-        <p class="meta">4 May 2026 &mdash; Infrastructure</p>
+        <p class="meta">4 May 2026 &mdash; <strong>Updated 8 September 2026</strong> &mdash; Infrastructure</p>
         <h1>OpenClaw API Key Corruption: Anatomy of a Silent 401</h1>
         <div>
             <span class="tag">OpenClaw</span>
@@ -124,6 +124,10 @@
 <p>Your AI agent stops responding. Model switches fail silently. Cron jobs that ran reliably for weeks start returning errors. You check your config file — the API key is there, 35 characters, correct. You test it directly with <code>curl</code> — 200 OK. But the gateway keeps logging <code>401 Authentication Fails</code>.</p>
 
 <p>This is the story of a particularly insidious bug: how <strong>macOS launchd silently poisons your API keys with shell injection artifacts</strong>, why nothing in your config shows it, how to fix it permanently — and critically, why the original fix didn't stick and the problem kept coming back after every gateway restart.</p>
+
+<div class="callout">
+<strong>Version note (8 September 2026):</strong> This post was written against OpenClaw's pre-2026.8 file-based state (<code>~/.openclaw/.env</code> &rarr; service env &rarr; <code>models.json</code>). Since ~2026.8, OpenClaw state is SQLite-based (<code>~/.openclaw/state/</code>), and on OpenClaw &ge; 2026.8.1 the supported repair path is doctor migrations against the <em>stopped</em> gateway: <code>openclaw doctor --session-sqlite import --session-sqlite-all-agents</code>, then <code>openclaw doctor --fix --non-interactive</code>. The env/JSON file paths described below may no longer exist on current installs. The launchd <code>$()</code>-poisoning diagnosis itself is still valid and is exactly why that migration path exists — keep reading for the history and the general lesson.
+</div>
 
 <div class="callout">
 <strong>Related:</strong> If your dashboard goes offline entirely after updates (not just failing model calls), that's a separate issue: the LaunchAgent plist gets overwritten. See <a href="openclaw-dashboard-offline-fix.html" style="text-decoration:underline;">OpenClaw Dashboard Offline After Update? Here's the Fix</a> for the backup/restore workflow.
@@ -202,6 +206,10 @@
 
 <p>This priority chain is normal for OpenClaw and isn't a bug in itself — it's the standard way environment variables override config files. The bug is specifically that <strong>the installer writes a non-expandable shell command as the environment value</strong>.</p>
 
+<div class="callout">
+<strong>Historical note:</strong> This resolution chain is how OpenClaw &le; 2026.8.0 worked. On OpenClaw &ge; 2026.8.1, state lives in SQLite (<code>~/.openclaw/state/</code>); if the gateway refuses to boot after an upgrade, run the doctor migrations against the <em>stopped</em> gateway (see the version note at the top) rather than hand-editing these files. The ordering principle — environment overrides config — still holds.
+</div>
+
 <hr>
 
 <h2>The Recovery: Fix It in One Shot</h2>
@@ -266,13 +274,13 @@ openclaw gateway install --force</code></pre>
 # To:
 #   export DEEPSEEK_API_KEY='sk-your-real-35-char-key-here'
 
-# Or use this one-liner (substitute your real key):
+# Or use this one-liner — set key to YOUR real key first (sk-REPLACE... is a placeholder):
 python3 -c "
 import re
-key = 'sk-your-real-key-here'
+key = 'sk-REPLACE_WITH_YOUR_REAL_35_CHAR_KEY'
 with open('$HOME/.openclaw/service-env/ai.openclaw.gateway.env','r') as f:
     c = f.read()
-c = re.sub(r'export DEEPSEEK_API_KEY=.*', f\"export DEEPSEEK_API_KEY='***'\", c)
+c = re.sub(r'export DEEPSEEK_API_KEY=.*', f\"export DEEPSEEK_API_KEY='{key}'\", c)
 with open('$HOME/.openclaw/service-env/ai.openclaw.gateway.env','w') as f:
     f.write(c)
 print('Done')
@@ -333,7 +341,7 @@ curl -s -o /dev/null -w "%{http_code}" \
 
 <ol>
 <li><strong>FIRST: Fix <code>~/.openclaw/.env</code></strong> — resolve all <code>$(security ...)</code> patterns to real key values. This is the seed file; everything else is derived from it.</li>
-<li><strong>NEVER</strong> rely solely on <code>openclaw config set models.providers.{name}.apiKey</code> — it only writes <code>openclaw.json</code>, which is layer 4 in the priority chain</li>
+<li><strong>NEVER</strong> rely solely on <code>openclaw config set models.providers.{name}.apiKey</code> — it only writes <code>openclaw.json</code>, which is layer 3 in the priority chain</li>
 <li><strong>ALWAYS</strong> write API keys directly into <code>~/.openclaw/.env</code> and <code>~/.openclaw/service-env/ai.openclaw.gateway.env</code> as literal values</li>
 <li><strong>ALWAYS</strong> test with a direct <code>curl</code> after any key change</li>
 <li><strong>ALWAYS</strong> restart the gateway after changing keys</li>
@@ -409,10 +417,12 @@ curl -s -o /dev/null -w "%{http_code}" \
 
 <h2>Files Reference</h2>
 
+<p><strong>Note:</strong> These paths reflect the pre-2026.8 file-based layout this post was written against. On OpenClaw &ge; 2026.8.1 the supported repair path is doctor migrations against the <em>stopped</em> gateway (<code>openclaw doctor --session-sqlite import --session-sqlite-all-agents</code>, then <code>openclaw doctor --fix --non-interactive</code>), not hand-editing these files.</p>
+
 <table>
 <tr><th>File</th><th>Role</th></tr>
 <tr><td><code>~/.openclaw/.env</code></td><td><strong>State-dir dotenv — actual source of truth.</strong> Written by <code>openclaw setup</code>. Contains <code>$(security ...)</code> patterns on affected installs. <strong>Fix this first.</strong></td></tr>
-<tr><td><code>~/.openclaw/openclaw.json</code></td><td>Config file — API keys live here (layer 4)</td></tr>
+<tr><td><code>~/.openclaw/openclaw.json</code></td><td>Config file — API keys live here (layer 3)</td></tr>
 <tr><td><code>~/.openclaw/service-env/ai.openclaw.gateway.env</code></td><td>Runtime env file — <strong>keys here win over config at runtime</strong> (layer 1). Generated from <code>~/.openclaw/.env</code> on install.</td></tr>
 <tr><td><code>~/.openclaw/agents/main/agent/models.json</code></td><td>Agent model catalog — auto-patched by WatchPath (layer 4)</td></tr>
 <tr><td><code>~/Library/LaunchAgents/ai.openclaw.gateway.plist</code></td><td>LaunchAgent plist — check for <code>$()</code> in EnvironmentVariables (layer 2)</td></tr>

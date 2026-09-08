@@ -103,7 +103,7 @@
 
 <section class="page-hero">
     <div class="container">
-        <p class="meta">4 May 2026 &mdash; Infrastructure &mdash; <strong>Updated 21 May 2026</strong> (npm check fix, expanded features, TTY requirement)</p>
+        <p class="meta">4 May 2026 &mdash; <strong>Updated 8 September 2026</strong> &mdash; Infrastructure (previously updated 21 May 2026)</p>
         <h1>OpenClaw Dashboard Offline After Update? Here's the Fix</h1>
         <div>
             <span class="tag">OpenClaw</span>
@@ -218,6 +218,12 @@ echo "  ~/.openclaw/scripts/post-update-restore.sh $BACKUP_DIR"</code></pre>
 # Run AFTER updating OpenClaw if the dashboard is offline.
 # Usage: ~/.openclaw/scripts/post-update-restore.sh [backup_dir]
 # If no backup_dir given, uses the most recent backup.
+#
+# NOTE (8 September 2026): the plist/JSON restore below is the pre-2026.8.1
+# flow. OpenClaw >= 2026.8.1 keeps state in SQLite (~/.openclaw/state/) — if
+# the gateway won't boot after an update, prefer the doctor migrations in the
+# "Manual Recovery" section of the blog post (run against the STOPPED
+# gateway). This script remains for older installs and as a safety net.
 
 set -e
 
@@ -250,10 +256,13 @@ if [ -f "$BACKUP_DIR/ai.openclaw.gateway.plist" ]; then
     fi
 fi
 
-# 2. Sync API keys into models.json
+# 2. Sync API keys into models.json (legacy pre-2026.8 step — OpenClaw
+#    >= 2026.8 keeps model state in SQLite; doctor migrations are the
+#    supported path, so this is harmless if the JSON files are absent)
 echo "Syncing API keys..."
-python3 &lt;&lt; 'EOF'
+python3 &lt;&lt; 'EOF' || echo "- models.json sync skipped (legacy files absent)"
 import json
+import os
 
 with open(os.path.expanduser(
     '~/.openclaw/openclaw.json'), 'r') as f:
@@ -277,9 +286,21 @@ with open(os.path.expanduser(
 print('✓ API keys synced to models.json')
 EOF
 
-# 3. Repair and reload (safe method)
+# 3. Repair and reload.
+# OpenClaw >= 2026.8.1: run the SQLite-state doctor migrations against the
+# STOPPED gateway; plain `doctor --yes` is the pre-2026.8.1 flow.
 echo "Running doctor to repair gateway..."
-openclaw doctor --yes 2>&1 || true
+if openclaw doctor --yes 2>&1; then
+    echo "✓ Doctor repair OK"
+else
+    echo "Doctor repair returned non-zero — running SQLite-state migrations..."
+    launchctl bootout gui/$(id -u)/ai.openclaw.gateway 2>/dev/null || true
+    openclaw doctor --session-sqlite import --session-sqlite-all-agents
+    openclaw doctor --fix --non-interactive
+    echo "✓ Migrations complete — restarting gateway..."
+    launchctl bootstrap gui/$(id -u) \
+        ~/Library/LaunchAgents/ai.openclaw.gateway.plist 2>/dev/null || true
+fi
 
 echo "Verifying..."
 sleep 3
@@ -341,6 +362,10 @@ openclaw doctor --yes
 
 <p>If you don't have the scripts yet and the dashboard is offline, here's the manual recovery sequence:</p>
 
+<div class="callout">
+<strong>Version note (8 September 2026):</strong> Steps 1&ndash;3 below reflect the pre-2026.8.1 flow (plist restore, models.json hand-sync, <code>doctor --yes</code>). On OpenClaw &ge; 2026.8.1, state is SQLite-based and the supported repair is doctor migrations run against the <strong>stopped</strong> gateway — use the &ge; 2026.8.1 commands in Step 3 if the gateway refuses to boot after an update.
+</div>
+
 <h3>Step 1: Restore the plist</h3>
 <pre><code>cp ~/Library/LaunchAgents/ai.openclaw.gateway.plist.backup \
    ~/Library/LaunchAgents/ai.openclaw.gateway.plist</code></pre>
@@ -367,7 +392,23 @@ print('Keys synced')
 "</code></pre>
 
 <h3>Step 3: Repair with doctor</h3>
-<pre><code>openclaw doctor --yes
+<pre><code># Pre-2026.8.1 flow:
+openclaw doctor --yes
+sleep 3
+openclaw gateway status</code></pre>
+
+<p><strong>On OpenClaw &ge; 2026.8.1</strong> (SQLite state), stop the gateway and run the doctor migrations against the <em>stopped</em> gateway, then start and verify:</p>
+
+<pre><code># 1. Stop the gateway (migrations must run while it is stopped)
+launchctl bootout gui/$(id -u)/ai.openclaw.gateway 2>/dev/null || true
+
+# 2. Migrate legacy state into the SQLite stores (~/.openclaw/state/)
+openclaw doctor --session-sqlite import --session-sqlite-all-agents
+openclaw doctor --fix --non-interactive
+
+# 3. Start the gateway
+launchctl bootstrap gui/$(id -u) \
+    ~/Library/LaunchAgents/ai.openclaw.gateway.plist
 sleep 3
 openclaw gateway status</code></pre>
 
@@ -379,7 +420,7 @@ openclaw gateway status</code></pre>
 
 <h2>Hardening the Plist (Prevention)</h2>
 
-<p>While we can't stop the update process from generating a fresh plist, we can make recovery safer. Instead of the destructive <code>install --force</code> (which uses bootout→bootstrap and can leave the LaunchAgent orphaned), use <strong><code>openclaw doctor --yes</code></strong> — it uses the safer <code>enable→bootstrap→kickstart</code> fallback pattern. If the bootstrap fails, the existing LaunchAgent isn't orphaned.</p>
+<p>While we can't stop the update process from generating a fresh plist, we can make recovery safer. Instead of the destructive <code>install --force</code> (which uses bootout→bootstrap and can leave the LaunchAgent orphaned), use <strong><code>openclaw doctor --yes</code></strong> — it uses the safer <code>enable→bootstrap→kickstart</code> fallback pattern. If the bootstrap fails, the existing LaunchAgent isn't orphaned. (On OpenClaw &ge; 2026.8.1, prefer the SQLite-state doctor migrations in Manual Recovery Step 3 — plain <code>doctor --yes</code> is the pre-2026.8.1 flow.)</p>
 
 <div class="callout">
 <strong>Note:</strong> The automated <code>update-openclaw.sh</code> script (described below) handles the plist, PATH, and LaunchAgent lifecycle automatically. If you're using the automated script, manually editing the plist to add PATH is no longer necessary.
@@ -388,9 +429,9 @@ openclaw gateway status</code></pre>
 <p>Edit <code>~/Library/LaunchAgents/ai.openclaw.gateway.plist</code> and add this inside the <code>&lt;dict&gt;</code> under <code>EnvironmentVariables</code>:</p>
 
 <pre><code>&lt;key&gt;PATH&lt;/key&gt;
-&lt;string&gt;/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:\
-/usr/bin:/bin:/usr/sbin:/sbin:$HOME/.local/bin:\
-$HOME/.npm-global/bin:$HOME/bin&lt;/string&gt;</code></pre>
+&lt;string&gt;/opt/homebrew/bin:/opt/homebrew/sbin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/&lt;username&gt;/.local/bin:/Users/&lt;username&gt;/.npm-global/bin:/Users/&lt;username&gt;/bin&lt;/string&gt;</code></pre>
+
+<p><strong>launchd does not expand <code>$HOME</code> or backslash line continuations inside plist strings</strong> — write the full absolute path on a single line and replace <code>&lt;username&gt;</code> with your macOS username. (<code>$HOME</code> and <code>\</code>-continuations are fine in <code>~/.openclaw/.env</code> and shell scripts; in a plist <code>&lt;string&gt;</code> they are passed literally.)</p>
 
 <p>This ensures the LaunchAgent can find <code>openclaw</code>, <code>node</code>, and any other tools it needs, even after an update changes the environment.</p>
 
@@ -429,7 +470,7 @@ openclaw gateway status</code></pre>
 <tr><th>File</th><th>Purpose</th></tr>
 <tr><td><code>~/.openclaw/.env</code></td><td><strong>State-dir dotenv — source of truth for API keys.</strong> Fix <code>$(security ...)</code> patterns here first. See <a href="openclaw-api-key-corruption.html" style="text-decoration:underline;">API Key Corruption post</a>.</td></tr>
 <tr><td><code>~/Library/LaunchAgents/ai.openclaw.gateway.plist</code></td><td>Active LaunchAgent config (fragile during updates)</td></tr>
-<tr><td><code>~/*.plist.backup</code></td><td>Working backup — your insurance policy</td></tr>
+<tr><td><code>~/Library/LaunchAgents/ai.openclaw.gateway.plist.backup</code></td><td>Working backup — your insurance policy</td></tr>
 <tr><td><code>~/.openclaw/openclaw.json</code></td><td>Source of truth for all config and API keys</td></tr>
 <tr><td><code>~/.openclaw/agents/main/agent/models.json</code></td><td>Model config (must stay in sync with openclaw.json)</td></tr>
 <tr><td><code>~/.openclaw/scripts/pre-update-backup.sh</code></td><td>Pre-update backup script</td></tr>

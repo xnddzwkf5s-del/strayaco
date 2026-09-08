@@ -98,7 +98,7 @@
 
 <section class="page-hero">
     <div class="container">
-        <p class="meta">23 May 2026 &mdash; AI / OpenClaw / Self-Improvement</p>
+        <p class="meta">23 May 2026 &mdash; <strong>Updated 8 September 2026</strong> &mdash; AI / OpenClaw / Self-Improvement</p>
         <h1>OpenClaw Recursive Learning: Teaching AI Agents to Learn from Their Mistakes</h1>
         <p style="color:rgba(255,255,255,0.7);margin-top:1rem;font-size:1.05rem;">Two-layer self-improvement with narrative + structured memory, recurrence tracking, automated review cadence, and cross-referenced learning files. Production-tested on OpenClaw since v4.</p>
         <div>
@@ -192,7 +192,7 @@
 │                                        │     │                                        │
 │  Daily cron: pull_worker_rules.sh      │     │  Startup injection: AGENTS.md step     │
 │  OpenClaw cron: weekly + monthly       │     │  3b checks .learnings/ items           │
-│  Email: rules_alert.py → SendGrid      │     │                                        │
+│  Email: rules_alert.py → Postmark      │     │                                        │
 └────────────────────────────────────────┘     └────────────────────────────────────────┘
 </pre>
 <p><strong>Data flow is unidirectional for writes.</strong> Conductor pushes rules to Worker. Worker writes locally and Conductor pulls. Worker never initiates connections to the Mac mini. This simplifies firewall rules and reduces the attack surface.</p>
@@ -438,7 +438,10 @@ def load_rules(session_scopes: list) -> list:
         PRIORITY_ORDER.get(r.get("priority", "normal"), 99),
         -r.get("trigger_count", 0),
         r.get("created", "")))
-    return active[:MAX_RULES]</code></pre>
+    # Contradiction handling archives both rules — never return an archived or
+    # stale rule (matches the "Neither is loaded" behaviour in section 8.3).
+    return [r for r in active
+            if r["maturity"] not in ("archived", "stale")][:MAX_RULES]</code></pre>
 <p><strong>Key details:</strong> load_jsonl() skips corrupt lines—a partially-written line from a crash won't block startup. check_age() auto-renews active rules. Contradiction detection uses the contradicts field. The sort key prioritises critical rules, then high-trigger-count rules, then newest.</p>
 
 <h3>7.2 write_rule.py — Post-Session Writer</h3>
@@ -634,15 +637,15 @@ chmod 755 /opt/openclaw/workspace/scripts/write_rule.py
 chmod 755 /opt/openclaw/workspace/scripts/rules_alert.py</code></pre>
 <h3>11.7 Wire Up Agent Startup</h3>
 <p>Add to your agent's AGENTS.md as step 3b:</p>
-<pre><code>3b. **Check .learnings/ items:** Run review-weekly.sh for high-priority items,
-    recurrence warnings, and active promotions
+<pre><code>3b. **Check .learnings/ items:** Run load_rules.py and review its output for
+    high-priority items, recurrence warnings, and active promotions
 
 # Before session prompt assembly:
 python3 /opt/openclaw/workspace/scripts/load_rules.py general,wescan
 # Inject output: "The following rules from past sessions apply: ..."</code></pre>
 <h3>11.8 Wire Up Post-Session Reflection</h3>
 <pre><code>export WRKR_SESSION_START="2026-05-23T03:00:00Z"
-echo '{"rule":"Always check DNS before assuming DKIM works","category":"sendgrid","scope":["wescan"],"priority":"high","source":"worker"}' \
+echo '{"rule":"Always check DNS before assuming DKIM works","category":"postmark","scope":["wescan"],"priority":"high","source":"worker"}' \
   | python3 /opt/openclaw/workspace/scripts/write_rule.py</code></pre>
 <h3>11.9 Set Up the Review Cadence</h3>
 <p>Install the review scripts and configure OpenClaw cron:</p>
@@ -663,7 +666,7 @@ LOCAL="/tmp/rules-alerts/"
 rsync -az "$REMOTE" "$LOCAL" --include='*.json' --exclude='*'
 for alert in "$LOCAL"*.json; do
   [ -f "$alert" ] || continue
-  python3 /opt/openclaw/scripts/send_email.py \
+  python3 ~/.openclaw/workspace/scripts/send_email.py \
     --to you@example.com \
     --subject "[T-Learning Alert] $(jq -r .type "$alert")" \
     --body "$(jq -r .message "$alert")"
@@ -725,7 +728,7 @@ done</code></pre>
                 <h4>Contact</h4>
                 <ul>
                     <li>Sydney, Australia</li>
-                    <li><a href="mailto:hello@example.com">hello@example.com</a></li>
+                    <li><a href="mailto:vincent@strayaco.com.au">vincent@strayaco.com.au</a></li>
                 </ul>
             </div>
         </div>
