@@ -108,7 +108,7 @@
 
 <section class="page-hero">
     <div class="container">
-        <p class="meta">30 April 2026 &mdash; Office IT &amp; Automation</p>
+        <p class="meta">30 April 2026 &mdash; <strong>Updated 8 September 2026</strong> &mdash; Office IT &amp; Automation</p>
         <h1>Network Drive Mapping That Actually Works</h1>
         <p class="subhead">A simple script that makes NAS drives behave reliably &mdash; no more "disconnected network drive" errors every time someone reboots.</p>
         <div style="margin-top:1rem;">
@@ -165,7 +165,7 @@
       "Guest-Network"
     ],
     "AllowedSubnets": [
-      "192.168.86."
+      "192.168.1."
     ]
   },
   "NAS": {
@@ -197,7 +197,7 @@
 <li><strong>Check network</strong> &mdash; is the machine on the right SSID or subnet? No &rarr; exit cleanly.</li>
 <li><strong>Validate NAS</strong> &mdash; can we reach the NAS? No &rarr; log the error, exit.</li>
 <li><strong>Remove stale connections</strong> &mdash; clean up any broken drive letters from previous sessions.</li>
-<li><strong>Map drives</strong> &mdash; connect P: to \\NAS\Projects, S: to \\NAS\Shared, etc.</li>
+<li><strong>Map drives</strong> &mdash; connect P: to \\192.168.1.100\Projects, S: to \\192.168.1.100\Shared, etc.</li>
 <li><strong>Log results</strong> &mdash; if logging is enabled, write success/failure to the log file.</li>
 </ol>
 

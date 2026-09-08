@@ -101,7 +101,7 @@
 
 <section class="page-hero">
     <div class="container">
-        <p class="meta">2 June 2026 &mdash; Smart Home / Automation</p>
+        <p class="meta">2 June 2026 &mdash; <strong>Updated 8 September 2026</strong> &mdash; Smart Home / Automation</p>
         <h1>Monitoring Home Appliances with Arlec Grid Connect Plugs + Tuya API + OpenClaw</h1>
         <div>
             <span class="tag">Arlec</span>
@@ -209,7 +209,7 @@ python3 -m tinytuya.scan</code></pre>
 <hr>
 
 <h2>Step 4: The Energy Collection Script</h2>
-<p>Here's the script that runs every 6 days and queries each plug directly over your local network &mdash; no cloud dependency needed. The <code>tinytuya</code> library sends a UDP discovery broadcast to find each plug, then reads the cumulative energy counter (DPS 25) straight off the device over TCP.</p>
+<p>Here's the script that runs once a week and queries each plug directly over your local network &mdash; no cloud dependency needed. The <code>tinytuya</code> library sends a UDP discovery broadcast to find each plug, then reads the cumulative energy counter (DPS 25) straight off the device over TCP.</p>
 
 <pre><code>#!/usr/bin/env python3
 """
@@ -255,7 +255,7 @@ def query_device(dev_id, ip, local_key):
 
 <table>
 <tr><th>Job</th><th>Schedule</th><th>What it does</th></tr>
-<tr><td><strong>Energy &mdash; Data Collection</strong></td><td>Every 6 days</td><td>Runs <code>energy_collect.py --force</code> to pull cumulative energy from all 4 plugs</td></tr>
+<tr><td><strong>Energy &mdash; Data Collection</strong></td><td>Weekly &mdash; Sunday 6 AM</td><td>Runs <code>energy_collect.py --force</code> to pull cumulative energy from all 4 plugs</td></tr>
 <tr><td><strong>Energy &mdash; Monthly Report</strong></td><td>1st of each month</td><td>Generates an HTML report and emails it to my inbox</td></tr>
 </table>
 
@@ -317,7 +317,7 @@ CREATE TABLE monthly_reports (
 <hr>
 
 <h2>Improvements I'd Make</h2>
-<p><strong>Real-time monitoring.</strong> The current setup polls every 6 days. If you want to catch short-duration appliances (kettle, microwave, toaster), you need polling every 5-15 minutes. The local <code>tinytuya</code> protocol supports this, but you're trading off WiFi chatter for granularity.</p>
+<p><strong>Real-time monitoring.</strong> The current setup polls weekly. If you want to catch short-duration appliances (kettle, microwave, toaster), you need polling every 5-15 minutes. The local <code>tinytuya</code> protocol supports this, but you're trading off WiFi chatter for granularity.</p>
 
 <p><strong>PostgreSQL instead of SQLite.</strong> If you're running this at scale, SQLite handles concurrent writes poorly. The monthly report generation collides with the collection script. A proper PostgreSQL database would be more robust.</p>
 

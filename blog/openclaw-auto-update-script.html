@@ -156,6 +156,8 @@
             <li><strong>Notification</strong> — Sends an email on success, on rollback, or on critical failure, with versions and the log path.</li>
         </ol>
 
+        <p><strong>Step mapping:</strong> These ten behaviours map onto the script's eight numbered log steps (Step 1/8&ndash;8/8): the pre-update backup and the SQLite state snapshot (behaviours 1 and 3) fold into Steps 1&ndash;2 &mdash; the snapshot is taken at the end of Step 2, once the gateway is stopped &mdash; behaviour 2 is Step 2, behaviour 4 spans Steps 3&ndash;4 (cask, then npm CLI), behaviour 5 is Step 5, behaviours 6 and 7 are Steps 6 and 7, and behaviour 8 runs in Step 8. Behaviour 9 (rollback) is not a numbered step &mdash; it replaces the normal completion path whenever a verification step fails &mdash; and behaviour 10 (notification) fires at the end of every path: success, rollback, or critical failure.</p>
+
         <div class="callout">
             <strong>File lock safety.</strong> The script writes a PID lock file to prevent concurrent updates. If the lock is stale (process died), it cleans up automatically.
         </div>
@@ -271,7 +273,6 @@ FORCE=0
 
 GATEWAY_PORT=18789
 GATEWAY_HOST="127.0.0.1"
-GATEWAY_URL="http://${GATEWAY_HOST}:${GATEWAY_PORT}"
 GATEWAY_LABEL="ai.openclaw.gateway"
 GATEWAY_PLIST="${HOME}/Library/LaunchAgents/${GATEWAY_LABEL}.plist"
 
@@ -804,7 +805,7 @@ else
     fi
 fi
 
-# === Step 6: Verify Gateway Running ========================================
+# === Step 7: Verify Gateway Running ========================================
 
 info "Step 7/8: Verifying gateway is running..."
 START_TIME=$(date +%s)
@@ -827,7 +828,7 @@ for ((attempt=1; attempt&lt;=START_RETRIES; attempt++)); do
             warn "Gateway responded but not yet stable (attempt ${attempt})"
         fi
     else
-        LAST_ERROR="No response from ${GATEWAY_URL} (attempt ${attempt}/${START_RETRIES})"
+        LAST_ERROR="No response from $(gateway_probe_url) (attempt ${attempt}/${START_RETRIES})"
         warn "${LAST_ERROR}"
 
         # Check if process is at least running
