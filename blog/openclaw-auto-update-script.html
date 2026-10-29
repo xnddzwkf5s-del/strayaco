@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OpenClaw Auto-Update Script — Fail-Safe, Self-Healing, Production-Ready - Straya Co Blog</title>
-    <meta name="description" content="A complete, battle-tested bash script for updating OpenClaw on macOS — pre-update backups, SQLite state snapshots, HTTPS-aware verified startup, and a rollback that restores npm package + state, not just config. Full source code included and explained.">
+    <meta name="description" content="A complete, battle-tested bash script for updating OpenClaw on macOS — Node runtime preflight, npm self-healing, pre-update backups, SQLite state snapshots, HTTPS-aware verified startup, abort-safe service recovery, and a rollback that restores npm package + state, not just config. Full source code included and explained.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -108,7 +108,7 @@
 
 <section class="page-hero">
     <div class="container">
-        <p class="meta">19 July 2026 — <strong>Updated 8 September 2026</strong> — Open Source / AI Infrastructure</p>
+        <p class="meta">19 July 2026 — <strong>Updated 29 October 2026</strong> — Open Source / AI Infrastructure</p>
         <h1>OpenClaw Auto-Update Script</h1>
         <p style="color:rgba(255,255,255,0.7);margin-top:1rem;font-size:1.05rem;">A fail-safe, self-healing, production-ready bash script for updating OpenClaw on macOS. Full source code included.</p>
         <div>
@@ -140,30 +140,33 @@
         <h2 id="why">Why an update script?</h2>
         <p>OpenClaw bundles an agent runtime (Gateway) distributed via Homebrew cask and a CLI tool distributed via npm. Updates arrive regularly. If the gateway goes down mid-update and doesn't come back — you lose scheduled jobs, email processing, and agent responsiveness until you fix it manually.</p>
         <p>This script makes updates a fire-and-forget operation. It backs up your state, stops the gateway cleanly, upgrades both the cask and CLI runtime, starts the gateway with verification, and rolls back automatically if anything goes wrong.</p>
-        <p>It's been in daily production use for months on a Mac mini running 24/7 — and that production history is the point. Two real incidents (the 2026.8.1 and 2026.9.2 upgrades) exposed failure modes no amount of theorising would have uncovered: a plain-HTTP readiness probe pointed at an HTTPS gateway, and a binary-only rollback that left the old version unable to boot against already-migrated SQLite. Both are fixed in the version below, with each incident documented in the script's header changelog.</p>
+        <p>It's been in daily production use for months on a Mac mini running 24/7 — and that production history is the point. Four real incidents (the 2026.8.1, 2026.9.2, 2026.9.4 and 2026.10.8 upgrades) exposed failure modes no amount of theorising would have uncovered: a plain-HTTP readiness probe pointed at an HTTPS gateway, a binary-only rollback that left the old version unable to boot against already-migrated SQLite, a Node runtime the service could not see, and an npm upgrade that completed before its own config write failed. All are fixed in the version below, with each incident documented in the script's header changelog.</p>
 
         <h2 id="what-it-does">What it does</h2>
         <ol>
             <li><strong>Pre-update backup</strong> — Calls the companion backup script before touching anything</li>
             <li><strong>Graceful gateway stop</strong> — <code>launchctl bootout</code>, then SIGTERM, then SIGKILL only as last resort (30&nbsp;s budget). Also unloads a crash-looping service found "loaded but not running" so it cannot respawn mid-update.</li>
             <li><strong>SQLite state snapshot</strong> — While the gateway is stopped, the per-agent and shared-state SQLite stores are WAL-checkpointed and copied into the backup so a failed upgrade can be rolled back atomically.</li>
-            <li><strong>Brew cask + npm CLI upgrade</strong> — Both components checked and upgraded independently, each retried twice on failure.</li>
+            <li><strong>Node runtime preflight</strong> — Reads the target release's <code>engines.node</code>, smoke-tests each installed candidate (a binary can exist but fail to launch), and selects a runtime that satisfies it before anything is stopped.</li>
+            <li><strong>npm write preflight</strong> — Verifies the npm global prefix and npm's own <code>npmrc</code> are writable, repairing the <code>0400</code> mode Homebrew leaves behind after a Node upgrade.</li>
+            <li><strong>Brew cask + npm CLI upgrade</strong> — Both components are checked and upgraded independently, each retried twice. If npm exits non-zero after already installing the target version, the installed version wins and the run continues.</li>
             <li><strong>Pre-start validation &amp; migration</strong> — Checks <code>gateway.trustedProxies</code> (2026.8.1+ ingress attribution), imports any legacy <code>exec-approvals.json</code>, and runs session-store migration + <code>doctor</code> repairs against the <em>stopped</em> gateway so the new code can boot.</li>
-            <li><strong>Gateway restart</strong> — Tries <code>launchctl bootstrap</code>, then <code>load</code>, then <code>kickstart</code>.</li>
+            <li><strong>Gateway restart</strong> — Reuses an already-loaded LaunchAgent with <code>kickstart -k</code>, otherwise tries <code>bootstrap</code> → <code>load</code> → <code>kickstart</code>. Success is never inferred from launchctl's exit status.</li>
             <li><strong>Scheme-aware verified startup</strong> — Probes with the correct scheme (<code>https</code> + <code>curl -k</code> when <code>gateway.tls.enabled</code>), up to 5 retries, requiring 2 consecutive stable probes.</li>
+            <li><strong>Abort safety</strong> — If any step fails after the gateway has been stopped, <code>cleanup()</code> restarts and verifies the service instead of leaving it down.</li>
             <li><strong>Post-update safety check</strong> — Schedules a 5-minute-delayed cron check for the "started then crashed" edge case (new CLI syntax, legacy fallback, heartbeat marker as last resort).</li>
             <li><strong>Real rollback</strong> — Stops lingering processes, restores the SQLite state snapshot, reinstalls the previous npm package, restores config, then verifies with a real probe before declaring success.</li>
             <li><strong>Notification</strong> — Sends an email on success, on rollback, or on critical failure, with versions and the log path.</li>
         </ol>
 
-        <p><strong>Step mapping:</strong> These ten behaviours map onto the script's eight numbered log steps (Step 1/8&ndash;8/8): the pre-update backup and the SQLite state snapshot (behaviours 1 and 3) fold into Steps 1&ndash;2 &mdash; the snapshot is taken at the end of Step 2, once the gateway is stopped &mdash; behaviour 2 is Step 2, behaviour 4 spans Steps 3&ndash;4 (cask, then npm CLI), behaviour 5 is Step 5, behaviours 6 and 7 are Steps 6 and 7, and behaviour 8 runs in Step 8. Behaviour 9 (rollback) is not a numbered step &mdash; it replaces the normal completion path whenever a verification step fails &mdash; and behaviour 10 (notification) fires at the end of every path: success, rollback, or critical failure.</p>
+        <p><strong>Step mapping:</strong> These thirteen behaviours map onto the script's eight numbered log steps (Step 1/8&ndash;8/8). Behaviours 4 and 5 are preflight checks that run before Step 1 &mdash; if either fails, nothing is stopped. Behaviours 1 and 3 fold into Steps 1&ndash;2 (the snapshot is taken at the end of Step 2, once the gateway is stopped), behaviour 2 is Step 2, behaviour 6 spans Steps 3&ndash;4, behaviour 7 is Step 5, behaviours 8 and 9 are Steps 6 and 7, and behaviour 11 runs in Step 8. Behaviours 10, 12 and 13 sit outside the numbered path: abort safety fires on any non-zero exit after Step 2, rollback replaces the completion path when verification fails, and notification ends every path.</p>
 
         <div class="callout">
             <strong>File lock safety.</strong> The script writes a PID lock file to prevent concurrent updates. If the lock is stale (process died), it cleans up automatically.
         </div>
 
         <h2 id="script">Full script</h2>
-        <p>This is the current production version (8 September 2026) — the header comment doubles as a changelog and documents both incidents below. Save it as <code>~/.openclaw/scripts/update-openclaw.sh</code> and make it executable with <code>chmod +x</code>. Set the <code>ALERT_EMAIL</code> variable at the top (placeholder shown) and, if you use the companion scripts, keep <code>pre-update-backup.sh</code> and <code>post-update-restore.sh</code> in the same directory.</p>
+        <p>This is the current production version (29 October 2026) — the header comment doubles as a changelog and documents the incidents below. Save it as <code>~/.openclaw/scripts/update-openclaw.sh</code> and make it executable with <code>chmod +x</code>. Set the <code>ALERT_EMAIL</code> variable at the top (placeholder shown) and, if you use the companion scripts, keep <code>pre-update-backup.sh</code> and <code>post-update-restore.sh</code> in the same directory.</p>
 
 <pre>#!/bin/bash
 # =============================================================================
@@ -173,34 +176,131 @@
 # Run with: bash ~/.openclaw/scripts/update-openclaw.sh
 # You'll be asked for your Mac password ONCE at the start (for brew + npm).
 #
-# This script:
-#   1. Backs up current state (calls pre-update-backup.sh)
-#   2. Gracefully stops the gateway with verification
-#   3. Snapshots the SQLite stores (agent + shared state) while stopped
-#   4. Upgrades the cask (brew) and CLI runtime (npm)
-#   5. Validates gateway.trustedProxies (2026.8.1+ ingress attribution)
-#   6. Runs legacy-state migrations/repairs while the gateway is stopped
-#   7. Starts the gateway directly via launchctl bootstrap/load/kickstart
-#   8. Verifies the gateway is running with a scheme-aware probe (https when
-#      gateway.tls.enabled=true) plus process-stability checks
-#   9. Rolls back (SQLite state + config + npm package) if startup fails
-#  10. Writes a timestamp file for the heartbeat safety net
-#  11. Sends a notification email on success or failure
+# Purpose
+#   Update a Homebrew/npm-installed OpenClaw on macOS with a verified
+#   stop → upgrade → migrate → start → verify → rollback pipeline. Safe to
+#   re-run: stages are idempotent and an aborted run restores the gateway.
 #
-# Usage: bash update-openclaw.sh [--force]
-#   --force  Skip prompts (auto-accept the trustedProxies narrowing fix)
+# Requirements
+#   - macOS with the Gateway installed as a LaunchAgent (ai.openclaw.gateway)
+#   - Homebrew (Apple Silicon: /opt/homebrew)
+#   - curl, python3, launchctl, npm
+#   - ~/.openclaw/.env for Postmark email notifications (optional)
+#   - A node satisfying the target release's engines.node (checked at runtime)
 #
-# Exit codes:
-#   0  — Update successful, gateway verified running
-#   1  — Pre-flight failure (backup, stop, or connectivity)
-#   2  — Upgrade failure (brew/npm)
-#   3  — Gateway failed to start after update (and rollback attempted)
-#   4  — Lock contention (another update in progress)
-#   5  — Execution interrupted / timeout
+# Usage
+#   bash update-openclaw.sh [--force]
+#     --force  Skip prompts (auto-accept the trustedProxies narrowing fix)
+#
+# Exit codes
+#   0   Success — gateway verified running
+#   1   Pre-flight failure (connectivity, backup, stop, or port still in use)
+#   2   Package/npm failure (preflight or update); cleanup() restores the service
+#   3   Gateway failed to start, rollback succeeded
+#   4   Lock contention (another update is already running)
+#   5   Gateway failed to start AND rollback failed (manual recovery required)
+#   6   No compatible Node runtime (aborts before stopping anything)
+#   130 Interrupted (SIGINT); cleanup() restores the service if it was stopped
+#
+# What it does (log lines say "Step N/8"; preflight is step 0)
+#   0. Preflight: lock, connectivity, Node engine range, npm writability
+#   1. Backup: pre-update-backup.sh → ~/.openclaw/backups/&lt;timestamp&gt;/ (~53 MB:
+#      config, .env, plists, agent models, workspaces, services)
+#   2. Stop: launchctl bootout, poll for exit, escalate SIGTERM → SIGKILL,
+#      then verify the port is free
+#   3. Snapshot SQLite state (agents/*/agent/openclaw-agent.sqlite +
+#      state/openclaw.sqlite, WAL-checkpointed) into the backup dir. Required
+#      for a safe binary rollback.
+#   4. Upgrade: brew cask (non-fatal) + npm CLI update (version-reconciled, so
+#      an npm post-install error does not abort a completed package swap)
+#   5. Validate/migrate: trustedProxies, legacy exec-approvals, session stores,
+#      doctor --fix — all while the gateway is stopped
+#   6. Start: repoint the service node if needed; reuse an already-loaded job
+#   7. Verify: scheme-aware HTTP(S) probe + stability checks
+#   8. Report: plugin drift, timestamp file, 5-min safety cron, email
+#   On failure after step 2: cleanup() restarts the gateway. If the gateway
+#   fails verification, rollback restores SQLite state, the npm package and
+#   the config, then verifies again before claiming success.
+#
+# Safety invariants
+#   - Never leave the gateway down: cleanup() restarts after any abort
+#   - Never trust launchctl exit status: only probes decide success
+#   - Never roll back binaries without state (SQLite snapshot comes first)
+#   - Never hand-edit ~/.openclaw/service-env/ (generated directory)
+#   - Never run plugin commands from a workspace cwd (use /tmp)
+#
+# Configuration (edit here, not in a wrapper)
+#   GATEWAY_PORT=18789 · GATEWAY_LABEL=ai.openclaw.gateway
+#   START_RETRIES=5 · START_RETRY_DELAY=5s · STOP_TIMEOUT=30s
+#   PROBE_TIMEOUT=5s · STABILITY_CHECKS=2
+#   ALERT_EMAIL is set in this file; SMTP credentials come from ~/.openclaw/.env
+#
+# Function index
+#   Logging/notify   log info warn error send_email
+#   Gateway probes   gateway_scheme gateway_probe_url gateway_http_responds
+#                    gateway_running_probe gateway_process_running gateway_stable
+#   Lifecycle        start_gateway_service cleanup
+#   State/version    write_timestamp get_version
+#   Node runtime     service_node_bin node_satisfies find_compatible_node
+#                    ensure_runtime_node
+#   npm              ensure_npm_writable
+#   Plugins          sync_plugins report_plugin_drift
+#   Config safety    trusted_proxies_suspicious validate_trusted_proxies
+#   Backup/rollback  snapshot_sqlite_state restore_sqlite_state
+#                    restore_npm_package
+#   Rollback         main + post-update-restore.sh (probe-verified)
+#
+# Testing
+#   bash -n update-openclaw.sh        # syntax only, no side effects
+#   bash update-openclaw.sh --force   # full run; log in ~/.openclaw/logs/
+#   The probe and start helpers are stub-friendly: override launchctl/curl in
+#   a sourced harness to exercise the abort path without touching the service.
+#   Integration guide and per-incident write-ups: UPDATE-SYSTEM-README.md.
 #
 # =============================================================================
 # Changelog / incident notes (newest first — append new dated entries above)
 # =============================================================================
+# 2026-10-29 11:48 +1100 — 2026.10.8 update: npm EACCES + gateway left down
+#   Symptoms: npm update replaced the package (2026.10.4 → 2026.10.8) but
+#   died in reify-finish writing /opt/homebrew/lib/node_modules/npm/npmrc
+#   (mode 0400) → script exited 2 at step 4 and skipped doctor/start/verify.
+#   The gateway had already been stopped at step 2 and stayed down ~3.5 min.
+#   Also: launchctl load printed "Load failed: 5" yet the script logged
+#   "launchctl load succeeded"; and step 6 re-bootstrapped a job that doctor
+#   had already loaded.
+#   Fixes in this version:
+#     - cleanup() restarts the service on any non-zero exit after step 2
+#     - npm global prefix/npmrc writability is preflighted before stopping,
+#       and npm's own read-only npmrc is chmod u+w'd (Homebrew recreates it)
+#     - npm failure is reconciled against the installed version: if the
+#       target version is already on disk, continue instead of aborting
+#     - start_gateway_service() kickstarts an already-loaded job and never
+#       reports success from launchctl exit status (verification decides)
+#     - node candidates are smoke-tested (`node -e`) so a binary with a
+#       broken dylib is skipped; npm is pinned to the selected runtime
+#     - missing /opt/homebrew/bin/node is relinked automatically
+#     - node preflight now suggests `brew upgrade node@NN` when the keg is
+#       installed but too old, instead of a misleading `brew install`
+# 2026-09-14 22:11 +1000 — 2026.9.4 update: node preflight + plugin drift
+#   Symptoms: the update aborted with `node-runtime-preflight` even though
+#   node@24 (24.21.0) was installed. Homebrew's `node` was node@22 on PATH and
+#   the LaunchAgent pinned /opt/homebrew/opt/node@22, while node@24 sat in a
+#   keg-only prefix. Also seen: plugin version drift after core updates, and
+#   an updater record of `restart-unhealthy` for a gateway that was healthy.
+#   Fixes in this version:
+#     - ensure_runtime_node reads the target's engines.node, selects the newest
+#       installed compatible node, puts it first on PATH for the whole run and
+#       flags the service for repointing
+#     - Step 6 runs `openclaw gateway install --force`, which rewrites both the
+#       LaunchAgent ProgramArguments and the generated service-env/ wrapper;
+#       never hand-edit service-env/ (it is regenerated)
+#     - sync_plugins runs `openclaw plugins update --all` from /tmp while the
+#       gateway is stopped; npm does not update ClawHub plugins
+#     - report_plugin_drift reports drift after start without failing the run
+#     - the script trusts its own scheme-aware probes over the updater's
+#       `restart-unhealthy` record, which can be a false negative
+#   Outcome: fixes applied; the host has since run 2026.9.4 (backup
+#     20261016_180245 records OpenClaw 2026.9.4).
 # 2026-09-08 11:29 +1000 — 2026.9.2 update: false FAILURE + unsafe rollback
 #   Symptoms: the 11:14 run upgraded npm to 2026.9.2 but reported FAILED and
 #   rolled back, even though the new gateway had booted and served traffic
@@ -242,6 +342,27 @@
 #     consistent fix is to complete the upgrade (npm update -g openclaw, then
 #     launchctl kickstart -k gui/$(id -u)/ai.openclaw.gateway) — do NOT fight
 #     the downgrade.
+# 2026-09-01 12:00 +1000 — 2026.8.1 update: ingress, migrations, rollback
+#   Symptoms: the 2026-08-31 update to 2026.8.1 failed (exit 3) and exposed
+#   three gaps: LAN access broken by ingress attribution, start attempted
+#   against unmigrated state, and a config-only rollback that left the new
+#   npm package in place.
+#   Fixes in this version:
+#     - trustedProxies validated before start: 2026.8.1+ treats every peer in
+#       gateway.trustedProxies as a proxy hop, so a LAN subnet there breaks
+#       direct access; the script narrows (or prompts to narrow) to loopback
+#     - migrations run while the gateway is stopped (session-sqlite import,
+#       doctor --fix); 2026.8.1 refuses to boot against unmigrated state
+#     - rollback restores the npm package too, not just config
+#     - known 2026.8.1 doctor bug: a legacy exec-approvals.json aborts
+#       doctor --fix; the script moves it aside and imports it via
+#       `openclaw approvals set`
+#   Outcome: 2026.7.1-2 → 2026.8.1 completed on rerun.
+#
+# Earlier revisions (2026-06 → 2026-07, OpenClaw 2026.6.x – 2026.7.1-2)
+# predate this in-file changelog. Their behaviour is summarised in
+# UPDATE-SYSTEM-README.md and preserved in the dated backups under
+# ~/.openclaw/backups/ (each contains version.txt).
 
 set -euo pipefail
 
@@ -256,7 +377,7 @@ HEARTBEAT_STATE_DIR="${OPENCLAW_HOME}/.heartbeat"
 LOG_DIR="${OPENCLAW_HOME}/logs"
 LOG_FILE="${LOG_DIR}/update-$(date +%Y%m%d_%H%M%S).log"
 RESTORE_SCRIPT="${SCRIPTS_DIR}/post-update-restore.sh"
-ALERT_EMAIL="you@example.com"  # ← Change this to your address!
+ALERT_EMAIL="you@example.com"  # &lt;- Change this to your address!
 
 # Load secrets (POSTMARK_SERVER_TOKEN etc.). The gateway loads ~/.openclaw/.env
 # at startup, but this script runs from a terminal where they aren't exported.
@@ -288,6 +409,12 @@ STABILITY_CHECKS=2    # consecutive successful probes to confirm stability
 SUCCESS_SUBJECT="✅ OpenClaw Update Succeeded"
 FAILURE_SUBJECT="❌ OpenClaw Update FAILED"
 
+# Lifecycle state. cleanup() uses these to avoid leaving the gateway down
+# when the script aborts between Step 2 (stop) and Step 7 (verified start).
+GATEWAY_STOPPED_BY_SCRIPT=0
+UPDATE_SUCCESS=0
+NPM_BIN=""
+
 # === Helpers ================================================================
 
 log()  { echo "[$(date '+%H:%M:%S')] $*"; }
@@ -297,6 +424,22 @@ error(){ log "ERROR: $*"; }
 
 cleanup() {
     local rc=$?
+    # Never leave the host with the gateway down after an aborted update.
+    # Every exit after Step 2 stopped the service must restore it first
+    # (2026-10-29: an npm EACCES at step 4 left the gateway down ~3.5 min).
+    if [ "${rc}" -ne 0 ] \
+        &amp;&amp; [ "${GATEWAY_STOPPED_BY_SCRIPT}" = "1" ] \
+        &amp;&amp; [ "${UPDATE_SUCCESS}" != "1" ]; then
+        warn "Update aborted while the gateway was stopped — attempting to restart it"
+        start_gateway_service
+        sleep 3
+        if gateway_running_probe; then
+            info "Gateway restarted after aborted update"
+            GATEWAY_STOPPED_BY_SCRIPT=0
+        else
+            error "Gateway is still down — manual recovery: launchctl kickstart -k gui/$(id -u)/${GATEWAY_LABEL}"
+        fi
+    fi
     rm -f "${LOCK_FILE}"
     if [ $rc -ne 0 ] &amp;&amp; [ $rc -ne 130 ]; then
         error "Script exited with code ${rc} — see ${LOG_FILE}"
@@ -378,6 +521,35 @@ gateway_stable() {
     [ "$consecutive" -ge "${STABILITY_CHECKS}" ]
 }
 
+start_gateway_service() {
+    # Submit a start/restart for the managed LaunchAgent. Never claims success
+    # from launchctl's exit status alone: `launchctl load` can print
+    # "Load failed: 5: Input/output error" yet still exit 0 (2026-10-29), and
+    # bootstrapping an already-loaded job always fails with error 5. Callers
+    # must verify with gateway_running_probe().
+    local uid
+    uid=$(id -u)
+    if launchctl print "gui/${uid}/${GATEWAY_LABEL}" &gt;/dev/null 2&gt;&amp;1; then
+        info "Service already loaded — kickstarting"
+        launchctl kickstart -k "gui/${uid}/${GATEWAY_LABEL}" 2&gt;&amp;1 || \
+            warn "launchctl kickstart failed"
+        return 0
+    fi
+    if launchctl bootstrap "gui/${uid}" "${GATEWAY_PLIST}" 2&gt;&amp;1; then
+        info "launchctl bootstrap submitted"
+        return 0
+    fi
+    warn "launchctl bootstrap failed — trying launchctl load"
+    if launchctl load "${GATEWAY_PLIST}" 2&gt;&amp;1; then
+        info "launchctl load submitted"
+        return 0
+    fi
+    warn "launchctl load failed — trying launchctl kickstart"
+    launchctl kickstart -k "gui/${uid}/${GATEWAY_LABEL}" 2&gt;&amp;1 || \
+        warn "launchctl kickstart also failed"
+    return 0
+}
+
 write_timestamp() {
     local status="$1"  # "in-progress", "success", "failed", "rolled-back"
     local version="${2:-unknown}"
@@ -395,13 +567,216 @@ get_version() {
     openclaw --version 2&gt;/dev/null || echo "unknown"
 }
 
+# --- Node runtime compatibility --------------------------------------------
+# 2026.9.4 raised the floor to node &gt;=24.16.0 &lt;25 (or &gt;=26.1.0). Homebrew can
+# still be serving node@22 from `node` while node@24 sits in a keg-only
+# prefix, and the managed service pins an ABSOLUTE node path in its
+# LaunchAgent. So the CLI resolving a good node is NOT enough — the SERVICE
+# must run one too, or the update aborts with `node-runtime-preflight`
+# (2026-09-14). Gate on both, and repoint the service when it is stale.
+
+service_node_bin() {
+    # Absolute node path the LaunchAgent will exec, else empty.
+    python3 - "${GATEWAY_PLIST}" &lt;&lt;'PYEOF' 2&gt;/dev/null || true
+import plistlib, re, sys
+try:
+    with open(sys.argv[1], "rb") as f:
+        plist = plistlib.load(f)
+    for arg in plist.get("ProgramArguments", []):
+        if re.search(r"/node(\.exe)?$", arg):
+            print(arg)
+            break
+except Exception:
+    pass
+PYEOF
+}
+
+node_satisfies() {
+    # node_satisfies &lt;node-bin&gt; &lt;range&gt;  -&gt;  0 when the binary meets the range
+    python3 - "$1" "$2" &lt;&lt;'PYEOF'
+import re, subprocess, sys
+node_bin, rng = sys.argv[1], sys.argv[2]
+try:
+    raw = subprocess.run([node_bin, "--version"], capture_output=True,
+                         text=True, timeout=10).stdout.strip()
+except Exception:
+    sys.exit(1)
+m = re.match(r"v?(\d+)\.(\d+)\.(\d+)", raw)
+if not m:
+    sys.exit(1)
+cur = tuple(int(x) for x in m.groups())
+def clause_ok(clause):
+    for cmp in clause.split():
+        g = re.match(r"(&gt;=|&lt;=|&gt;|&lt;|=)?v?(\d+)\.(\d+)\.(\d+)", cmp)
+        if not g:
+            continue
+        op, ver = (g.group(1) or "="), tuple(int(x) for x in g.groups()[1:])
+        if op == "&gt;=" and not cur &gt;= ver: return False
+        if op == "&gt;"  and not cur &gt;  ver: return False
+        if op == "&lt;=" and not cur &lt;= ver: return False
+        if op == "&lt;"  and not cur &lt;  ver: return False
+        if op == "="  and not cur == ver: return False
+    return True
+sys.exit(0 if any(clause_ok(c) for c in rng.split("||")) else 1)
+PYEOF
+}
+
+find_compatible_node() {
+    # Print the first installed node satisfying the range (newest major first).
+    local rng="$1" cand
+    for cand in /opt/homebrew/opt/node@27/bin/node \
+                /opt/homebrew/opt/node@26/bin/node \
+                /opt/homebrew/opt/node@25/bin/node \
+                /opt/homebrew/opt/node@24/bin/node \
+                /opt/homebrew/bin/node \
+                "$(command -v node 2&gt;/dev/null)"; do
+        [ -n "${cand}" ] &amp;&amp; [ -x "${cand}" ] || continue
+        # Existence + exec bit is not enough: a Homebrew node can fail to
+        # launch when a dylib dependency was upgraded underneath it
+        # (2026-10-29: node@22 died on libsimdjson.33).
+        if ! "${cand}" -e 'process.exit(0)' &gt;/dev/null 2&gt;&amp;1; then
+            warn "Skipping ${cand}: binary exists but does not run"
+            continue
+        fi
+        if node_satisfies "${cand}" "${rng}"; then
+            echo "${cand}"
+            return 0
+        fi
+    done
+    return 1
+}
+
+ensure_runtime_node() {
+    # Resolve the node the target release requires, put it first on PATH for
+    # this whole run (the CLI itself runs under node), and flag the service for
+    # repointing — Step 6 performs the actual rewrite.
+    local rng service_node replacement
+    rng=$(npm view openclaw@latest engines.node 2&gt;/dev/null | tr -d '"' | tr -d "'" | head -1)
+    if [ -z "${rng}" ]; then
+        warn "Could not read target node engine range — skipping node gate"
+        return 0
+    fi
+    info "Target openclaw requires node: ${rng}"
+
+    if ! replacement=$(find_compatible_node "${rng}"); then
+        error "No installed node satisfies ${rng} — update would abort (node-runtime-preflight)."
+        # Distinguish "not installed" from "installed but broken/too old" so
+        # the suggested fix is correct (2026-10-29: node@24 24.21.0 was
+        # installed, but the old message said "brew install node@24").
+        local want_major guess_node guess_ver
+        want_major=$(printf '%s' "${rng}" | grep -oE '[0-9]+' | head -1 || true)
+        guess_node="/opt/homebrew/opt/node@${want_major}/bin/node"
+        if [ -n "${want_major}" ] &amp;&amp; [ -x "${guess_node}" ]; then
+            guess_ver=$("${guess_node}" --version 2&gt;/dev/null || echo "unusable")
+            error "node@${want_major} is installed but unusable (${guess_ver})."
+            error "Fix it with: brew upgrade node@${want_major} &amp;&amp; brew link --overwrite node@${want_major}"
+        else
+            error "Install a supported runtime first, e.g.: brew install node@${want_major:-24}"
+        fi
+        send_email "${FAILURE_SUBJECT}" \
+            "OpenClaw update aborted: no compatible Node runtime found.\nRequired: ${rng}\nDate: $(date)\nLog: ${LOG_FILE}"
+        exit 6
+    fi
+    NODE_DIR=$(dirname "${replacement}")
+    export PATH="${NODE_DIR}:${PATH}"
+    # Pin npm to the selected runtime instead of whatever PATH resolves.
+    NPM_BIN="${NODE_DIR}/npm"
+    [ -x "${NPM_BIN}" ] || NPM_BIN="$(command -v npm 2&gt;/dev/null || echo npm)"
+    info "Using node $(node --version) from ${NODE_DIR} (npm: ${NPM_BIN})"
+
+    # A vanished /opt/homebrew/bin/node breaks every PATH-based tool after a
+    # keg upgrade (2026-10-29); relink when the selected runtime is Homebrew's.
+    local formula
+    formula=$(basename "$(dirname "${NODE_DIR}")")
+    if [ -d /opt/homebrew/opt ] &amp;&amp; [ ! -e /opt/homebrew/bin/node ] \
+        &amp;&amp; [[ "${formula}" == node@* ]]; then
+        warn "/opt/homebrew/bin/node is missing — relinking ${formula}"
+        brew link --overwrite "${formula}" 2&gt;&amp;1 | tail -2 || warn "brew link failed"
+    fi
+
+    service_node=$(service_node_bin)
+    if [ -z "${service_node}" ]; then
+        warn "Could not read a node path from ${GATEWAY_PLIST}"
+        return 0
+    fi
+    if node_satisfies "${service_node}" "${rng}"; then
+        info "Service node OK: ${service_node} ($("${service_node}" --version 2&gt;/dev/null))"
+    else
+        warn "Service node ${service_node} ($("${service_node}" --version 2&gt;/dev/null)) does not satisfy ${rng}"
+        warn "Managed service will be repointed at ${NODE_DIR} before start (Step 6)."
+        SERVICE_NODE_REPOINT=1
+    fi
+}
+
+ensure_npm_writable() {
+    # npm's global prefix must be writable. Homebrew recreates npm's own npmrc
+    # read-only (0400) on node upgrades; `npm update -g` rewrites it during
+    # reify-finish and dies with EACCES *after* replacing package files
+    # (2026-10-29). Fail fast, and repair the mode when that is the only issue.
+    local npm root npmrc
+    npm="${NPM_BIN:-npm}"
+    if ! root=$("${npm}" root -g 2&gt;/dev/null); then
+        error "Cannot resolve npm global root via ${npm}"
+        return 1
+    fi
+    if [ ! -w "${root}" ]; then
+        error "npm global root is not writable by $(whoami): ${root}"
+        return 1
+    fi
+    npmrc="${root}/npm/npmrc"
+    if [ -e "${npmrc}" ]; then
+        if [ ! -w "${npmrc}" ]; then
+            warn "npm's own npmrc is not writable (${npmrc}) — fixing mode"
+            chmod u+w "${npmrc}" 2&gt;/dev/null || true
+        fi
+        if [ ! -w "${npmrc}" ]; then
+            error "npm npmrc is still not writable: ${npmrc}"
+            error "Fix with: chmod u+w '${npmrc}'"
+            return 1
+        fi
+    fi
+    return 0
+}
+
+# --- plugin sync / drift ---------------------------------------------------
+# `npm update -g openclaw` refreshes the CLI only. Official plugins installed
+# from ClawHub can lag a release (2026-09-14: duckduckgo was 2026.9.2 on
+# ClawHub while npm already published 2026.9.4), and the gateway then reports
+# "plugin version drift". Always run plugin commands from a NEUTRAL cwd —
+# `plugins install` resolves relative paths against the cwd.
+
+sync_plugins() {
+    info "Syncing plugins (from /tmp so relative paths cannot resolve)..."
+    if ( cd /tmp &amp;&amp; openclaw plugins update --all 2&gt;&amp;1 ); then
+        info "Plugin sync complete"
+    else
+        warn "openclaw plugins update --all reported issues (see log)"
+    fi
+}
+
+report_plugin_drift() {
+    # Informational only: a ClawHub-sourced plugin lagging a release is not an
+    # update failure, so this never fails the run.
+    local drift
+    drift=$(openclaw gateway status --deep 2&gt;/dev/null | sed -n '/Plugin version drift/,/^$/p') || true
+    if [ -z "${drift}" ]; then
+        info "No plugin version drift"
+        return 0
+    fi
+    warn "${drift}"
+    warn "A ClawHub-sourced plugin can lag the core release. To pin one to the"
+    warn "matching npm release (the plugin manifest's default source):"
+    warn "  cd /tmp &amp;&amp; openclaw plugins install &lt;npm-package&gt;@&lt;version&gt; --force"
+    warn "then restart the gateway. See 'openclaw plugins list --json' for names."
+}
+
 # --- trustedProxies validation --------------------------------------------
 # OpenClaw 2026.8.1+ enforces ingress attribution: any peer inside
 # gateway.trustedProxies is treated as a proxy hop that must supply forwarded
-# headers. A broad entry (LAN subnet like 192.168.86.0/24, or 0.0.0.0/0)
+# headers. A broad entry (LAN subnet like 10.0.0.0/8, or 0.0.0.0/0)
 # silently breaks direct access from devices inside that range
 # (HTTP proxy_attribution_required). Only actual proxy addresses belong
-# here — for this host, the DSH web server on loopback: 127.0.0.1 and ::1.
+# here — only actual proxy addresses, typically loopback: 127.0.0.1 and ::1.
 
 trusted_proxies_suspicious() {
     # Prints non-loopback / range entries from gateway.trustedProxies.
@@ -443,7 +818,7 @@ validate_trusted_proxies() {
     warn "${bad}"
     warn "With ingress attribution (2026.8.1+), broad ranges block direct access"
     warn "from inside them (proxy_attribution_required). Only actual proxies"
-    warn "belong here; this host's proxy is the DSH web server on loopback."
+    warn "belong here; only actual proxies (typically loopback) belong here."
     local answer="n"
     if [ "${FORCE}" = "1" ]; then
         answer="y"
@@ -600,6 +975,20 @@ if ! curl -s --max-time 5 https://registry.npmjs.org/ &gt;/dev/null 2&gt;&amp;1;
     exit 1
 fi
 
+# Node runtime gate: fail fast (before stopping anything) if the target
+# release needs a node this host does not have, and remember whether the
+# managed service must be repointed. See ensure_runtime_node.
+ensure_runtime_node
+
+# npm write gate: also before stopping anything, so a permissions problem can
+# never leave the gateway down (2026-10-29).
+if ! ensure_npm_writable; then
+    error "npm global install is not writable — aborting before touching packages"
+    send_email "${FAILURE_SUBJECT}" \
+        "OpenClaw update aborted: npm global prefix/npmrc is not writable.\nDate: $(date)\nLog: ${LOG_FILE}"
+    exit 2
+fi
+
 # === Step 1: Backup ========================================================
 
 info "Step 1/8: Creating pre-update backup..."
@@ -625,6 +1014,9 @@ info "Latest backup: ${LATEST_BACKUP:-none}"
 info "Step 2/8: Stopping gateway..."
 if gateway_running_probe || gateway_process_running; then
     info "Gateway is running — initiating graceful shutdown"
+    # From here until a verified start, cleanup() owns restoring the service
+    # if the script exits early.
+    GATEWAY_STOPPED_BY_SCRIPT=1
 
     # Try launchctl bootout first (cleanest)
     info "Attempting launchctl bootout..."
@@ -666,6 +1058,7 @@ else
         info "Gateway service loaded but not running — unloading it"
         launchctl bootout gui/$(id -u)/"${GATEWAY_LABEL}" 2&gt;&amp;1 || \
             warn "launchctl bootout did not succeed (may already be unloaded)"
+        GATEWAY_STOPPED_BY_SCRIPT=1
     fi
 fi
 
@@ -714,14 +1107,14 @@ fi
 
 info "Step 4/8: Checking for npm CLI package update..."
 
-if npm outdated -g openclaw &gt;/dev/null 2&gt;&amp;1; then
+if "${NPM_BIN:-npm}" outdated -g openclaw &gt;/dev/null 2&gt;&amp;1; then
     info "npm package is up to date — skipping"
 else
     info "npm package update available — upgrading..."
     NPM_OK=false
     for attempt in 1 2; do
         info "npm update -g openclaw attempt ${attempt}/2..."
-        if npm update -g openclaw 2&gt;&amp;1; then
+        if "${NPM_BIN:-npm}" update -g openclaw 2&gt;&amp;1; then
             NPM_OK=true
             break
         else
@@ -733,10 +1126,20 @@ else
         fi
     done
     if [ "${NPM_OK}" = false ]; then
-        error "npm update -g openclaw failed after 2 attempts"
-        send_email "${FAILURE_SUBJECT}" \
-            "OpenClaw update failed at step 4 (npm update).\nOld version: ${OLD_VERSION}\nDate: $(date)\nLog: ${LOG_FILE}"
-        exit 2
+        # npm can replace every package file and still exit non-zero on the
+        # final config write (2026-10-29: EACCES on npm's own npmrc). Trust the
+        # installed version over the exit code before declaring failure.
+        installed_ver=$(get_version)
+        target_ver=$("${NPM_BIN:-npm}" view openclaw@latest version 2&gt;/dev/null | tr -d '"' | head -1 || true)
+        if [ -n "${target_ver}" ] &amp;&amp; [[ "${installed_ver}" == *"${target_ver}"* ]]; then
+            warn "npm reported failure but ${installed_ver} is already installed — continuing"
+            NPM_OK=true
+        else
+            error "npm update -g openclaw failed after 2 attempts (installed: ${installed_ver}, target: ${target_ver:-unknown})"
+            send_email "${FAILURE_SUBJECT}" \
+                "OpenClaw update failed at step 4 (npm update).\nOld version: ${OLD_VERSION}\nInstalled: ${installed_ver}\nTarget: ${target_ver:-unknown}\nDate: $(date)\nLog: ${LOG_FILE}"
+            exit 2
+        fi
     fi
 fi
 
@@ -746,6 +1149,11 @@ if [ "${OLD_VERSION}" != "${NEW_VERSION}" ]; then
 else
     info "Version unchanged — still ${NEW_VERSION}"
 fi
+
+# Core update does not touch plugins. Sync them now, while the gateway is
+# stopped, so the service picks up matching versions on its first boot rather
+# than reporting drift afterwards.
+sync_plugins
 
 # === Step 5: Pre-start validation &amp; migration ==============================
 
@@ -791,18 +1199,28 @@ fi
 # === Step 6: Reinstall &amp; Start Gateway =====================================
 
 info "Step 6/8: Starting gateway service..."
-# Try bootstrap first (modern macOS), fall back to load/start/kickstart
-if launchctl bootstrap gui/$(id -u) "${GATEWAY_PLIST}" 2&gt;&amp;1; then
-    info "launchctl bootstrap succeeded"
-else
-    warn "launchctl bootstrap failed — trying launchctl load as fallback..."
-    if launchctl load "${GATEWAY_PLIST}" 2&gt;&amp;1; then
-        info "launchctl load succeeded"
+
+# Repoint the managed service if its pinned node is unsupported.
+# `gateway install --force` regenerates the LaunchAgent ProgramArguments AND
+# the generated service-env/ wrapper from the node running the CLI, so NODE_DIR
+# must already lead PATH (done in ensure_runtime_node). Never hand-edit
+# ~/.openclaw/service-env/ — service reinstall, update and doctor repair
+# regenerate it.
+SERVICE_STARTED_BY_INSTALL=false
+if [ "${SERVICE_NODE_REPOINT:-0}" = "1" ]; then
+    info "Repointing managed service at ${NODE_DIR}/node..."
+    if openclaw gateway install --force 2&gt;&amp;1; then
+        info "Service definition refreshed"
+        SERVICE_STARTED_BY_INSTALL=true
     else
-        warn "launchctl load also failed — trying launchctl start..."
-        launchctl kickstart -k gui/$(id -u)/"${GATEWAY_LABEL}" 2&gt;&amp;1 || \
-            warn "launchctl kickstart also failed (may already be loaded)"
+        warn "gateway install --force failed — falling back to launchctl"
     fi
+fi
+
+if [ "${SERVICE_STARTED_BY_INSTALL}" = false ]; then
+    # Handles already-loaded jobs (doctor --fix may have restarted the
+    # LaunchAgent during Step 5) and never trusts launchctl's exit status.
+    start_gateway_service
 fi
 
 # === Step 7: Verify Gateway Running ========================================
@@ -848,6 +1266,22 @@ done
 
 if [ "${GATEWAY_STARTED}" = true ]; then
     info "✅ Update complete — gateway is running"
+    UPDATE_SUCCESS=1
+    GATEWAY_STOPPED_BY_SCRIPT=0
+
+    # Report plugin drift (informational — never fails the run).
+    report_plugin_drift
+
+    # The updater's own run record is NOT authoritative: a run is recorded as
+    # `restart-unhealthy` when its restart-verification window expires while
+    # the gateway is still coming up, even though it comes up healthy
+    # (2026-09-14). We verified with real probes above, so surface a failed
+    # record as information rather than as a problem.
+    if openclaw update status --json 2&gt;/dev/null | grep -q '"status"[[:space:]]*:[[:space:]]*"failed"'; then
+        info "Note: the updater's last run record says 'failed', but this script"
+        info "verified the gateway is running and stable — treat that record as stale."
+    fi
+
     write_timestamp "success" "${NEW_VERSION}" "Auto-update successful"
 
     # Step 7: Schedule a 5-minute post-update safety check (belt and suspenders)
@@ -975,6 +1409,7 @@ fi
 
 if [ "${ROLLBACK_OK}" = true ]; then
     info "✅ Rollback successful — original version restored and gateway running"
+    GATEWAY_STOPPED_BY_SCRIPT=0
     ROLLBACK_VERSION=$(get_version)
     write_timestamp "rolled-back" "${ROLLBACK_VERSION}" "Update failed, rollback succeeded"
     send_email "⚠️ OpenClaw Update Rolled Back" \
@@ -983,6 +1418,7 @@ if [ "${ROLLBACK_OK}" = true ]; then
 else
     error "⚠️ CRITICAL: Update failed AND rollback failed. Gateway is down."
     error "Manual intervention required."
+    GATEWAY_STOPPED_BY_SCRIPT=0
     write_timestamp "failed" "${NEW_VERSION}" "Update failed, rollback also failed"
     send_email "${FAILURE_SUBJECT}" \
         "CRITICAL: OpenClaw update failed and rollback also failed.\nGateway is DOWN.\n\nOld version: ${OLD_VERSION}\nTarget version: ${NEW_VERSION}\nDate: $(date)\nBackup: ${LATEST_BACKUP:-none}\nLog: ${LOG_FILE}\n\nManual recovery: launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/ai.openclaw.gateway.plist"
@@ -1007,12 +1443,18 @@ fi
         <h3>Two-stage upgrade</h3>
         <p>OpenClaw ships two components — the <strong>runtime</strong> via Homebrew cask and the <strong>CLI</strong> via npm. Both are checked and upgraded independently, and each is retried twice if the first attempt fails, since registries occasionally hiccup.</p>
 
+        <h3>Node runtime preflight: the service pins its own Node</h3>
+        <p>The CLI resolving a working <code>node</code> is not enough — the LaunchAgent stores an <em>absolute</em> path, so the service can keep launching an old or keg-only runtime. 2026.9.4 raised the floor to Node <code>&gt;=24.16.0 &lt;25 || &gt;=26.1.0</code>; on the production host Homebrew still served node@22 from <code>node</code> while node@24 sat in a keg-only prefix, and the update aborted before changing anything. The script now reads the target's <code>engines.node</code>, smoke-tests every candidate with <code>node -e</code>, selects the newest compatible runtime, puts it first on <code>PATH</code>, and flags the service for repointing via <code>openclaw gateway install --force</code>. A binary that exists but cannot launch (for example after a Homebrew library upgrade) is skipped rather than selected.</p>
+
         <h3>Scheme-aware verified startup</h3>
         <p>After starting the gateway, the script probes it up to 5 times (5 seconds apart) and requires <strong>2 consecutive stable probes</strong> before declaring success. Two details matter here:</p>
         <ul>
             <li><strong>Any real HTTP status counts as "up".</strong> The gateway answers <code>200</code>, <code>302</code>, <code>401</code> and more depending on the path — requiring a specific code is brittle.</li>
             <li><strong>The probe speaks the gateway's scheme.</strong> With <code>gateway.tls.enabled</code> set (HTTPS certs in <code>~/.openclaw/tls</code>), a plain <code>curl http://…</code> probe can <em>never</em> succeed. The script reads the scheme from <code>openclaw.json</code> and probes <code>https</code> with <code>curl -k</code> when TLS is on. This exact bug made the script declare a perfectly healthy 2026.9.2 upgrade "down" and roll it back (see below).</li>
         </ul>
+
+        <h3>npm can fail after it has already installed the upgrade</h3>
+        <p>On 29 October 2026, <code>npm update -g openclaw</code> replaced every package file (2026.10.4 → 2026.10.8) and then died writing its own config: <code>EACCES</code> on <code>/opt/homebrew/lib/node_modules/npm/npmrc</code>, which Homebrew recreates read-only (<code>0400</code>) during Node upgrades. The old script treated the non-zero exit as a failed upgrade, exited at Step 4 and skipped doctor, start and verification — leaving the gateway down until launchd revived it. Two fixes: a preflight that repairs the npmrc mode before anything is stopped, and a reconciliation step that compares <code>openclaw --version</code> with <code>openclaw@latest</code> — if the target is already on disk, the run continues instead of rolling back a completed upgrade.</p>
 
         <h3>Delayed safety net</h3>
         <p>The most insidious failure mode is "starts fine, crashes 3 minutes later." The script schedules an isolated cron check 5 minutes in the future to verify the gateway is still running. CLI drift note: 2026.9.2 replaced the <code>cron add --job &lt;json&gt;</code> syntax with flag-based syntax — the script tries the new form first, falls back to the legacy JSON form for older versions, and writes a heartbeat marker file if cron isn't ready yet.</p>
@@ -1037,16 +1479,19 @@ fi
         <p>Recovery note worth knowing: if an older failed run ever leaves the old package unable to boot against already-migrated SQLite and there is <em>no</em> state snapshot, the consistent fix is to complete the upgrade (update the npm package, kickstart the service) — not to fight the downgrade.</p>
 
         <h3>trustedProxies guard: the 2026.8.1 ingress-attribution change</h3>
-        <p>OpenClaw 2026.8.1 began enforcing ingress attribution: any peer listed in <code>gateway.trustedProxies</code> is treated as a proxy hop that must supply forwarded headers. If the config carried a broad entry (a LAN subnet like <code>192.168.86.0/24</code>), every direct device inside that range was misclassified as a proxy without <code>X-Forwarded-For</code> and rejected with <code>proxy_attribution_required</code>. The script now inspects <code>trustedProxies</code> after upgrading and offers to narrow broad ranges to the loopback entries actually needed (<code>["127.0.0.1", "::1"]</code>); <code>--force</code> accepts automatically.</p>
+        <p>OpenClaw 2026.8.1 began enforcing ingress attribution: any peer listed in <code>gateway.trustedProxies</code> is treated as a proxy hop that must supply forwarded headers. If the config carried a broad entry (a LAN subnet like <code>10.0.0.0/8</code>), every direct device inside that range was misclassified as a proxy without <code>X-Forwarded-For</code> and rejected with <code>proxy_attribution_required</code>. The script now inspects <code>trustedProxies</code> after upgrading and offers to narrow broad ranges to the loopback entries actually needed (<code>["127.0.0.1", "::1"]</code>); <code>--force</code> accepts automatically.</p>
 
         <h3>Migrate state before the first boot with new code</h3>
         <p>New versions refuse to boot against unmigrated legacy state, so Step 5 runs — all while the gateway is stopped: any legacy <code>exec-approvals.json</code> is moved aside and imported via <code>openclaw approvals set</code> (dodging a known <code>doctor --fix</code> bug that aborts with <code>ExecApprovalsMigrationRequiredError</code>), then <code>doctor --session-sqlite import --session-sqlite-all-agents</code>, then <code>doctor --fix --non-interactive</code>.</p>
 
+        <h3>Never leave the gateway down</h3>
+        <p>Every failure path after Step 2 is now covered by <code>cleanup()</code>. It tracks whether this run stopped the service and whether verification succeeded; on any other non-zero exit (including Ctrl-C) it submits a start/restart, waits three seconds and probes. If the probe fails it says so explicitly and prints the manual recovery command, rather than exiting quietly with the host offline.</p>
+
         <h3>Exit codes</h3>
-        <p>The script exits <code>0</code> on success, <code>1</code> on pre-flight failure (backup, stop, or connectivity), <code>2</code> if the npm upgrade fails, <code>3</code> when the update failed but rollback succeeded, <code>4</code> on lock contention, and <code>5</code> when the update <em>and</em> rollback both failed (gateway down — manual intervention). Useful for scheduling and monitoring.</p>
+        <p>The script exits <code>0</code> on success, <code>1</code> on pre-flight failure (backup, stop, or connectivity), <code>2</code> on an npm failure, <code>3</code> when the update failed but rollback succeeded, <code>4</code> on lock contention, <code>5</code> when the update <em>and</em> rollback both failed (gateway down — manual intervention), <code>6</code> when no compatible Node runtime is installed (aborts before stopping anything), and <code>130</code> when interrupted — which also triggers the abort-safe restart. Useful for scheduling and monitoring.</p>
 
         <h2 id="incidents">Production incidents that shaped the script</h2>
-        <p>Both incidents below actually happened on the production Mac mini. Each is documented in the script's header changelog and drove a concrete fix in the version above.</p>
+        <p>The incidents below all happened on the production Mac mini. Each is documented in the script's header changelog and drove a concrete fix in the version above.</p>
 
         <h3>2026-08-31 → 2026.8.1: migration and rollback gaps</h3>
         <p>The upgrade to 2026.8.1 failed (exit 3) and exposed three gaps, all since fixed:</p>
@@ -1064,6 +1509,12 @@ fi
             <li><strong>The restore script reported success while the gateway was down</strong> (exit 0 from a status command that succeeds for stopped services).</li>
         </ul>
         <p>The rerun (<code>--force</code>) completed 2026.8.1 → 2026.9.2 cleanly, with the HTTPS probe passing on attempt 1. All three bugs are fixed in the version above: scheme-aware probes, SQLite state snapshots taken while stopped, and a rollback that stops processes, restores state + package + config, and verifies with a real probe before declaring success.</p>
+
+        <h3>2026-09-14 → 2026.9.4: the update that would not start</h3>
+        <p>The 2026.9.4 update aborted with <code>node-runtime-preflight</code> even though a compatible node was installed. Homebrew's <code>node</code> was still node@22 on <code>PATH</code>, node@24 sat in a keg-only prefix, and the LaunchAgent pinned the node@22 path — so the CLI and the service disagreed about which runtime existed. The same period exposed plugin drift (an npm update refreshes the CLI, not ClawHub plugins) and an updater record of <code>restart-unhealthy</code> for a gateway that was actually serving traffic. Fixes: the runtime preflight above, plugin sync while stopped, and trusting the script's own scheme-aware probes over the updater's record.</p>
+
+        <h3>2026-10-29 → 2026.10.8: a permission error after the package swap</h3>
+        <p>The npm upgrade installed 2026.10.8, then failed on its own read-only <code>npmrc</code>. Because the script stopped at Step 4, the gateway stayed down for about three and a half minutes — and the log still claimed <code>launchctl load succeeded</code> while launchctl had printed <code>Load failed: 5</code>. Fixes: npm writability preflight, version reconciliation, a single start helper that kickstarts an already-loaded job, probe-only success decisions, and <code>cleanup()</code> restarting the service on any abort.</p>
 
         <h2 id="usage">Usage</h2>
         <p>Run it manually or schedule it via launchd, crontab, or OpenClaw's own cron system:</p>
