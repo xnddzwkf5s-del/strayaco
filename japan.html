@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Across Shikoku: Six Rides, Two Trains and Three Minivans — Straya Co</title>
+    <meta name="description" content="A day-by-day account of twelve days across Shikoku: six rides from Onomichi to Kochi, two train days, three minivan days, and every restaurant, onsen and photo stop along the way.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --dark:#1a1a2e; --gold:#c9a96e; --gold-dark:#b8945a; --cream:#f8f6f1; --white:#fff; --gray:#6b7280; --gray-light:#e8e4dd; --radius:4px; --radius-lg:12px; --shadow:0 4px 20px rgba(0,0,0,0.08); --shadow-lg:0 20px 60px rgba(0,0,0,0.15); --transition:all 0.35s cubic-bezier(0.4,0,0.2,1); }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Inter',sans-serif;color:var(--dark);background:var(--white);line-height:1.7;overflow-x:hidden;}
+        h1,h2,h3,h4{font-family:'Playfair Display',serif;font-weight:600;line-height:1.2;}
+        .container{max-width:800px;margin:0 auto;padding:0 32px;}
+        a{text-decoration:none;color:inherit;}
+        img{max-width:100%;height:auto;}
+        code{font-family:monospace;background:var(--cream);padding:2px 6px;border-radius:3px;font-size:0.9em;}
+        pre{background:var(--dark);color:#e2e8f0;padding:1.25rem;border-radius:var(--radius-lg);overflow-x:auto;margin:1.5rem 0;font-size:0.85rem;line-height:1.6;}
+        pre code{background:transparent;padding:0;color:inherit;font-size:0.85rem;}
+        table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:0.9rem;}
+        th,td{padding:0.75rem 1rem;text-align:left;border-bottom:1px solid var(--gray-light);}
+        th{background:var(--dark);color:var(--white);font-weight:600;}
+        tr:last-child td{border-bottom:none;}
+        p{margin-bottom:1rem;}
+        ul,ol{margin:1rem 0 1rem 1.5rem;}
+        li{margin-bottom:0.4rem;}
+        hr{margin:2rem 0;border:none;border-top:1px solid var(--gray-light);}
+
+        #site-header{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(26,26,46,0.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,169,110,0.2);}
+        .header-inner{max-width:1200px;margin:0 auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:80px;}
+        .logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--white);letter-spacing:0.02em;}
+        .logo span{color:var(--gold);}
+        nav ul{display:flex;list-style:none;gap:2rem;}
+        nav a{color:rgba(255,255,255,0.85);font-size:0.85rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;transition:var(--transition);}
+        nav a:hover,nav a.active{color:var(--gold);}
+        .btn-cta{background:var(--gold);color:var(--dark);padding:0.6rem 1.5rem;border-radius:var(--radius);font-size:0.82rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;transition:var(--transition);}
+        .btn-cta:hover{background:var(--gold-dark);}
+        .nav-icon{display:flex;flex-direction:column;justify-content:space-between;width:26px;height:20px;cursor:pointer;z-index:1100;flex-shrink:0;}
+        .nav-icon span{display:block;height:2px;width:100%;background:#fff;border-radius:9px;transition:all 0.25s ease-in-out;transform-origin:left center;}
+
+        .page-hero{padding:140px 0 40px;background:var(--dark);color:var(--white);}
+        .page-hero h1{font-size:2.4rem;margin-bottom:0.5rem;}
+        .page-hero .meta{color:var(--gold);font-size:0.85rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;}
+        .post-content{padding:60px 0 80px;}
+        .post-content h2{margin:2.5rem 0 1rem;font-size:1.6rem;}
+        .post-content h3{margin:2rem 0 0.75rem;font-size:1.2rem;color:var(--gray);}
+        .post-content ul{margin:1rem 0;}
+        .post-content li{margin-bottom:0.4rem;}
+        .post-content table{margin:1.5rem 0;}
+        .post-content .tag{display:inline-block;background:var(--cream);color:var(--gray);padding:0.3rem 0.8rem;border-radius:20px;font-size:0.8rem;margin-right:0.5rem;margin-bottom:0.5rem;border:1px solid var(--gray-light);}
+        .callout{background:var(--cream);border-left:4px solid var(--gold);padding:1rem 1.25rem;margin:1.5rem 0;border-radius:0 var(--radius) var(--radius) 0;font-size:0.95rem;}
+        .callout strong{color:var(--dark);}
+        .toc{background:var(--cream);border-radius:var(--radius-lg);padding:1.5rem 2rem;margin:2rem 0;}
+        .toc h3{margin-bottom:0.75rem;font-family:'Inter',sans-serif;font-weight:600;font-size:1rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--gray);}
+        .toc ul{list-style:none;margin:0;padding:0;}
+        .toc li{margin-bottom:0.4rem;}
+        .toc a{color:var(--gold);font-weight:500;}
+        .toc a:hover{color:var(--gold-dark);}
+
+        footer{background:var(--dark);color:rgba(255,255,255,0.7);padding:60px 0 30px;margin-top:60px;}
+        .footer-inner{max-width:1200px;margin:0 auto;padding:0 32px;}
+        .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;padding-bottom:2rem;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:2rem;}
+        .footer-brand{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--white);margin-bottom:0.75rem;}
+        .footer-brand span{color:var(--gold);}
+        .footer-col h4{color:var(--white);margin-bottom:1rem;font-size:1rem;}
+        .footer-col ul{list-style:none;}
+        .footer-col li{margin-bottom:0.5rem;}
+        .footer-col a:hover{color:var(--gold);}
+        .footer-bottom{text-align:center;font-size:0.85rem;}
+
+        .backdrop{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:900;opacity:0;visibility:hidden;transition:var(--transition);}
+        .backdrop.open{opacity:1;visibility:visible;}
+        .slide-navigation{position:fixed;top:0;right:0;bottom:0;width:320px;background:var(--dark);z-index:950;padding:2rem;transform:translateX(100%);transition:var(--transition);}
+        .slide-navigation.open{transform:translateX(0);}
+        .slide-nav-logo{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--white);margin:2rem 0;}
+        .slide-nav-logo span{color:var(--gold);}
+        .slide-nav-grid{display:grid;grid-template-columns:1fr;gap:2rem;}
+        .slide-nav-title{color:var(--gold);font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:1rem;}
+        .slide-nav-links{list-style:none;}
+        .slide-nav-links li{margin-bottom:0.75rem;}
+        .slide-nav-links a{color:rgba(255,255,255,0.75);font-size:0.95rem;transition:var(--transition);}
+        .slide-nav-links a:hover{color:var(--gold);}
+
+        @media(max-width:991px){nav ul{display:none;}}
+        @media(max-width:768px){.container{padding:0 20px;}.header-inner{padding:0 20px;}.footer-inner{padding:0 20px;}.footer-grid{grid-template-columns:1fr;}.page-hero h1{font-size:1.8rem;}.slide-navigation{width:100%;}}
+    
+        #sk-guide{font-family:'Inter',sans-serif;font-size:1rem;line-height:1.8;color:var(--dark);}
+        #sk-guide p{margin:0 0 1rem;}
+        #sk-guide h2{font-family:'Playfair Display',serif;font-size:1.7rem;color:var(--dark);border-bottom:1px solid var(--gray-light);padding-bottom:.4rem;}
+        #sk-guide h3{font-family:'Playfair Display',serif;font-size:1.25rem;color:var(--dark);}
+        #sk-guide .day-card{background:var(--cream);border:1px solid var(--gray-light);box-shadow:none;border-radius:var(--radius-lg);}
+        #sk-guide .day-card h2{border-bottom:2px solid var(--gold);}
+        #sk-guide table th{background:var(--dark);}
+        #sk-guide a{color:var(--gold-dark);}
+        #sk-guide img{width:100%;height:auto;border-radius:var(--radius-lg);}
+    </style>
+</head>
+<body>
+
+<header id="site-header">
+    <div class="header-inner">
+        <a href="index.html" class="logo">Straya <span>Co</span></a>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="resources.html">Resources</a></li>
+                <li><a href="index.html" class="active">Blog</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </nav>
+        <a href="contact.html" class="btn-cta">Get Started</a>
+        <div class="nav-icon" id="navIcon"><span></span><span></span><span></span></div>
+    </div>
+</header>
+
+<section class="page-hero">
+    <div class="container">
+        <p class="meta">19 July 2026 — <strong>Updated 29 October 2026</strong> — Open Source / AI Infrastructure</p>
+        <h1>OpenClaw Auto-Update Script</h1>
+        <p style="color:rgba(255,255,255,0.7);margin-top:1rem;font-size:1.05rem;">A fail-safe, self-healing, production-ready bash script for updating OpenClaw on macOS. Full source code included.</p>
+        <div>
+            <span class="tag">OpenClaw</span>
+            <span class="tag">Bash</span>
+            <span class="tag">Automation</span>
+            <span class="tag">DevOps</span>
+            <span class="tag">Homebrew</span>
+            <span class="tag">macOS</span>
+        </div>
+    </div>
+</section>
+
+<section class="post-content">
+    <div class="container">
+
+        <p class="meta">3 November 2026 &mdash; Travel / Cycling</p>
+        <h1 style="font-size:2.4rem;margin-bottom:1rem;">Across Shikoku: six rides, two trains and three minivans</h1>
+        <p style="font-size:1.1rem;color:var(--gray);margin-bottom:1.5rem;">Twelve days from Onomichi to Kochi &mdash; the rides, the rest days, the restaurants, and the things worth knowing before you go.</p>
+
+        <div class="toc">
+            <h3>Contents</h3>
+            <ul>
+                <li><a href="#before-you-ride">Before you ride</a></li>
+                <li><a href="#ride-1-sat-31-oct-onomichi-to-setoda-39-1-km-341-m-6-7-hours">Ride 1 · Sat 31 Oct — Onomichi to Setoda · 39.1 km · +341 m · 6–7 hours</a></li>
+                <li><a href="#ride-2-sun-1-nov-setoda-to-imabari-49-5-km-409-m-7-8-hours">Ride 2 · Sun 1 Nov — Setoda to Imabari · 49.5 km · +409 m · 7–8 hours</a></li>
+                <li><a href="#rest-day-mon-2-nov-imabari-to-matsuyama-train">Rest day · Mon 2 Nov — Imabari to Matsuyama (train)</a></li>
+                <li><a href="#rest-day-tue-3-nov-matsuyama-to-takamatsu-train">Rest day · Tue 3 Nov — Matsuyama to Takamatsu (train)</a></li>
+                <li><a href="#ride-3-wed-4-nov-takamatsu-to-tokushima-82-5-km-354-m-8-9-ho">Ride 3 · Wed 4 Nov — Takamatsu to Tokushima · 82.5 km · +354 m · 8–9 hours</a></li>
+                <li><a href="#ride-4-thu-5-nov-tokushima-to-minami-70-0-km-504-m-7-8-hours">Ride 4 · Thu 5 Nov — Tokushima to Minami · 70.0 km · +504 m · 7–8 hours</a></li>
+                <li><a href="#ride-5-fri-6-nov-minami-to-muroto-61-8-km-409-m-6-7-hours">Ride 5 · Fri 6 Nov — Minami to Muroto · 61.8 km · +409 m · 6–7 hours</a></li>
+                <li><a href="#ride-6-sat-7-nov-muroto-to-kochi-86-3-km-329-m-8-9-hours">Ride 6 · Sat 7 Nov — Muroto to Kochi · 86.3 km · +329 m · 8–9 hours</a></li>
+                <li><a href="#minivan-days-sun-8-tue-10-nov-kochi-shimanto-and-cape-ashizu">Minivan days · Sun 8 – Tue 10 Nov — Kochi, Shimanto and Cape Ashizuri</a></li>
+                <li><a href="#wed-11-nov-the-flight-home">Wed 11 Nov — the flight home</a></li>
+                <li><a href="#the-route-in-numbers">The route in numbers</a></li>
+                <li><a href="#climbing-day-by-day">Climbing, day by day</a></li>
+                <li><a href="#resupply-at-a-glance">Resupply at a glance</a></li>
+                <li><a href="#quick-reference-every-place-on-the-map">Quick reference: every place on the map</a></li>
+                <li><a href="#what-we-ate-town-by-town">What we ate, town by town</a></li>
+                <li><a href="#photos-from-the-route">Photos from the route</a></li>
+                <li><a href="#bailouts">Bailouts</a></li>
+                <li><a href="#what-worked">What worked</a></li>
+                <li><a href="#what-i-d-change">What I'd change</a></li>
+            </ul>
+        </div>
+
+<div id="sk-guide">
+<p>This is the working guide to twelve days across Shikoku — six rides, two train days and three minivans — from Onomichi to Kochi via the Shimanami Kaido and the Pacific coast. It's written for anyone thinking of following the same line — the road numbers, the stops worth making, the climbs that actually matter, and the escape routes if a day goes wrong.</p>
+<p style="margin:0 0 24px 0"><img src="japan-assets/img-01.jpg" alt="The Shimanami Photo Spot, Imabari — the view the whole route is built around." style="width:100%;height:auto;border-radius:6px" /><span style="display:block;font-size:9pt;color:#666;margin-top:6px">The Shimanami Photo Spot, Imabari — the view the whole route is built around.</span></p>
+
+<p>Everything below comes from the six GPX tracks we rode, then checked against the road. Where a number disagrees with a tourist brochure, trust the track.</p>
+<h2 id="before-you-ride">Before you ride</h2>
+<p><strong>Bikes.</strong> We took the Mamacari, the rental fleet's flat-bar city bike, with a pannier holder on the front — enough for a day bag and a camera, not for a loaded tour. Check the mount takes your bag before you leave the counter, because the alternative is riding with it on your back for six days.</p>
+<p>The group ran two bags: a <a href="https://a.aliexpress.com/_m01qzld">budget pannier from AliExpress</a> and the <a href="https://aus.ortlieb.com/products/vario-lite">Ortlieb Vario Lite</a>. Both are 2-in-1 — a pannier on the bike, a backpack off it — and that is the feature worth buying for: an ordinary pannier is a bucket you unclip and carry by the handle, which is fine for a bag drop and useless for a walk into town or a flight of stairs.</p>
+<p>Both were as good as each other, rain included. The cheap one kept its contents dry and never gave trouble, so the extra money buys the name, the fittings and the finish, not the function. If you want the convertible trick for the least money, the budget one is the sensible buy. One bag each is right — a second one is weight you will feel on Ride 4, and a backpack on the bike is a sweaty mistake.</p>
+<p>We used two separate rentals. The Shimanami rental network covers the islands only, so the first bike is collected at Onomichi and dropped at Imabari at the end of Ride 2. A second rental starts in Takamatsu and finishes in Kochi. Book both well ahead — six cross bikes in one size run is not something you arrange the week before, and the Takamatsu–Kochi leg has fewer shops than the islands do. If you bring your own bike, this is one of the easiest places in Japan to ride it: the Shimanami is fully signposted, and the ferries take bikes without fuss.</p>
+<p><strong>Luggage.</strong> No forwarding on this trip — everything is carried on the bike for six riding days. That's the single biggest change to how you pack, and it's worth a loaded test ride before you commit. If you'd rather not carry it, Yamato's Ta-Q-Bin will move a bag between hotels for roughly the price of a good dinner.</p>
+<p><strong>Bags that aren't panniers.</strong> A dry bag or daypack needs tying down, and the rental counter sells elastic loops for ¥500 each. Buy one per bag: they hold a load against the rack over bridge ramps and bad surfaces, and without one you are re-securing the same bag every ten kilometres. Cheapest useful thing in the shop.</p>
+<p style="margin:0 0 24px 0"><img src="japan-assets/img-02.jpg" alt="Tying a bag down with an elastic loop, Onomichi." style="width:100%;height:auto;border-radius:6px" /><span style="display:block;font-size:9pt;color:#666;margin-top:6px">Tying a bag down with an elastic loop, Onomichi.</span></p>
+
+<p><strong>Ferry fares.</strong> Coins ready before you reach the ramp — ¥100 for a passenger and ¥10 for the bike. You pay on board after you have boarded, not at a ticket window, so there is nothing to queue for and no reason to arrive early with a wallet in your hand. Services run from 06:00 to 22:00, which is wide enough that the timetable rarely decides your day.</p>
+<p><strong>Trains and bikes.</strong> JR services here don't take assembled bikes. Plan the two middle days as genuine rest days: bikes returned, bags in a hotel, limited express between cities. Imabari to Matsuyama is under an hour; Matsuyama to Takamatsu is around two and a half hours. Locals take twice as long and aren't worth it with luggage.</p>
+<p><strong>Lights and tunnels.</strong> Rides 4, 5 and 6 are all Route 55, and Route 55 goes through tunnels. Lights on, every time, single file. Not a suggestion.</p>
+<p><strong>Water and food.</strong> Two bottles minimum, refilled at every convenience store. Rides 1–2 have shops every few kilometres. Rides 4–6 do not — carry food from town, and treat the last konbini as the last konbini.</p>
+<p><strong>Timing.</strong> Late October into November: sunset around 17:10 and a Pacific headwind that builds after lunch. Every long day starts at 07:00–07:30 for that reason, not for discipline.</p>
+<p><strong>Fix the bike on Ride 1.</strong> Saddle height, cleats, rubbing, sore knees — sort it at the rental station and again that evening. Whatever you leave until Ride 4 will still be there on Ride 4, and Ride 4 is not the day you want it.</p>
+<div class="day-card"><h2 id="ride-1-sat-31-oct-onomichi-to-setoda-39-1-km-341-m-6-7-hours">Ride 1 · Sat 31 Oct — Onomichi to Setoda · 39.1 km · +341 m · 6–7 hours</h2>
+<p>The easy one, deliberately: it's also the day you meet the bikes.</p>
+<p><strong>The profile.</strong> Three gentle rises — km 1.2–9.6 (+34 m), km 18.1–20.9 (+23 m), km 29.9–34.8 (+41 m). High point 42 m. Nothing here needs a small ring.</p>
+<ul>
+<li><strong>08:00, km 0</strong> — Collect bikes at <a href="https://maps.app.goo.gl/DNjj6MGaYmZoH3Pt7?g_st=ic">Bicycle Rental Onomichi Station</a>, 1-10 Higashigoshocho. Saddle height, brakes, lights, tyres, group photo. Allow 45 minutes.</li>
+</ul>
+<p style="margin:0 0 24px 0"><img src="japan-assets/img-03.jpg" alt="Bikes collected at Onomichi Station, 08:00." style="width:100%;height:auto;border-radius:6px" /><span style="display:block;font-size:9pt;color:#666;margin-top:6px">Bikes collected at Onomichi Station, 08:00.</span></p>
+
+<p style="margin:0 0 24px 0"><img src="japan-assets/img-04.jpg" alt="The Mamacari, with pannier holder — the bike for the next six days." style="width:100%;height:auto;border-radius:6px" /><span style="display:block;font-size:9pt;color:#666;margin-top:6px">The Mamacari, with pannier holder — the bike for the next six days.</span></p>
+
+<p style="margin:0 0 24px 0"><img src="japan-assets/img-05.jpg" alt="" style="width:100%;height:auto;border-radius:6px" /></p>
+
+<div class="warning"><strong>Warning:</strong> the rental station opens at 08:00, but the queue forms well before it — the photo below is 07:45, with the doors still shut. Be at the counter by 07:30 rather than 08:00. For scale: we joined that queue at 07:45 and were out with six bikes at 08:30 — 45 minutes, and the paperwork is the slow part, not the queue. Do breakfast after collection, not before. We collected on a Saturday, which may be why the queue reached the street — a midweek start is probably calmer, but assume a weekend crowd.</div>
+<p style="margin:0 0 24px 0"><img src="japan-assets/img-06.jpg" alt="The queue at the Onomichi bike collection point, 07:45." style="width:100%;height:auto;border-radius:6px" /><span style="display:block;font-size:9pt;color:#666;margin-top:6px">The queue at the Onomichi bike collection point, 07:45.</span></p>
+
+<ul>
+<li><strong>08:45, km 0</strong> — Coffee and breakfast in town before the ferry. The bikes are sorted, so this is the last sit-down until Setoda: nothing else opens before the islands.</li>
+<li><strong>09:50, km 2</strong> — Ferry to Mukaishima. The Shimanami proper starts on the far side; ferries run often and take cash.</li>
+<li><strong>10:15, km 10.5</strong> — Shimanami Beach: first view of the island chain, plus toilets and vending.</li>
+<li><strong>11:15, km 14.1</strong> — The scenic village path: narrow lanes between houses, the old Shimanami.</li>
+<li><strong>11:50, km 19.2</strong> — A citrus farm shop on Innoshima. Hassaku juice, cakes, bottle refills.</li>
+<li><strong>12:40, km 31</strong> — Lunch in Setoda: lemon ramen or lemon curry. The island grows most of Japan's lemons.</li>
+<li><strong>13:50, km 34</strong> — Kosan-ji and the Hill of Hope: an underground marble cave and a scaled-down Parthenon built by one man's obsession. Closes around 17:00.</li>
+<li><strong>15:20, km 39.1</strong> — Setoda, done for the day.</li>
+</ul>
+<p><strong>See:</strong> Kosan-ji is the day's centrepiece and deserves real time — it is strange and wonderful. Sunset Beach is a ten-minute walk from anywhere in town.</p>
+<p><strong>Eat:</strong> lunch in Setoda. Dinner options are limited and close early — look at them and book at check-in, not at 19:00.</p>
+</div><div class="day-card"><h2 id="ride-2-sun-1-nov-setoda-to-imabari-49-5-km-409-m-7-8-hours">Ride 2 · Sun 1 Nov — Setoda to Imabari · 49.5 km · +409 m · 7–8 hours</h2>
+<p>Four bridges, lemon groves, and a shrine with a national-treasure armoury. If you ride only one day of this route, ride this one: it is the scenic day, bridge after bridge over water, where Day 1 runs through villages and factory edges on its way out of Onomichi.</p>
+<p><strong>The profile.</strong> Short rises at km 11.3–15.9 (+40 m), km 18.3–21.4 (+21 m), km 23.0–27.6 (+43 m), then a long gentle drag from km 31.9 to 42.6 (+41 m over nearly 11 km). High point 53 m. All bridge approaches: short, sharp, over quickly.</p>
+<ul>
+<li><strong>08:30, km 0</strong> — Away from Setoda.</li>
+<li><strong>08:55, km 5.3</strong> — Rest area, toilets and vending. First regroup.</li>
+<li><strong>09:15, km 5.7–8.5</strong> — Do the whole cluster as one 40-minute stop: Lemon Bench, Dinosaur Skeleton, Lemon Valley, Lake Shikoku viewpoint.</li>
+<li><strong>10:15, km 14</strong> — Tatara Bridge. Photo stop; the prettiest of the four.</li>
+<li><strong>10:45, km 18–22</strong> — Oyamazumi Shrine. One of Japan's oldest, and the treasury holds national-treasure armour and swords. An hour, minimum.</li>
+<li><strong>12:15, km 23</strong> — Lunch at <a href="https://maps.app.goo.gl/nrG43Vyommb2siti9?g_st=iw">Roadside Station Yoshiumi Iki-iki-kan</a>: seafood grilled over charcoal, and the best lunch on the Shimanami. There is a bike rental station on site too, which makes this a place you could start or finish a ride from rather than only pass through.</li>
+<li><strong>13:30–15:00, km 26–37.6</strong> — Bay View regroup, murals on the breakwater, the shipyard viewpoint, the Jizō statue. Each is ten minutes and together they make the afternoon.</li>
+<li>
+<p><strong>Before Imabari</strong> — <a href="https://maps.app.goo.gl/HnrxWFoH2V78mD5r8?g_st=ic">Shimanami Photo Spot</a>, Sunabacho. The classic Shimanami frame, and the one stop on this route worth making purely for a photograph — sea, islands and bridge lined up. Stop, take it, then ride the last few kilometres into town.</p>
+</li>
+<li>
+<p><strong>15:45, km 45</strong> — Kurushima Kaikyo Bridge. Four kilometres over the whirlpool strait, with an observation point at the end. The ramp onto it is the steepest thing on the Shimanami at around 6% — short, but it will find your easiest gear.</p>
+</li>
+<li><strong>16:30, km 49.2</strong> — Bikes returned, 300 m before the hotel. That closes the first rental: the Shimanami bikes go back at Imabari, the next set is collected in Takamatsu, and everything until then is on foot — starting with the onsen.</li>
+</ul>
+<p><strong>After the ride:</strong> <a href="https://maps.app.goo.gl/MMN46DBhqZPABRwa9?g_st=ic">Shimanami Hot Spring Kisuke no Yu</a>, 1-2-30 Nakahiyoshicho, Imabari — the onsen we walked to after handing the bikes back, and it serves dinner too, which removes the evening's logistics in one stop: eat, soak, walk back. Book the meal when you arrive rather than hoping for a table at 19:00.</p>
+<p><strong>See:</strong> Oyamazumi is the one unmissable stop; the Kurushima crossing is the spectacle. If you're running late, cut the murals and the shipyard, never the shrine.</p>
+<p><strong>Eat:</strong> Imabari is a yakitori town. Walk the castle first — seawater moat, original stone walls.</p>
+<div class="info-box"><strong>One practical note:</strong> send your strongest rider up the Kurushima ramp first to hold the regroup at the top. Six riders strung out on a 6% ramp beside traffic is the one place today where a gap becomes a problem.</div>
+</div><div class="day-card"><h2 id="rest-day-mon-2-nov-imabari-to-matsuyama-train">Rest day · Mon 2 Nov — Imabari to Matsuyama (train)</h2>
+<p>No riding. The bikes went back the night before, so this is luggage in hand and the LEX south.</p>
+<p>Breakfast was the station itself: a Lawson and a 7-Eleven, both at Imabari Station — the honest answer to a wet morning with a train to catch. Tickets from the machine, no booking needed; the service runs roughly hourly and unreserved is the cheap option.</p>
+<p><strong>The day, as it went.</strong> Luggage dropped at the hotel first, then straight up to Matsuyama Castle — the keep, the original stone walls, and the Seto laid out below. Down by chairlift, then a few minutes' walk to lunch: tai meshi at <a href="https://maps.app.goo.gl/HiE5wvoNKiQQiuUF6?g_st=ic">Tai Meshi Motoyama</a>, Okaido — sea bream and rice with a raw egg cracked over the top and mixed through at the table. That egg is the local way to eat it, and the reason to order the dish here rather than anywhere else on the route.</p>
+<p style="margin:0 0 24px 0"><img src="japan-assets/img-07.jpg" alt="Tai meshi with a raw egg, Tai Meshi Motoyama — lunch, Mon 2 Nov." style="width:100%;height:auto;border-radius:6px" /><span style="display:block;font-size:9pt;color:#666;margin-top:6px">Tai meshi with a raw egg, Tai Meshi Motoyama — lunch, Mon 2 Nov.</span></p>
+
+<p>Matsuyama is worth the stop for Dogo Onsen alone — the oldest hot spring in Japan by most accounts, and the bathhouse that supposedly inspired Spirited Away. The main building reopened in 2024 after a long restoration. It is also the right answer to a wet afternoon: the arcade is covered and the baths are indoors.</p>
+</div><div class="day-card"><h2 id="rest-day-tue-3-nov-matsuyama-to-takamatsu-train">Rest day · Tue 3 Nov — Matsuyama to Takamatsu (train)</h2>
+<p>The second train day, and the one to stay loose about. We were booked on the 09:15 and took the 07:20 instead — the tickets are non-reserved, so an earlier train costs nothing and arriving at 09:47 buys half a day in Takamatsu.</p>
+<p>Bags to the accommodation first, because check-in is 15:00 and a key-code apartment has no front desk to leave them with. Then the Kotoden from Takamatsu-Chikko, two stops to Ritsurin-koen, for the garden — the finest landscape garden in the country and the reason to arrive early.</p>
+<p>Lunch was Sanuki udon, which is the local religion rather than a dish: kamatama butter at Baka Ichidai if you want the famous bowl, or Yamada-ya beside the garden if you want to sit down in a 200-year-old house. Either way, eat before 13:00 — they close when the noodles run out.</p>
+<p>Takamatsu is the last stop before the second half of the riding.</p>
+</div><div class="day-card"><h2 id="ride-3-wed-4-nov-takamatsu-to-tokushima-82-5-km-354-m-8-9-ho">Ride 3 · Wed 4 Nov — Takamatsu to Tokushima · 82.5 km · +354 m · 8–9 hours</h2>
+<p>The route was re-drawn late in planning and it's much the better for it. The old line went inland over a +186 m climb at km 36–42; this one runs the coast east through Kitanada, then turns inland to the Yoshino plain. Ten kilometres longer, no climb, and a far better lunch.</p>
+<p><strong>The profile.</strong> Almost entirely flat. Highest point just 68 m at km 26.8. It is now the second-longest day, on open road rather than a cycleway — which is why it takes eight hours despite the profile.</p>
+<ul>
+<li><strong>07:30, km 0</strong> — Depart. A longer day than the distance suggests.</li>
+<li><strong>09:00, km 12.3–12.6</strong> — Early stop, then the convenience store for water and snacks.</li>
+<li><strong>10:45, km 26.8</strong> — Top of the day at 68 m. After this it stays gentle.</li>
+<li><strong>12:15, km 53.9</strong> — <a href="https://www.google.com/maps/search/?api=1&amp;query=Kitanada+Fish+Market">Kitanada Fish Market</a>. This is the reason the route exists: fresh seafood on the coast, and the best lunch of the first half.</li>
+<li><strong>14:15, km 62.2</strong> — Last resupply.</li>
+<li><strong>16:30, km 82.5</strong> — Tokushima.</li>
+</ul>
+<p><strong>See:</strong> the Awa Odori Kaikan runs year-round performances of Japan's biggest dance festival, and you can join in. Do it that night — tomorrow starts early. The new line runs the Naruto coast, so the whirlpool observatory is a shorter detour than it used to be — decide on the day rather than committing in advance.</p>
+<p><strong>Eat:</strong> Tokushima ramen, or an izakaya — and book for six.</p>
+<div class="pro-tip"><strong>Bailout:</strong> the Kotoku Line parallels the route the whole way. Any station works.</div>
+</div><div class="day-card"><h2 id="ride-4-thu-5-nov-tokushima-to-minami-70-0-km-504-m-7-8-hours">Ride 4 · Thu 5 Nov — Tokushima to Minami · 70.0 km · +504 m · 7–8 hours</h2>
+<p>The hardest day, and not because of the total. High point 120 m at km 42.5, with two late climbs and constant rolling road.</p>
+<p><strong>The profile.</strong> A long false flat from km 1.7 to 43.0 — +117 m at 0.3%, which never feels like a climb but costs you anyway. Then the two that do: km 53.6–58.5, +76 m at 1.6%, and km 58.9–61.5, +33 m at 1.3%.</p>
+<ul>
+<li><strong>07:30, km 0</strong> — Depart.</li>
+<li><strong>08:45, km 12.4</strong> — Convenience store. Water, snacks.</li>
+<li><strong>09:45, km 21.3</strong> — Regroup.</li>
+<li><strong>10:45, km 27.9</strong> — Viewpoint and photo stop.</li>
+<li><strong>11:15, km 31.2</strong> — Café. The last sit-down until late; take it.</li>
+<li><strong>11:50, km 31.3</strong> — A small pass, and a regroup at the top.</li>
+<li><strong>13:45, km 58.4</strong> — Late lunch. This is your marker: 83% of the way, so eat a snack before you get here.</li>
+<li><strong>15:15, km 70.0</strong> — Minami.</li>
+</ul>
+<p><strong>See:</strong> Byodo-ji, just past Minami — a small seaside temple with a floating Jizō, twenty minutes, very atmospheric. The northern edge of the Muroto Geopark starts here.</p>
+<p><strong>Eat:</strong> the real meal of the day is the late lunch at km 58.4. Carry snacks for the gap from km 31 to 58, where services are thin.</p>
+<div class="warning"><strong>Safety:</strong> narrow shoulders and several tunnels. Front and rear lights, single file through every tunnel, no overtaking. The Mugi Line follows the coast as far as Kaifu if anyone needs to stop.</div>
+</div><div class="day-card"><h2 id="ride-5-fri-6-nov-minami-to-muroto-61-8-km-409-m-6-7-hours">Ride 5 · Fri 6 Nov — Minami to Muroto · 61.8 km · +409 m · 6–7 hours</h2>
+<p>The wildest scenery of the ride — and the day that lies to you on paper.</p>
+<p><strong>The profile.</strong> High point just 18 m at km 35.5. No climb worth naming. What the track shows instead is dozens of small rises: the classic Japanese coastal road. Ride it compact and it flows; ride it hard and it drains you.</p>
+<ul>
+<li><strong>08:00, km 0</strong> — Depart.</li>
+<li><strong>09:00, km 11.7</strong> — Oshiro-Matsubara beach: long sand, black pines, almost nobody. Best photo stop of the morning.</li>
+<li><strong>09:35, km 14.1</strong> — Coffee.</li>
+<li><strong>11:15, km 41.3</strong> — Regroup at the public toilet.</li>
+<li><strong>12:00, km 45.3</strong> — Small shop: water and snacks.</li>
+<li><strong>12:30, km 48</strong> — Lunch in Muroto. Katsuo no tataki, seared over straw. This is the town for it; don't order anything else.</li>
+<li><strong>14:00, km 52</strong> — Hotsumisaki-ji, Temple 24 of the eighty-eight. Kukai trained here; the main hall faces open ocean. Allow an hour.</li>
+<li><strong>15:15, km 56</strong> — Muroto Cape and Shiofuki Iwa: lighthouse, cliffs, a blowhole that performs when the swell is up.</li>
+<li><strong>16:15, km 61.8</strong> — Muroto.</li>
+</ul>
+<p><strong>See:</strong> Hotsumisaki-ji and the cape are the reasons to come to this peninsula. If the weather turns, the Muroto Geopark Museum is a genuinely good substitute — plate tectonics and whaling history.</p>
+<p><strong>Eat:</strong> katsuo no tataki at lunch. Dinner is not available where you're sleeping, so eat in town or buy at a konbini before you arrive.</p>
+<div class="warning"><strong>Warning:</strong> there is no railway on this peninsula. A mechanical or medical problem means a taxi, and they are not thick on the ground. Full repair kit, two bottles, charged phones.</div>
+</div><div class="day-card"><h2 id="ride-6-sat-7-nov-muroto-to-kochi-86-3-km-329-m-8-9-hours">Ride 6 · Sat 7 Nov — Muroto to Kochi · 86.3 km · +329 m · 8–9 hours</h2>
+<p>Longest day, flattest gradient, and the one where the weather decides everything.</p>
+<p><strong>The profile.</strong> Essentially level for 86 km. High point 21 m at km 26.4. But a 25–30 km/h headwind on an exposed coast is the equivalent of a long steady climb, and it usually arrives after lunch.</p>
+<ul>
+<li><strong>07:00, km 0</strong> — Depart. The early start is the whole plan.</li>
+<li><strong>07:20, km 1.5</strong> — The bench: morning view back over the cape.</li>
+<li><strong>08:45, km 12.8</strong> — Regroup.</li>
+<li><strong>10:00, km 25.2</strong> — Early lunch at the port canteen. Eat now; the afternoon is the hard half.</li>
+<li><strong>11:15, km 31.4</strong> — Convenience store: water and snacks for the exposed stretch.</li>
+<li><strong>13:30, km 55</strong> — No marker here. Carry water and pick a shop when you see one.</li>
+<li><strong>14:45, km 62.8</strong> — Regroup.</li>
+<li><strong>15:00, km 62.9</strong> — Tei Port's movable bridge, one of the few still working in Japan. Fifteen minutes, and you either sail through or wait for it.</li>
+<li><strong>16:30, km 86.3</strong> — Kochi.</li>
+</ul>
+<p><strong>Eat:</strong> Kochi finishes well — a castle with its original keep rather than a reconstruction, and <a href="https://www.google.com/maps/search/?api=1&amp;query=Hirome+Ichiba+Kochi">Hirome Ichiba</a>: 65 food stalls under one roof, communal tables, beer from the convenience store next door. It's the right way to end six days on a bike.</p>
+</div><div class="day-card"><h2 id="minivan-days-sun-8-tue-10-nov-kochi-shimanto-and-cape-ashizu">Minivan days · Sun 8 – Tue 10 Nov — Kochi, Shimanto and Cape Ashizuri</h2>
+<p>Three days in a minivan, and worth the detour: roughly 106 km west to the Shimanto River, 50 km on to Cape Ashizuri, then 156 km back to Kochi.</p>
+<p>West of Kochi, the Shimanto River is Japan's last free-flowing clear stream — no dams along its length — crossed by chinkabashi, the low-water bridges that disappear under the river when it floods. Further south, Cape Ashizuri is the southernmost point of Shikoku: white lighthouse, dramatic cliffs, and Kongo-fukuji, Temple 38, whose main hall faces open ocean and has stood there for twelve centuries.</p>
+</div><div class="day-card"><h2 id="wed-11-nov-the-flight-home">Wed 11 Nov — the flight home</h2>
+<p>Kochi to Haneda, then Haneda to Sydney: two flights, no riding, and a long day rather than a hard one. Kochi Airport is small and quick, so the check-in is not the risk — the Haneda connection is. Leave the margin you would leave for a domestic transfer in Sydney, and keep the bike bags where you can reach them.</p>
+</div><h2 id="the-route-in-numbers">The route in numbers</h2>
+<table>
+<thead>
+<tr>
+<th>Day</th>
+<th>Route</th>
+<th>Distance</th>
+<th>Climb</th>
+<th>Moving</th>
+<th>Allow</th>
+<th>Character</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Onomichi → Setoda</td>
+<td>39.1 km</td>
+<td>+341 m</td>
+<td>2:37</td>
+<td>6–7 h</td>
+<td>Easy — island warm-up</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Setoda → Imabari</td>
+<td>49.5 km</td>
+<td>+409 m</td>
+<td>3:21</td>
+<td>7–8 h</td>
+<td>Moderate — the postcard day</td>
+</tr>
+<tr>
+<td>—</td>
+<td>Imabari → Matsuyama (train)</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>Rest day</td>
+</tr>
+<tr>
+<td>—</td>
+<td>Matsuyama → Takamatsu (train)</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>Rest day</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Takamatsu → Tokushima</td>
+<td>82.5 km</td>
+<td>+354 m</td>
+<td>4:57</td>
+<td>8–9 h</td>
+<td>Long, almost flat</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Tokushima → Minami</td>
+<td>70.0 km</td>
+<td>+504 m</td>
+<td>5:17</td>
+<td>7–8 h</td>
+<td>Hardest</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Minami → Muroto</td>
+<td>61.8 km</td>
+<td>+409 m</td>
+<td>3:50</td>
+<td>6–7 h</td>
+<td>Moderate, wild coast</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Muroto → Kochi</td>
+<td>86.3 km</td>
+<td>+329 m</td>
+<td>5:12</td>
+<td>8–9 h</td>
+<td>Longest, flattest, wind</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Totals: 389.2 km, +2,346 m over six riding days.</strong> Moving time is about 25 hours; door-to-door it's closer to 45, which is the number that decides your evening.</p>
+<p>A note on the numbers, because you will compare them with a route planner: komoot's own cards report higher ascent for the same tracks — 510 m for Day 1 against our 341 m. That is smoothing, not a different road. Plan with the higher figure if you want to be conservative; the shape of each day does not change.</p>
+<h2 id="climbing-day-by-day">Climbing, day by day</h2>
+<p>Cumulative ascent flatters a coastal route. What matters on the day is the one climb you actually notice:</p>
+<table>
+<thead>
+<tr>
+<th>Day</th>
+<th>The climb that matters</th>
+<th>High point</th>
+<th>What it feels like</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Three gentle rises: +34 m, +23 m, +41 m</td>
+<td>42 m at km 34.8</td>
+<td>Rollers. Nothing needs the small ring</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Bridge approaches only; the Kurushima ramp is the steepest of the trip at about 6%</td>
+<td>53 m</td>
+<td>Short and sharp, over quickly</td>
+</tr>
+<tr>
+<td>5</td>
+<td>None — re-routed coastal</td>
+<td>68 m at km 26.8</td>
+<td>Flat all day, and it still takes 8 hours</td>
+</tr>
+<tr>
+<td>6</td>
+<td>A false flat from km 1.7 to 43 (+117 m at 0.3%), then +76 m at 1.6% and +33 m at 1.3%</td>
+<td>120 m at km 42.5</td>
+<td>The drag that never feels like a climb, and still costs you</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Dozens of small rises, no single climb</td>
+<td>18 m at km 35.5</td>
+<td>Undulates constantly — tiring in a way the profile hides</td>
+</tr>
+<tr>
+<td>8</td>
+<td>None</td>
+<td>21 m at km 26.4</td>
+<td>The headwind is the climb</td>
+</tr>
+</tbody>
+</table>
+<p>The lesson from that table: this route has one genuinely steep ramp, on the approach to the Kurushima bridge, and everything else is either a long grind or a coastal roll. Day 6 is hard because of the shape of it — a three-hour false flat at the start, when your legs are cold — not because of any wall.</p>
+<h2 id="resupply-at-a-glance">Resupply at a glance</h2>
+<table>
+<thead>
+<tr>
+<th>Day</th>
+<th>Water and food</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Vending at km 10.5, farm shop km 19.2, full town at km 31</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Rest area km 5.3, michi-no-eki km 23, bay viewpoint km 25.8</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Convenience store km 12.6, fish market km 53.9, last shop km 62.2</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Convenience stores km 12.4 and 21.3, café km 31.2 — then nothing until km 58.4</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Café km 14.1, shop km 45.3, town at km 48</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Port canteen km 25.2, convenience store km 31.4</td>
+</tr>
+</tbody>
+</table>
+<p>Ride 4 is the one to plan around. After the café at km 31 the services disappear, so the lunch you eat at km 58 is the lunch you carried out of Tokushima.</p>
+<h2 id="quick-reference-every-place-on-the-map">Quick reference: every place on the map</h2>
+<p>Everything named in this guide, in one table — the logistics first, then the food. Tap the map link and it opens where you need to be.</p>
+<table>
+<thead>
+<tr>
+<th>Place</th>
+<th>Where</th>
+<th>Why it is here</th>
+<th>Map</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A-Bomb Dome</td>
+<td>Hiroshima, Peace Memorial Park</td>
+<td>The reason for the detour into the city</td>
+<td><a href="https://www.google.com/maps/search/?api=1&amp;query=Hiroshima+Peace+Memorial+Park+A-Bomb+Dome">Map</a></td>
+</tr>
+<tr>
+<td>Peace Memorial Museum</td>
+<td>Hiroshima, Peace Memorial Park</td>
+<td>Allow a morning, not an hour</td>
+<td><a href="https://www.google.com/maps/search/?api=1&amp;query=Hiroshima+Peace+Memorial+Museum">Map</a></td>
+</tr>
+<tr>
+<td>Okonomimura</td>
+<td>Hiroshima, Shintenchi</td>
+<td>Hiroshima-style okonomiyaki, first lunch</td>
+<td><a href="https://maps.app.goo.gl/yi2Dr25SQxs8PVdc9?g_st=aw">Map</a></td>
+</tr>
+<tr>
+<td>Toyota Rent a Car</td>
+<td>Hiroshima Airport</td>
+<td>One-way pickup, car collected on landing</td>
+<td><a href="https://www.google.com/maps/search/?api=1&amp;query=Toyota+Rent+a+Car+Hiroshima+Airport">Map</a></td>
+</tr>
+<tr>
+<td>Apollo Station Shin-Onomichi</td>
+<td>5900-1 Kuriharacho, Onomichi</td>
+<td>Refuel before handing the car back</td>
+<td><a href="https://maps.app.goo.gl/RJmGe3vkjeBHbKmz8?g_st=ic">Map</a></td>
+</tr>
+<tr>
+<td>Toyota Rent a Car Shin-Onomichi Ekimae</td>
+<td>1-6 Kuriharacho, Onomichi</td>
+<td>One-way drop-off, near the start line</td>
+<td><a href="https://maps.app.goo.gl/xCf7Pwo6hGbTfv118?g_st=ic">Map</a></td>
+</tr>
+<tr>
+<td>Bicycle Rental Onomichi Station</td>
+<td>1-10 Higashigoshocho, Onomichi</td>
+<td>Collect the bikes — opens 08:00, queue from 07:30</td>
+<td><a href="https://maps.app.goo.gl/DNjj6MGaYmZoH3Pt7?g_st=ic">Map</a></td>
+</tr>
+<tr>
+<td>Onomichi Ramen Betcha</td>
+<td>4-11 Higashigoshocho, Onomichi</td>
+<td>Pork and oyster ramen, first dinner</td>
+<td><a href="https://maps.app.goo.gl/SbkfucJAN4uAngfeA?g_st=iw">Map</a></td>
+</tr>
+<tr>
+<td>Keima</td>
+<td>Setoda</td>
+<td>Restaurant</td>
+<td>Sashimi set</td>
+</tr>
+<tr>
+<td>Roadside Station Yoshiumi Iki-iki-kan</td>
+<td>4520-2 Yoshiumichomyo, Imabari</td>
+<td>Charcoal-grilled seafood, Day 2 lunch — bike rental on site</td>
+<td><a href="https://maps.app.goo.gl/nrG43Vyommb2siti9?g_st=iw">Map</a></td>
+</tr>
+<tr>
+<td>Shimanami Photo Spot</td>
+<td>2-8-8 Sunabacho, Imabari</td>
+<td>The must-stop frame, Day 2</td>
+<td><a href="https://maps.app.goo.gl/HnrxWFoH2V78mD5r8?g_st=ic">Map</a></td>
+</tr>
+<tr>
+<td>Shimanami Hot Spring Kisuke no Yu</td>
+<td>1-2-30 Nakahiyoshicho, Imabari</td>
+<td>Onsen with dinner, after Day 2</td>
+<td><a href="https://maps.app.goo.gl/MMN46DBhqZPABRwa9?g_st=ic">Map</a></td>
+</tr>
+<tr>
+<td>Tai Meshi Motoyama</td>
+<td>Okaido 3-8-2, Matsuyama</td>
+<td>Tai meshi with raw egg, Day 3 lunch</td>
+<td><a href="https://maps.app.goo.gl/HiE5wvoNKiQQiuUF6?g_st=ic">Map</a></td>
+</tr>
+<tr>
+<td>Yubune Sento</td>
+<td>269 Setodacho Setoda</td>
+<td>Public bath, two doors from dinner</td>
+<td><a href="https://maps.app.goo.gl/mZJkj85c7WkcVTPm6?g_st=ic">Map</a></td>
+</tr>
+</tbody>
+</table>
+<h2 id="what-we-ate-town-by-town">What we ate, town by town</h2>
+<p>The route tells you where to ride. This is the other half of the trip: the food, in the order we reached each town. Everything under Hiroshima is what we actually ate; the rest is the list we carried into each town, and it stays here until we get there or cross it off. Every place name links to Google Maps, so you can pull it up at the table rather than searching for it.</p>
+<table>
+<thead>
+<tr>
+<th>Place</th>
+<th>Town</th>
+<th>What it is</th>
+<th>What to order</th>
+<th>Verdict</th>
+<th>Map</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Okonomimura</td>
+<td>Hiroshima</td>
+<td>A building of okonomiyaki counters</td>
+<td>Hiroshima-style okonomiyaki with noodles</td>
+<td>First meal of the trip, and a good omen  <a href="https://maps.app.goo.gl/yi2Dr25SQxs8PVdc9?g_st=aw">Map</a></td>
+<td></td>
+</tr>
+<tr>
+<td>Onomichi Ramen Betcha</td>
+<td>Onomichi</td>
+<td>Ramen counter</td>
+<td>Pork and oyster ramen</td>
+<td>The recommendation of the trip so far  <a href="https://maps.app.goo.gl/SbkfucJAN4uAngfeA?g_st=iw">Map</a></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3>Hiroshima — first lunch</h3>
+<p>We came into Hiroshima by car before the ride, for the Peace Memorial Park: the <a href="https://www.google.com/maps/search/?api=1&amp;query=Hiroshima+Peace+Memorial+Park+A-Bomb+Dome">A-Bomb Dome</a> and the <a href="https://www.google.com/maps/search/?api=1&amp;query=Hiroshima+Peace+Memorial+Museum">Peace Memorial Museum</a>. That is the reason lunch was in the city rather than on the road — the museum takes a morning, and you do not drive far after it.</p>
+<p>The car was a one-way hire: picked up from Toyota Rent a Car at Hiroshima Airport, driven into the city, and dropped at the <a href="https://maps.app.goo.gl/xCf7Pwo6hGbTfv118?g_st=ic">Shin-Onomichi Ekimae branch</a> the same afternoon. That is the quiet trick of this start — you land, see the museum, hand back the keys near the start line, and wake up on Day 1 with nothing to return and nowhere to drive.</p>
+<p>One practical note: refuel before the drop. We filled up at <a href="https://maps.app.goo.gl/RJmGe3vkjeBHbKmz8?g_st=ic">Apollo Station Shin-Onomichi</a> and handed the car back full — a one-way hire normally goes back with a full tank, and settling it at a station beats paying the rental desk's refuelling rate.</p>
+<p style="margin:0 0 24px 0"><img src="japan-assets/img-08.jpg" alt="The A-Bomb Dome, Hiroshima." style="width:100%;height:auto;border-radius:6px" /><span style="display:block;font-size:9pt;color:#666;margin-top:6px">The A-Bomb Dome, Hiroshima.</span></p>
+
+<p><a href="https://maps.app.goo.gl/yi2Dr25SQxs8PVdc9?g_st=aw">Okonomimura</a> — "okonomi village" — is a single building in Shintenchi given over entirely to okonomiyaki. Floors of tiny counters, each with a hotplate and a handful of stools, each run by a different cook. You sit where there is space, order, and watch the whole thing built in front of you.</p>
+<p>Hiroshima-style okonomiyaki is not the Osaka pancake. Thin batter first, then a heap of cabbage and beansprouts, pork, a press of noodles, and an egg cracked on top before the flip. The layers stay separate and the cabbage is still crunchy. Sauce on the table, seaweed and bonito if you want them.</p>
+<p style="margin:0 0 24px 0"><img src="japan-assets/img-09.jpg" alt="Okonomiyaki, Hiroshima — the first proper meal of the trip." style="width:100%;height:auto;border-radius:6px" /><span style="display:block;font-size:9pt;color:#666;margin-top:6px">Okonomiyaki, Hiroshima — the first proper meal of the trip.</span></p>
+
+<p style="margin:0 0 24px 0"><img src="japan-assets/img-10.jpg" alt="" style="width:100%;height:auto;border-radius:6px" /></p>
+
+<p style="margin:0 0 24px 0"><img src="japan-assets/img-11.jpg" alt="" style="width:100%;height:auto;border-radius:6px" /></p>
+
+<p>Two practical notes. One is a full meal, not a snack, so do not order a second unless you have skipped breakfast. And the building gets busy after 19:00 — at lunch it is calmer, the counters turn over quickly, and you eat within ten minutes of walking in.</p>
+<p>The verdict: the noodles are what make it. A pancake with cabbage is a vegetable dish; add the press of yakisoba and it becomes the thing you want after a long flight.</p>
+<h3>Onomichi</h3>
+<p>Dinner was here for a simple reason: Onomichi is where we stayed, and where Day 1 starts. You drive in from Hiroshima, sleep in town, collect the bikes in the morning and ride out. That makes the evening the last proper meal before six days of riding, and the town's default meal worth taking seriously.</p>
+<p><strong>Onomichi Ramen Betcha</strong> — <a href="https://maps.app.goo.gl/SbkfucJAN4uAngfeA?g_st=iw">4-11 Higashigoshocho, Onomichi</a>. The first dinner of the trip, and the bowl I would send anyone to: pork and oyster ramen. The base is the standard Onomichi soy broth with its film of pork fat; the oysters go in on top and give it a briny, mineral depth the plain bowl does not have. Order the oyster version rather than the standard one — it is the reason to come.</p>
+<p style="margin:0 0 24px 0"><img src="japan-assets/img-12.jpg" alt="Pork and oyster ramen, Onomichi." style="width:100%;height:auto;border-radius:6px" /><span style="display:block;font-size:9pt;color:#666;margin-top:6px">Pork and oyster ramen, Onomichi.</span></p>
+
+<ul>
+<li><strong>Onomichi ramen</strong> — soy-based broth with a film of melted pork fat and, in the local style, a raw egg. <a href="https://www.google.com/maps/search/?api=1&amp;query=Shukaen+Onomichi+ramen">Shukaen</a> and <a href="https://www.google.com/maps/search/?api=1&amp;query=Hassho+Onomichi+ramen">Hassho</a> are the two names that come up; both are near the station and both are cheap.</li>
+<li><strong>Lemon sour</strong> — Hiroshima Prefecture grows most of Japan's lemons, and the local highball is made with them. Cold, sharp, exactly right after a warm day.</li>
+<li><strong>Setouchi seafood</strong> — the inland sea is at the door. Look for a counter with a fish tank and a short menu.</li>
+</ul>
+<h3>Setoda</h3>
+<p>A small island town with a lemon fixation, which sounds like a marketing line until you eat there.</p>
+<p><strong>Yubune Sento</strong> — <a href="https://maps.app.goo.gl/mZJkj85c7WkcVTPm6?g_st=ic">269 Setodacho Setoda</a>. The public bath, two or three doors from Keima, which is the whole shape of a Setoda evening: dip in the hot pool, walk past two shopfronts, sit down to sashimi. Do it in that order — a hot soak is the only thing that reliably loosens a day in the saddle, and you do not want to eat first and soak second.</p>
+<p><strong>Keima</strong> — <a href="https://maps.app.goo.gl/TqCHm1zYSu2uHgqD9?g_st=ic">251 Setodacho Setoda</a>. Dinner at the end of Day 1, after the ride in from Onomichi: a sashimi set, and a generous one. Eating fish here rather than waiting for Kochi is the right call — the island sits in the middle of the inland sea, and it shows on the plate.</p>
+<p style="margin:0 0 24px 0"><img src="japan-assets/img-13.jpg" alt="The sashimi set at Keima, Setoda — Day 1 dinner." style="width:100%;height:auto;border-radius:6px" /><span style="display:block;font-size:9pt;color:#666;margin-top:6px">The sashimi set at Keima, Setoda — Day 1 dinner.</span></p>
+
+<p style="margin:0 0 24px 0"><img src="japan-assets/img-14.jpg" alt="Sunset at Setoda." style="width:100%;height:auto;border-radius:6px" /><span style="display:block;font-size:9pt;color:#666;margin-top:6px">Sunset at Setoda.</span></p>
+
+<p>Setoda's evening options are thin, which is the argument for deciding at check-in rather than at 19:00 with tired legs.</p>
+<ul>
+<li><strong>Lemon ramen or lemon curry</strong> — the local lunch, and better than it has any right to be. <a href="https://www.google.com/maps/search/?api=1&amp;query=Cafe+Umi+no+Mieru+Setoda">Cafe Umi no Mieru</a> is the obvious stop.</li>
+<li><strong>Lemon gelato</strong> — creamy, properly tart, and the correct mid-ride purchase. Stalls along the route sell it; buy the one with the shortest queue and the fullest freezer.</li>
+<li><strong>Fresh lemonade</strong> — squeezed to order at roadside stands on the island.</li>
+</ul>
+<h3>Yoshiumi</h3>
+<p><strong>Roadside Station Yoshiumi Iki-iki-kan</strong> — <a href="https://maps.app.goo.gl/nrG43Vyommb2siti9?g_st=iw">4520-2 Yoshiumichomyo, Imabari</a>. Lunch on Day 2, and the best meal of the Shimanami: seafood grilled over charcoal at the roadside station, which sounds like a service-area compromise and is not. Order the fish and whatever shellfish is in the tank. Ours came with a hibachi stove set into the table, lobster and miso alongside it — the stove is lit at your seat and you cook the rest yourself, which is a better lunch than the price suggests. The lobster is served two ways and this is the part to copy: the tail comes as sashimi, and when the tail is finished you send the head back to the kitchen and it returns as miso soup. Ask for it that way rather than picking one. The bike rental counter here is the other useful detail — you can start or end a Shimanami ride at this door, which nobody tells you.</p>
+<p style="margin:0 0 24px 0"><img src="japan-assets/img-15.jpg" alt="Charcoal-grilled seafood at Yoshiumi Iki-iki-kan, Day 2 lunch." style="width:100%;height:auto;border-radius:6px" /><span style="display:block;font-size:9pt;color:#666;margin-top:6px">Charcoal-grilled seafood at Yoshiumi Iki-iki-kan, Day 2 lunch.</span></p>
+
+<p style="margin:0 0 24px 0"><img src="japan-assets/img-16.jpg" alt="Hibachi stove with lobster and miso, lit at the table — Yoshiumi." style="width:100%;height:auto;border-radius:6px" /><span style="display:block;font-size:9pt;color:#666;margin-top:6px">Hibachi stove with lobster and miso, lit at the table — Yoshiumi.</span></p>
+
+<p style="margin:0 0 24px 0"><img src="japan-assets/img-17.jpg" alt="Lobster tail as sashimi — the head goes back for miso soup." style="width:100%;height:auto;border-radius:6px" /><span style="display:block;font-size:9pt;color:#666;margin-top:6px">Lobster tail as sashimi — the head goes back for miso soup.</span></p>
+
+<h3>Imabari</h3>
+<p><strong>Shimanami Hot Spring Kisuke no Yu</strong> — <a href="https://maps.app.goo.gl/MMN46DBhqZPABRwa9?g_st=ic">1-2-30 Nakahiyoshicho, Imabari</a>. Right beside Imabari Station — you can see the station from the door, which makes it the obvious stop on the way to the train as well as after the ride. Dinner on Day 2, and the onsen does the cooking: you eat here after the ride and soak in the same building, which is the right end to the best day of the route. Ask about the meal when you arrive — it saves deciding anything at 19:00 with tired legs.</p>
+<p>Yakitori town, unexpectedly.</p>
+<ul>
+<li><strong>Imabari yakitori</strong> — thigh meat, heavily marinated, grilled over charcoal until the edges catch. <a href="https://www.google.com/maps/search/?api=1&amp;query=Toriko+Imabari+yakitori">Toriko</a> is the name locals give.</li>
+<li><strong>Seto Inland Sea seafood bowl</strong> — tai, octopus, amaebi, all raw and all sweet. <a href="https://www.google.com/maps/search/?api=1&amp;query=Uoshin+Imabari">Uoshin</a> does a good one.</li>
+<li><strong>Imabari burger</strong> — a local chain with a cult following among cyclists. Not fine dining. Entirely correct after 50 km.</li>
+</ul>
+<h3>Matsuyama</h3>
+<p>The best eating town on the route, and a rest day that should be spent at a table.</p>
+<ul>
+<li><strong>Tai meshi</strong> — sea bream and rice cooked together in a stone pot, mixed at the table. We ate it at <a href="https://maps.app.goo.gl/HiE5wvoNKiQQiuUF6?g_st=ic">Tai Meshi Motoyama</a> on Okaido. Ask for a raw egg with it: cracked over the rice and stirred through, it is the version locals eat. Ask for a raw egg with it: cracked over the rice and stirred through, it is the version locals eat and it turns the dish from a rice pot into a meal. <a href="https://www.google.com/maps/search/?api=1&amp;query=Hibiki+Matsuyama+tai+meshi">Hibiki</a> in Dogo and <a href="https://www.google.com/maps/search/?api=1&amp;query=Mikawaya+Matsuyama+tai+meshi">Mikawaya</a> near the castle are the two to know.</li>
+<li><strong>Botchan dango</strong> — three dumplings on a stick: bean paste, egg, green tea. Named after the novel, sold everywhere, worth one.</li>
+<li><strong>Jakoten</strong> — deep-fried fish cake, dense and savoury. Beer food.</li>
+<li><strong>Sushi counters</strong> — this is a city that takes sushi seriously; book rather than walk in.</li>
+</ul>
+<h3>Takamatsu</h3>
+<p>Sanuki udon country. Do not overthink it.</p>
+<ul>
+<li><strong>Sanuki udon</strong> — thick, chewy, and served in a broth so plain it looks like a mistake. <a href="https://www.google.com/maps/search/?api=1&amp;query=Nagata+Udon+Takamatsu">Nagata Udon</a> opens at 06:00 and closes at 12:30, which tells you what it thinks of late risers.</li>
+<li><strong>Shippoku udon</strong> — hot-pot style with seafood and vegetables, the heartier version for dinner.</li>
+<li><strong>Wasambon</strong> — a fine-grained local sugar sweet, traditionally taken with green tea.</li>
+</ul>
+<h3>Tokushima</h3>
+<ul>
+<li><strong>Tokushima ramen</strong> — pork bone broth, raw egg, and offal, darker and sweeter than the ramen further north. <a href="https://www.google.com/maps/search/?api=1&amp;query=Mendokoro+Kashiwagi+Tokushima">Mendokoro Kashiwagi</a> is the reference.</li>
+<li><strong>Sudachi</strong> — the prefecture grows almost all of Japan's sudachi citrus. Look for it in sours, on fish, and in anything labelled すだち.</li>
+<li><strong>Awa odori dango</strong> — colourful rice dumplings, more a souvenir than a meal.</li>
+</ul>
+<h3>Minami and the Pacific coast</h3>
+<p>The food thins out with the population, and what replaces it is better.</p>
+<ul>
+<li><strong>Katsuo no tataki</strong> — bonito seared fast over a straw fire, sliced thick, with garlic, ginger and ponzu. This is the dish of the southern coast; every town claims the best version.</li>
+<li><strong>Saba sushi</strong> — pressed mackerel with vinegared rice, wrapped in leaves. Built to travel, which is why it turns up in every station shop.</li>
+<li><strong>Ise-ebi</strong> — spiny lobster. Expensive, occasionally unforgettable, and best ordered when someone else is driving.</li>
+</ul>
+<h3>Muroto</h3>
+<ul>
+<li><strong>Muroto katsuo tataki</strong> — the same dish again, and genuinely the best of the trip. <a href="https://www.google.com/maps/search/?api=1&amp;query=Muroto+Sennen+Ichi">Muroto Sennen Ichi</a> is the famous counter.</li>
+<li><strong>Sawachi ryori</strong> — a huge seafood platter on a wooden tray, meant for a group. Order one between four.</li>
+</ul>
+<h3>Kochi</h3>
+<p>The finish line, and the best single meal of the trip.</p>
+<ul>
+<li><strong><a href="https://www.google.com/maps/search/?api=1&amp;query=Hirome+Ichiba+Kochi">Hirome Ichiba</a></strong> — a market hall of food stalls under one roof, communal tables in the middle, beer bought from the shop next door and drunk at the table. You buy from whichever counter looks good, carry it back, and eat with everyone else. Go on the last night, not the first.</li>
+<li><strong>Katsuo no tataki</strong> — again, and better than anywhere inland.</li>
+<li><strong>Tosa Kuroshio beer</strong> — the yuzu ale is the one to try.</li>
+<li><strong>Yuzu honey lemonade</strong> — sweet, sharp, and non-alcoholic, which matters on a riding day.</li>
+</ul>
+<h3>Shimanto and Tosashimizu</h3>
+<p>The far southwest, where the trip earns its quiet.</p>
+<ul>
+<li><strong>Shimanto River ayu</strong> — sweetfish grilled whole with salt. Sweet flesh, faint watermelon aroma, eaten with the fingers.</li>
+<li><strong>Shimanto wagyu</strong> — a small, low-profile wagyu brand. If it is on a menu, order it.</li>
+<li><strong>Chinkabashi sake</strong> — brewed with river water, named after the bridges without railings that cross the Shimanto.</li>
+<li><strong>Tosashimizu katsuo</strong> — landed at the port that morning. The freshest version of the dish on the whole coast.</li>
+</ul>
+<div class="info-box"><strong>One practical note:</strong> riding days finish between 15:00 and 17:00, which puts dinner squarely in the window when small restaurants in small towns fill up or close early. Decide at check-in, book the one place worth booking, and keep a konbini fallback within walking distance.</div>
+<h2 id="photos-from-the-route">Photos from the route</h2>
+<p style="margin:0 0 24px 0"><img src="japan-assets/img-18.jpg" alt="Shikoku bike tour" style="width:100%;height:auto;border-radius:6px" /></p>
+<p style="margin:0 0 24px 0"><img src="japan-assets/img-19.jpg" alt="Shikoku bike tour" style="width:100%;height:auto;border-radius:6px" /></p>
+<p style="margin:0 0 24px 0"><img src="japan-assets/img-20.jpg" alt="Shikoku bike tour" style="width:100%;height:auto;border-radius:6px" /></p>
+<p style="margin:0 0 24px 0"><img src="japan-assets/img-21.jpg" alt="Shikoku bike tour" style="width:100%;height:auto;border-radius:6px" /></p>
+<p style="margin:0 0 24px 0"><img src="japan-assets/img-22.jpg" alt="Shikoku bike tour" style="width:100%;height:auto;border-radius:6px" /></p>
+<p style="margin:0 0 24px 0"><img src="japan-assets/img-23.jpg" alt="Shikoku bike tour" style="width:100%;height:auto;border-radius:6px" /></p>
+<p style="margin:0 0 24px 0"><img src="japan-assets/img-24.jpg" alt="Shikoku bike tour" style="width:100%;height:auto;border-radius:6px" /></p>
+<p style="margin:0 0 24px 0"><img src="japan-assets/img-25.jpg" alt="Shikoku bike tour" style="width:100%;height:auto;border-radius:6px" /></p>
+<p style="margin:0 0 24px 0"><img src="japan-assets/img-26.jpg" alt="Shikoku bike tour" style="width:100%;height:auto;border-radius:6px" /></p>
+
+<h2 id="bailouts">Bailouts</h2>
+<table>
+<thead>
+<tr>
+<th>Day</th>
+<th>Escape</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3</td>
+<td>The Kotoku Line parallels Route 11 the whole way — any station works</td>
+</tr>
+<tr>
+<td>4</td>
+<td>The Mugi Line follows the coast as far as Kaifu; beyond that, nothing</td>
+</tr>
+<tr>
+<td>5–6</td>
+<td>No railway on the Muroto peninsula at all — taxi only</td>
+</tr>
+</tbody>
+</table>
+<p>Rides 5 and 6 carry real consequence if something breaks: full repair kit, charged phone, and a plan that doesn't depend on a train appearing.</p>
+<h2 id="what-worked">What worked</h2>
+<ul>
+<li><strong>Ten minutes off the bike every 45–50 minutes</strong>, plus 45–60 for lunch. Frequency matters more than length.</li>
+<li><strong>Regroup at every turn and every bridge ramp</strong>, not at the top of a climb after the damage is done.</li>
+<li><strong>Two bottles, refilled constantly.</strong> Days 6–8 have long gaps between shops.</li>
+<li><strong>Lights in every tunnel</strong>, single file, no overtaking the lead rider.</li>
+<li><strong>E-bikes are not a defeat.</strong> If a rider is struggling, an e-bike keeps the group together and costs nothing in enjoyment. The group finishing together is the whole point.</li>
+</ul>
+<h2 id="what-i-d-change">What I'd change</h2>
+<p>Ride 3 is long. It's flat, the fish market justifies it, and the coastal line is far better than the inland climb it replaced — but 82.5 km sitting in front of the hardest day of the trip is a big ask. Next time I'd start earlier or shave a little off Ride 4.</p>
+<p>And I'd carry one more layer than I think I need. The Pacific coast in November is warm in the sun and cold in the wind, often within the same hour.</p>
+</div>
+
+        <p style="margin-top:2rem;">
+            <span class="tag">Japan</span><span class="tag">Shikoku</span><span class="tag">Cycling</span><span class="tag">Travel</span>
+        </p>
+
+    </div>
+</section>
+
+<footer>
+    <div class="footer-inner">
+        <div class="footer-grid">
+            <div>
+                <div class="footer-brand">Straya <span>Co</span></div>
+                <p style="font-size:0.9rem;margin-top:0.5rem;">Helping Australian small businesses and individuals with technology consulting, IT security, and AI integration.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Site</h4>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="index.html">Blog</a></li>
+                    <li><a href="resources.html">Resources</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <ul>
+                    <li><a href="about.html">About Us</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="index.html#services">IT Consulting</a></li>
+                    <li><a href="index.html#services">Security</a></li>
+                    <li><a href="index.html#services">AI Solutions</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">&copy; 2026 Straya Co. All rights reserved.</div>
+    </div>
+</footer>
+
+<div class="backdrop" id="backdrop"></div>
+<div class="slide-navigation" id="slideNav">
+    <div class="slide-nav-logo">Straya <span>Co</span></div>
+    <div class="slide-nav-grid">
+        <div>
+            <div class="slide-nav-title">Site</div>
+            <ul class="slide-nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="index.html">Blog</a></li>
+                <li><a href="resources.html">Resources</a></li>
+            </ul>
+        </div>
+        <div>
+            <div class="slide-nav-title">Company</div>
+            <ul class="slide-nav-links">
+                <li><a href="about.html">About Us</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+(function(){
+    var n=document.getElementById('navIcon'),s=document.getElementById('slideNav'),b=document.getElementById('backdrop');
+    function o(){n.classList.add('open');s.classList.add('open');b.classList.add('open');document.body.style.overflow='hidden';}
+    function x(){n.classList.remove('open');s.classList.remove('open');b.classList.remove('open');document.body.style.overflow='';}
+    n.addEventListener('click',o);b.addEventListener('click',x);
+})();
+</script>
+
+</body>
+</html>
