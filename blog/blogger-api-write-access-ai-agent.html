@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giving an AI Write Access to a Blogger Blog — Without Sharing a Password - Straya Co Blog</title>
+    <meta name="description" content="A practical guide to the Blogger API v3: create the OAuth client, capture a refresh token, and give an AI agent draft-first publishing rights — without passwords, browser automation, or an API key that cannot write.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --dark:#1a1a2e; --gold:#c9a96e; --gold-dark:#b8945a; --cream:#f8f6f1; --white:#fff; --gray:#6b7280; --gray-light:#e8e4dd; --radius:4px; --radius-lg:12px; --shadow:0 4px 20px rgba(0,0,0,0.08); --shadow-lg:0 20px 60px rgba(0,0,0,0.15); --transition:all 0.35s cubic-bezier(0.4,0,0.2,1); }
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{font-family:'Inter',sans-serif;color:var(--dark);background:var(--white);line-height:1.7;overflow-x:hidden;}
+        h1,h2,h3,h4{font-family:'Playfair Display',serif;font-weight:600;line-height:1.2;}
+        .container{max-width:800px;margin:0 auto;padding:0 32px;}
+        a{text-decoration:none;color:inherit;}
+        img{max-width:100%;height:auto;}
+        code{font-family:monospace;background:var(--cream);padding:2px 6px;border-radius:3px;font-size:0.9em;}
+        pre{background:var(--dark);color:#e2e8f0;padding:1.25rem;border-radius:var(--radius-lg);overflow-x:auto;margin:1.5rem 0;font-size:0.85rem;line-height:1.6;}
+        pre code{background:transparent;padding:0;color:inherit;font-size:0.85rem;}
+        table{width:100%;border-collapse:collapse;margin:1.5rem 0;font-size:0.9rem;}
+        th,td{padding:0.75rem 1rem;text-align:left;border-bottom:1px solid var(--gray-light);}
+        th{background:var(--dark);color:var(--white);font-weight:600;}
+        tr:last-child td{border-bottom:none;}
+        p{margin-bottom:1rem;}
+        ul,ol{margin:1rem 0 1rem 1.5rem;}
+        li{margin-bottom:0.4rem;}
+        hr{margin:2rem 0;border:none;border-top:1px solid var(--gray-light);}
+
+        #site-header{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(26,26,46,0.95);backdrop-filter:blur(12px);border-bottom:1px solid rgba(201,169,110,0.2);}
+        .header-inner{max-width:1200px;margin:0 auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:80px;}
+        .logo{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--white);letter-spacing:0.02em;}
+        .logo span{color:var(--gold);}
+        nav ul{display:flex;list-style:none;gap:2rem;}
+        nav a{color:rgba(255,255,255,0.85);font-size:0.85rem;font-weight:500;letter-spacing:0.06em;text-transform:uppercase;transition:var(--transition);}
+        nav a:hover,nav a.active{color:var(--gold);}
+        .btn-cta{background:var(--gold);color:var(--dark);padding:0.6rem 1.5rem;border-radius:var(--radius);font-size:0.82rem;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;transition:var(--transition);}
+        .btn-cta:hover{background:var(--gold-dark);}
+        .nav-icon{display:flex;flex-direction:column;justify-content:space-between;width:26px;height:20px;cursor:pointer;z-index:1100;flex-shrink:0;}
+        .nav-icon span{display:block;height:2px;width:100%;background:#fff;border-radius:9px;transition:all 0.25s ease-in-out;transform-origin:left center;}
+
+        .page-hero{padding:140px 0 40px;background:var(--dark);color:var(--white);}
+        .page-hero h1{font-size:2.4rem;margin-bottom:0.5rem;}
+        .page-hero .meta{color:var(--gold);font-size:0.85rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;}
+        .post-content{padding:60px 0 80px;}
+        .post-content h2{margin:2.5rem 0 1rem;font-size:1.6rem;}
+        .post-content h3{margin:2rem 0 0.75rem;font-size:1.2rem;color:var(--gray);}
+        .post-content ul{margin:1rem 0;}
+        .post-content li{margin-bottom:0.4rem;}
+        .post-content table{margin:1.5rem 0;}
+        .post-content .tag{display:inline-block;background:var(--cream);color:var(--gray);padding:0.3rem 0.8rem;border-radius:20px;font-size:0.8rem;margin-right:0.5rem;margin-bottom:0.5rem;border:1px solid var(--gray-light);}
+        .callout{background:var(--cream);border-left:4px solid var(--gold);padding:1rem 1.25rem;margin:1.5rem 0;border-radius:0 var(--radius) var(--radius) 0;font-size:0.95rem;}
+        .callout strong{color:var(--dark);}
+        .toc{background:var(--cream);border-radius:var(--radius-lg);padding:1.5rem 2rem;margin:2rem 0;}
+        .toc h3{margin-bottom:0.75rem;font-family:'Inter',sans-serif;font-weight:600;font-size:1rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--gray);}
+        .toc ul{list-style:none;margin:0;padding:0;}
+        .toc li{margin-bottom:0.4rem;}
+        .toc a{color:var(--gold);font-weight:500;}
+        .toc a:hover{color:var(--gold-dark);}
+
+        footer{background:var(--dark);color:rgba(255,255,255,0.7);padding:60px 0 30px;margin-top:60px;}
+        .footer-inner{max-width:1200px;margin:0 auto;padding:0 32px;}
+        .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:3rem;padding-bottom:2rem;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:2rem;}
+        .footer-brand{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--white);margin-bottom:0.75rem;}
+        .footer-brand span{color:var(--gold);}
+        .footer-col h4{color:var(--white);margin-bottom:1rem;font-size:1rem;}
+        .footer-col ul{list-style:none;}
+        .footer-col li{margin-bottom:0.5rem;}
+        .footer-col a:hover{color:var(--gold);}
+        .footer-bottom{text-align:center;font-size:0.85rem;}
+
+        .backdrop{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:900;opacity:0;visibility:hidden;transition:var(--transition);}
+        .backdrop.open{opacity:1;visibility:visible;}
+        .slide-navigation{position:fixed;top:0;right:0;bottom:0;width:320px;background:var(--dark);z-index:950;padding:2rem;transform:translateX(100%);transition:var(--transition);}
+        .slide-navigation.open{transform:translateX(0);}
+        .slide-nav-logo{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:var(--white);margin:2rem 0;}
+        .slide-nav-logo span{color:var(--gold);}
+        .slide-nav-grid{display:grid;grid-template-columns:1fr;gap:2rem;}
+        .slide-nav-title{color:var(--gold);font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:1rem;}
+        .slide-nav-links{list-style:none;}
+        .slide-nav-links li{margin-bottom:0.75rem;}
+        .slide-nav-links a{color:rgba(255,255,255,0.75);font-size:0.95rem;transition:var(--transition);}
+        .slide-nav-links a:hover{color:var(--gold);}
+
+        @media(max-width:991px){nav ul{display:none;}}
+        @media(max-width:768px){.container{padding:0 20px;}.header-inner{padding:0 20px;}.footer-inner{padding:0 20px;}.footer-grid{grid-template-columns:1fr;}.page-hero h1{font-size:1.8rem;}.slide-navigation{width:100%;}}
+    </style>
+</head>
+<body>
+
+<header id="site-header">
+    <div class="header-inner">
+        <a href="../index.html" class="logo">Straya <span>Co</span></a>
+        <nav>
+            <ul>
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../about.html">About</a></li>
+                <li><a href="../resources.html">Resources</a></li>
+                <li><a href="index.html" class="active">Blog</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </nav>
+        <a href="../contact.html" class="btn-cta">Get Started</a>
+        <div class="nav-icon" id="navIcon"><span></span><span></span><span></span></div>
+    </div>
+</header>
+
+<section class="page-hero">
+    <div class="container">
+        <p class="meta">26 November 2026 &mdash; AI / Publishing / APIs</p>
+        <h1>Giving an AI Write Access to a Blogger Blog &mdash; Without Sharing a Password</h1>
+        <div>
+            <span class="tag">Blogger API</span>
+            <span class="tag">OAuth 2.0</span>
+            <span class="tag">Python</span>
+            <span class="tag">AI Agents</span>
+            <span class="tag">Security</span>
+        </div>
+    </div>
+</section>
+
+<section class="post-content">
+    <div class="container">
+
+<p>Blogger's API key can only read. Here is the OAuth flow that lets an AI agent create drafts, edit them, and publish &mdash; with the blog owner approving exactly once and never sharing a password.</p>
+
+<hr>
+
+<div class="toc">
+    <h3>Contents</h3>
+    <ul>
+        <li><a href="#why">Why an API key cannot write</a></li>
+        <li><a href="#flow">The flow in one picture</a></li>
+        <li><a href="#google-cloud">Step 1 &mdash; Prepare the Google Cloud project</a></li>
+        <li><a href="#consent">Step 2 &mdash; Capture the refresh token</a></li>
+        <li><a href="#credentials">Step 3 &mdash; Store the token properly</a></li>
+        <li><a href="#script">Step 4 &mdash; The publisher script</a></li>
+        <li><a href="#draft-first">The draft-first rule</a></li>
+        <li><a href="#limits">What the API cannot do</a></li>
+        <li><a href="#troubleshooting">Failure modes</a></li>
+        <li><a href="#security">Security rules</a></li>
+    </ul>
+</div>
+
+<h2 id="why">Why an API key cannot write</h2>
+
+<p>A Google API key identifies a <em>project</em>, not a person. It answers &ldquo;which application is calling?&rdquo; but not &ldquo;who authorised this?&rdquo;. For that reason Blogger's API key is read-only: it can fetch public posts, and nothing else.</p>
+
+<table>
+<tr><th>Capability</th><th>API key</th><th>OAuth 2.0</th></tr>
+<tr><td>Read public posts</td><td>Yes</td><td>Yes</td></tr>
+<tr><td>Create, edit, publish, delete</td><td>No</td><td>Yes</td></tr>
+<tr><td>Tied to</td><td>A Google Cloud project</td><td>The account owner's consent</td></tr>
+</table>
+
+<p>Writing requires an <strong>access token</strong> minted from a <strong>refresh token</strong>. The refresh token is issued once, when the blog owner approves your application. The agent stores that token and exchanges it for a short-lived access token whenever it needs to call the API.</p>
+
+<h2 id="flow">The flow in one picture</h2>
+
+<ol>
+    <li>You create an OAuth client in Google Cloud and download its JSON credentials.</li>
+    <li>The blog owner opens a consent URL and approves the <code>blogger</code> scope.</li>
+    <li>Google redirects to a loopback address with a one-time code.</li>
+    <li>You exchange the code for a refresh token and store it with mode <code>600</code>.</li>
+    <li>Every API call refreshes an access token from that refresh token.</li>
+</ol>
+
+<p>At no point does the agent see a password, a session cookie, or a two-factor code. The owner can revoke the grant at any time from their Google account, which invalidates the refresh token immediately.</p>
+
+<h2 id="google-cloud">Step 1 &mdash; Prepare the Google Cloud project</h2>
+
+<p>This is a one-time setup, about ten minutes. If a project already has the Blogger API enabled and a desktop OAuth client, reuse it.</p>
+
+<ol>
+    <li>Open the Google Cloud Console and create a project, for example <code>blog-publisher</code>.</li>
+    <li>Go to <strong>APIs &amp; Services &rarr; Library</strong>, search for <strong>Blogger API v3</strong>, and enable it.</li>
+    <li>Configure the OAuth consent screen (newer consoles call this <strong>Google Auth Platform</strong>). Choose <strong>External</strong> audience, set an app name and support email, and add the scope <code>https://www.googleapis.com/auth/blogger</code>.</li>
+    <li>Add the blog owner's Google account under <strong>Audience &rarr; Test users</strong>. Only listed accounts can approve while the app is in testing.</li>
+    <li>Go to <strong>Credentials &rarr; Create credentials &rarr; OAuth client ID</strong> and choose <strong>Desktop app</strong>. Download the JSON and keep it as <code>client_secret.json</code>.</li>
+</ol>
+
+<div class="lesson">
+    <p><strong>Why &ldquo;Desktop app&rdquo;?</strong> That client type permits a loopback redirect (<code>http://127.0.0.1:8765/</code>) without pre-registering a URL, which is exactly what a local script needs. If you are forced to use &ldquo;Web application&rdquo;, add that loopback URL under <strong>Authorised redirect URIs</strong>.</p>
+</div>
+
+<p>The account that approves the consent becomes the author of every post the API creates. If the blog should show a different byline, approve from an account with that display name, or add a dedicated account as an administrator.</p>
+
+<h2 id="consent">Step 2 &mdash; Capture the refresh token</h2>
+
+<p>The consent URL needs three parameters that are easy to miss:</p>
+
+<ul>
+    <li><code>access_type=offline</code> &mdash; asks Google for a refresh token, not just an access token.</li>
+    <li><code>prompt=consent</code> &mdash; forces the consent screen. Without it, a repeat authorisation silently returns no refresh token.</li>
+    <li><code>scope=https://www.googleapis.com/auth/blogger</code> &mdash; one scope covers reading and writing posts.</li>
+</ul>
+
+<p>On a machine with a browser, the script can listen on the loopback port and capture the code automatically. For an AI agent, the more reliable pattern is a <strong>manual handoff</strong>:</p>
+
+<ol>
+    <li>The agent prints the consent URL and sends it to the owner.</li>
+    <li>The owner approves. The browser is redirected to <code>http://127.0.0.1:8765/?code=...</code>, which <em>fails to load</em> because nothing is listening. That is expected; the URL bar still holds the grant.</li>
+    <li>The owner saves that full URL into a text file and hands the file back.</li>
+    <li>The agent exchanges the code for a refresh token.</li>
+</ol>
+
+<div class="lesson">
+    <p><strong>Use a file, not chat.</strong> Consent codes are single-use and expire within minutes. Chat clients and agent runtimes often redact or truncate secret-shaped strings, and a truncated code cannot be exchanged. A file on disk avoids the problem entirely.</p>
+</div>
+
+<p>While the OAuth app remains in <strong>Testing</strong> status, Google expires refresh tokens after seven days. The next write then fails with <code>invalid_grant</code>, which means &ldquo;re-consent&rdquo;, not &ldquo;wrong credentials&rdquo;. Publishing the app to production makes the token durable, at the cost of a one-time &ldquo;unverified app&rdquo; warning during consent.</p>
+
+<h2 id="credentials">Step 3 &mdash; Store the token properly</h2>
+
+<p>The exchange produces three values: client ID, client secret, and refresh token. Store them together in <code>token.json</code> with mode <code>600</code>, outside version control. On a server, environment variables are an acceptable alternative; on a laptop, the file is simpler.</p>
+
+<pre><code>chmod 600 client_secret.json token.json
+echo "client_secret.json" &gt;&gt; .gitignore
+echo "token.json" &gt;&gt; .gitignore</code></pre>
+
+<p>You also need the blog's numeric ID. Ask the API to resolve it from the public URL:</p>
+
+<pre><code>curl -s -H "Authorization: Bearer $ACCESS_TOKEN" \
+  "https://www.googleapis.com/blogger/v3/blogs/byurl?url=https://yourblog.blogspot.com"</code></pre>
+
+<p>The response includes an <code>id</code> such as <code>1234567890123456789</code>. That number, not the URL, identifies the blog in every write call.</p>
+
+<h2 id="script">Step 4 &mdash; The publisher script</h2>
+
+<p>The script below is deliberately small: three commands, standard library only, no browser automation. It creates a draft by default. Pass <code>--live</code> only when you mean it.</p>
+
+<pre><code>#!/usr/bin/env python3
+"""Minimal Blogger API v3 publisher.
+
+Three commands:
+  auth   print the consent URL
+  token  exchange a saved redirect URL for a refresh token
+  post   create a draft (or publish) from Markdown/HTML
+
+Examples:
+  python3 blogger.py auth  --client client_secret.json
+  python3 blogger.py token --client client_secret.json --redirect redirect.txt
+  python3 blogger.py post  --token token.json --blog 1234567890123456789 \
+      --title "Hello" --file hello.md
+"""
+
+import argparse
+import json
+import os
+import sys
+import urllib.error
+import urllib.parse
+import urllib.request
+from pathlib import Path
+
+AUTH = "https://accounts.google.com/o/oauth2/v2/auth"
+TOKEN = "https://oauth2.googleapis.com/token"
+API = "https://www.googleapis.com/blogger/v3"
+SCOPE = "https://www.googleapis.com/auth/blogger"
+REDIRECT = "http://127.0.0.1:8765/"
+
+
+def client(path):
+    block = json.loads(Path(path).expanduser().read_text())["installed"]
+    return block["client_id"], block["client_secret"]
+
+
+def cmd_auth(args):
+    cid, _ = client(args.client)
+    query = {
+        "client_id": cid,
+        "redirect_uri": REDIRECT,
+        "response_type": "code",
+        "scope": SCOPE,
+        "access_type": "offline",
+        "prompt": "consent",
+    }
+    print(f"{AUTH}?{urllib.parse.urlencode(query)}")
+
+
+def cmd_token(args):
+    cid, secret = client(args.client)
+    text = Path(args.redirect).expanduser().read_text().strip()
+    query = urllib.parse.parse_qs(urllib.parse.urlparse(text).query)
+    code = query.get("code", [text])[0]
+    data = urllib.parse.urlencode({
+        "code": code,
+        "client_id": cid,
+        "client_secret": secret,
+        "redirect_uri": REDIRECT,
+        "grant_type": "authorization_code",
+    }).encode()
+    try:
+        with urllib.request.urlopen(TOKEN, data=data, timeout=30) as resp:
+            payload = json.load(resp)
+    except urllib.error.HTTPError as exc:
+        sys.exit(f"Exchange failed [{exc.code}]: {exc.read().decode()[:300]}")
+    if "refresh_token" not in payload:
+        sys.exit("No refresh_token returned — revoke access and retry the consent.")
+    out = Path(args.out).expanduser()
+    out.write_text(json.dumps({
+        "client_id": cid,
+        "client_secret": secret,
+        "refresh_token": payload["refresh_token"],
+    }, indent=2) + "
+")
+    os.chmod(out, 0o600)
+    print(f"Wrote {out}")
+
+
+def access_token(creds):
+    data = urllib.parse.urlencode({
+        "client_id": creds["client_id"],
+        "client_secret": creds["client_secret"],
+        "refresh_token": creds["refresh_token"],
+        "grant_type": "refresh_token",
+    }).encode()
+    try:
+        with urllib.request.urlopen(TOKEN, data=data, timeout=30) as resp:
+            return json.load(resp)["access_token"]
+    except urllib.error.HTTPError as exc:
+        body = exc.read().decode()
+        hint = " — re-run the consent" if "invalid_grant" in body else ""
+        sys.exit(f"Token refresh failed [{exc.code}]{hint}: {body[:200]}")
+
+
+def api(method, path, creds, body=None):
+    request = urllib.request.Request(
+        f"{API}{path}",
+        data=json.dumps(body).encode("utf-8") if body is not None else None,
+        method=method,
+    )
+    request.add_header("Authorization", f"Bearer {access_token(creds)}")
+    if body is not None:
+        request.add_header("Content-Type", "application/json; charset=utf-8")
+    try:
+        with urllib.request.urlopen(request, timeout=45) as resp:
+            return json.load(resp)
+    except urllib.error.HTTPError as exc:
+        sys.exit(f"{method} {path} failed [{exc.code}]: {exc.read().decode()[:300]}")
+
+
+def to_html(path, raw):
+    if raw:
+        return raw
+    text = Path(path).expanduser().read_text(encoding="utf-8")
+    if path.endswith((".md", ".markdown")):
+        try:
+            import markdown
+        except ImportError:
+            sys.exit("Markdown input needs: python3 -m pip install markdown")
+        return markdown.markdown(text, extensions=["extra", "sane_lists"])
+    return text
+
+
+def cmd_post(args):
+    creds = json.loads(Path(args.token).expanduser().read_text())
+    body = {"kind": "blogger#post", "title": args.title,
+            "content": to_html(args.file, args.html)}
+    if args.labels:
+        body["labels"] = [s.strip() for s in args.labels.split(",") if s.strip()]
+    draft = "false" if args.live else "true"
+    post = api("POST", f"/blogs/{args.blog}/posts/?isDraft={draft}", creds, body)
+    print(json.dumps({"id": post.get("id"), "status": post.get("status"),
+                      "url": post.get("url")}, indent=2))
+
+
+def main():
+    ap = argparse.ArgumentParser(description="Minimal Blogger API v3 publisher")
+    sub = ap.add_subparsers(dest="cmd", required=True)
+
+    p = sub.add_parser("auth")
+    p.add_argument("--client", required=True)
+    p.set_defaults(func=cmd_auth)
+
+    p = sub.add_parser("token")
+    p.add_argument("--client", required=True)
+    p.add_argument("--redirect", required=True)
+    p.add_argument("--out", default="token.json")
+    p.set_defaults(func=cmd_token)
+
+    p = sub.add_parser("post")
+    p.add_argument("--token", required=True)
+    p.add_argument("--blog", required=True)
+    p.add_argument("--title", required=True)
+    p.add_argument("--file")
+    p.add_argument("--html")
+    p.add_argument("--labels")
+    p.add_argument("--live", action="store_true")
+    p.set_defaults(func=cmd_post)
+
+    args = ap.parse_args()
+    args.func(args)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        sys.exit(130)</code></pre>
+
+<p>Install the optional Markdown dependency if you author posts as <code>.md</code>:</p>
+
+<pre><code>python3 -m pip install markdown</code></pre>
+
+<p>Then the full cycle looks like this:</p>
+
+<pre><code># 1. Print the consent URL and send it to the owner
+python3 blogger.py auth --client client_secret.json
+
+# 2. Exchange the saved redirect URL for a refresh token
+python3 blogger.py token --client client_secret.json --redirect redirect.txt
+
+# 3. Create a draft
+python3 blogger.py post --token token.json --blog 1234567890123456789 \
+    --title "First post from the API" --file post.md --labels notes,api
+
+# 4. Publish it once the draft has been reviewed
+python3 blogger.py post --token token.json --blog 1234567890123456789 \
+    --title "First post from the API" --file post.md --live</code></pre>
+
+<p>For a fuller workflow &mdash; listing posts, reading one back, patching a title, deleting &mdash; extend the same <code>api()</code> helper with <code>GET</code>, <code>PATCH</code> and <code>DELETE</code>. The endpoints are ordinary REST:</p>
+
+<pre><code>GET    /blogs/{blogId}/posts/{postId}
+PATCH  /blogs/{blogId}/posts/{postId}
+POST   /blogs/{blogId}/posts/{postId}/publish
+DELETE /blogs/{blogId}/posts/{postId}</code></pre>
+
+<h2 id="draft-first">The draft-first rule</h2>
+
+<p>Drafts are free; corrections on a live post are visible to readers and can notify subscribers. The workflow that avoids embarrassment:</p>
+
+<ol>
+    <li><strong>Create a draft.</strong> The API returns its ID and status.</li>
+    <li><strong>Open it in Blogger.</strong> Check rendering, images, links, labels, and the byline.</li>
+    <li><strong>Patch what is wrong.</strong> Send only the fields that changed: title, content, or labels.</li>
+    <li><strong>Publish.</strong> Call <code>posts/{id}/publish</code>, then fetch the returned URL and confirm it loads.</li>
+</ol>
+
+<p>One Blogger quirk is worth coding around: <code>posts.get</code> can return <code>404</code> for a draft that exists. Fall back to listing drafts with <code>status=draft&amp;fetchBodies=true</code> and matching the ID in the response.</p>
+
+<h2 id="limits">What the API cannot do</h2>
+
+<table>
+<tr><th>Limitation</th><th>Workaround</th></tr>
+<tr><td>No image or file upload</td><td>Upload through the Blogger editor, or host images publicly and reference absolute HTTPS URLs</td></tr>
+<tr><td>No theme, layout, comment or settings changes</td><td>Those stay in the Blogger dashboard</td></tr>
+<tr><td>No reliable post scheduling</td><td>Create the draft, schedule it in the UI</td></tr>
+<tr><td>Post HTML is sanitised</td><td>Scripts and some embeds are stripped; use inline styles and test in a draft</td></tr>
+<tr><td>Author is the consenting account</td><td>Consent from the account whose byline should appear</td></tr>
+</table>
+
+<p>The image limitation catches most people. The API accepts HTML, not multipart uploads, so a post that references local paths or private photo links will render broken for every reader.</p>
+
+<h2 id="troubleshooting">Failure modes</h2>
+
+<table>
+<tr><th>Symptom</th><th>Meaning</th><th>Fix</th></tr>
+<tr><td><code>400 invalid_grant</code></td><td>Refresh token expired or was revoked</td><td>Re-run the consent; publish the app to production if this keeps happening weekly</td></tr>
+<tr><td><code>403 access_denied</code></td><td>The account is not a test user, or the app is unverified</td><td>Add the account under Test users, or choose Advanced &rarr; continue on the warning</td></tr>
+<tr><td><code>403</code> on write, read works</td><td>The account is only a reader</td><td>Grant Owner, Admin or Author on the blog</td></tr>
+<tr><td><code>401</code></td><td>Token belongs to another account, or was revoked</td><td>Re-consent and confirm which account approved</td></tr>
+<tr><td><code>404</code> on a draft</td><td>Blogger does not return drafts reliably from <code>posts.get</code></td><td>List drafts and match the ID</td></tr>
+<tr><td>No refresh token returned</td><td>Consent lacked <code>prompt=consent</code>, or a grant already existed</td><td>Revoke at <code>myaccount.google.com/permissions</code> and retry</td></tr>
+<tr><td>Wrong blog updated</td><td>The numeric blog ID points elsewhere</td><td>Re-resolve it with <code>blogs/byurl</code></td></tr>
+</table>
+
+<h2 id="security">Security rules</h2>
+
+<ul>
+    <li><strong>Treat the refresh token like a password.</strong> It grants full write access to the blog. Mode <code>600</code>, never in git, never pasted into chat.</li>
+    <li><strong>Prefer a dedicated Google account.</strong> Add it as a blog administrator and consent from it. Revoking access is then one click and does not disturb a personal account.</li>
+    <li><strong>Delete is permanent.</strong> Blogger has no trash for API deletions. Keep the source Markdown in version control as the real archive.</li>
+    <li><strong>Ask before publishing.</strong> An agent with a token can publish instantly; the draft-first rule is what keeps a bad sentence off the front page.</li>
+    <li><strong>Strip personal data.</strong> No addresses, booking references, passport numbers, phone numbers, or live location in posts. Remove EXIF from photos before uploading.</li>
+</ul>
+
+<h2 id="takeaway">The takeaway</h2>
+
+<p>Giving an AI write access to a blog is not a matter of finding the right API key &mdash; it is a matter of delegating one narrow permission and handling the token like a credential. The owner approves once, keeps their password, and can revoke the grant at any time. The agent gets exactly what it needs: the ability to draft, edit, and publish, with a human reviewing the last step.</p>
+
+<p>That is a better security model than sharing a login, and a better workflow than automating a browser.</p>
+
+<hr>
+
+<p><em>Published 26 November 2026. The code in this article is provided as-is; test it on a draft before pointing it at anything you care about.</em></p>
+
+    </div>
+</section>
+
+
+<footer>
+    <div class="footer-inner">
+        <div class="footer-grid">
+            <div>
+                <div class="footer-brand">Straya <span>Co</span></div>
+                <p style="font-size:0.9rem;margin-top:0.5rem;">Helping Australian small businesses and individuals with technology consulting, IT security, and AI integration.</p>
+            </div>
+            <div class="footer-col">
+                <h4>Site</h4>
+                <ul>
+                    <li><a href="../index.html">Home</a></li>
+                    <li><a href="index.html">Blog</a></li>
+                    <li><a href="../resources.html">Resources</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Company</h4>
+                <ul>
+                    <li><a href="../about.html">About Us</a></li>
+                    <li><a href="../contact.html">Contact</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Services</h4>
+                <ul>
+                    <li><a href="../index.html#services">IT Consulting</a></li>
+                    <li><a href="../index.html#services">Security</a></li>
+                    <li><a href="../index.html#services">AI Solutions</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">&copy; 2026 Straya Co. All rights reserved.</div>
+    </div>
+</footer>
+
+<div class="backdrop" id="backdrop"></div>
+<div class="slide-navigation" id="slideNav">
+    <div class="slide-nav-logo">Straya <span>Co</span></div>
+    <div class="slide-nav-grid">
+        <div>
+            <div class="slide-nav-title">Site</div>
+            <ul class="slide-nav-links">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="index.html">Blog</a></li>
+                <li><a href="../resources.html">Resources</a></li>
+            </ul>
+        </div>
+        <div>
+            <div class="slide-nav-title">Company</div>
+            <ul class="slide-nav-links">
+                <li><a href="../about.html">About Us</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+(function(){
+    var n=document.getElementById('navIcon'),s=document.getElementById('slideNav'),b=document.getElementById('backdrop');
+    function o(){n.classList.add('open');s.classList.add('open');b.classList.add('open');document.body.style.overflow='hidden';}
+    function x(){n.classList.remove('open');s.classList.remove('open');b.classList.remove('open');document.body.style.overflow='';}
+    n.addEventListener('click',o);b.addEventListener('click',x);
+})();
+</script>
+
+</body>
+</html>
